@@ -17,12 +17,13 @@ _checklistFileVersion_='0.2'
 # TreeStore entries displayed on the screen
 ISITEM=0     # Entry is an item as opposed to category
 DISPLAY=1    # Write the output to the review
-SUMMARY=2    # Unique title for the entry
-DESC=3       # Long description of what to do to verify the entry
-RESOLUTION=4 # Current resolution
-OUTPUT=5     # Current resolution's output
-RESLIST=6    # Python list of possible resolutions
-OUTPUTLIST=7 # Python hash of outputs keyed to resolution
+MODIFIED=2   # Boolean holding whether the value has been modified
+SUMMARY=3    # Unique title for the entry
+DESC=4       # Long description of what to do to verify the entry
+RESOLUTION=5 # Current resolution
+OUTPUT=6     # Current resolution's output
+RESLIST=7    # Python list of possible resolutions
+OUTPUTLIST=8 # Python hash of outputs keyed to resolution
 
 class Error(Exception):
     def __init__(self, msg):
@@ -44,6 +45,7 @@ class CheckList:
     def __init__(self, path, props):
        
         self.props = props
+        self.addPaths = {}
         libxml2.registerErrorHandler(self.__no_display_parse_error, None)
         ctxt = libxml2.newParserCtxt()
         checkFile = ctxt.ctxtReadFile(path, None, libxml2.XML_PARSE_DTDVALID)
@@ -71,6 +73,7 @@ class CheckList:
         # Store the checklist into a GtkTreeModel
         self.tree = gtk.TreeStore(gobject.TYPE_BOOLEAN,
                                   gobject.TYPE_BOOLEAN,
+                                  gobject.TYPE_BOOLEAN,
                                   gobject.TYPE_STRING,
                                   gobject.TYPE_STRING,
                                   gobject.TYPE_STRING,
@@ -85,6 +88,7 @@ class CheckList:
             iter = self.tree.append(None)
             self.tree.set(iter,
                           ISITEM, False,
+                          MODIFIED, False,
                           RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
                           RESOLUTION, 'Needs-Reviewing',
                           OUTPUT, None,
@@ -105,6 +109,7 @@ class CheckList:
                     entryIter=self.tree.append(iter)
                     self.tree.set(entryIter,
                                   ISITEM, True,
+                                  MODIFIED, False,
                                   DISPLAY, entry.display,
                                   SUMMARY, entry.name,
                                   DESC, entry.desc)
@@ -133,9 +138,10 @@ class CheckList:
                 node = node.next
 
         checkFile.freeDoc()
-        # More efficient to do the stuff in this signal handler manually
-        # during setup and only register it afterwards.
-        self.tree.connect('row-inserted', self.__add_to_entry_lookup)
+        # More efficient to do the stuff in the signal handlers manually
+        # during setup and only register them afterwards.
+        self.tree.connect('row-inserted', self.__added_row)
+        self.tree.connect('row-changed', self.__modified_row)
 
     def colorize_output(self, resolution, output):
         """Colorize the output based on the resolution"""
@@ -153,15 +159,36 @@ class CheckList:
                     output + '</span>')
         return output
 
-    def __add_to_entry_lookup(self, tree, path, iter):
-        """Add checklist item keys to the lookup hash.
+    def __modified_row(self, tree, path, iter):
+        """Maintain internal values whenever a row is modified.
 
-        CheckList maintains a lookup hash in self.entries so that users of the
-        CheckList object can search the CheckList by the Summary value.
+        The tree needs to set the modified flag on changed rows so that they
+        are saved properly.
         """
 
-        name = tree.get_value(iter, SUMMARY)
-        self.entries[name] = iter
+        if not tree.get_value(iter, MODIFIED):
+            tree.set(iter, MODIFIED, True)
+        if self.addPaths.has_key(path) and tree.get_value(iter, SUMMARY):
+            name = tree.get_value(iter, SUMMARY)
+            self.entries[name] = iter
+            del self.addPaths[path]
+            
+
+    def __added_row(self, tree, path, iter):
+        """Maintain some internal values whenever a row is added.
+      
+        The tree needs to set the modified value on new entries so they get
+        saved properly.  We also need to list the path to the item as needing
+        to be entered into  self.entries when the summary value becomes
+        available.  self.entries allows fast checking for the existence of
+        an entry.
+        """
+
+        # Set the MODIFIED flag
+        tree.set(iter, MODIFIED, True)
+
+        # List the path as needing to be entered into our lookup hash.
+        self.addPaths[tree.get_path(iter)] = True
 
     def __no_display_parse_error(self, ctx, str):
         """Disable Displaying parser errors."""

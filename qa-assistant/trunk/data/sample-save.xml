@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE qasave SYSTEM 'qasave.dtd'>
+<qasave version='0.1'>
+  <checklist name='fedoraus' revision='0.1'/>
+  <properties>
+    <property name='BugzillaId'>11452</property>
+    <property name='BugzillaURL'>http://bugzilla.somebugzillaurl.com/cgi-bin/bugquery</property>
+  </properties>
+  <entry name='Epoch' display='true' state='Fail'>
+    <states>
+      <state name='Fail'>Epoch is incorrect</state>
+      <state name='Pass'>Epoch is correct</state>
+    </states>
+  </entry>
+  <entry name='SRPM Signature' display='true' state='Pass'>
+    <states>
+      <state name='Fail'>This is a failur</state>
+    </states>
+  </entry>
+</qasave>

@@ -1,10 +1,19 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!ENTITY % Resolutions
+  '(Needs-Reviewing|Pass|Fail|Non-Blocker|Not-Applicable)'
+>
+<!ENTITY % ChecklistType
+  '(SRPM|generic)'
+>
+<!ENTITY % Boolean
+  '(true|false)'
+>
 <!ELEMENT checklist (category+)>
   <!ATTLIST checklist
     version CDATA #FIXED '0.2'
     name CDATA #REQUIRED
     revision CDATA #REQUIRED
-    type (SRPM|generic) "generic"
+    type %ChecklistType; "generic"
   >
   <!ELEMENT category (description, entry+)>
     <!ATTLIST category
@@ -14,10 +23,10 @@
     <!ELEMENT entry (states, description)>
       <!ATTLIST entry
         name CDATA #REQUIRED
-	display (true|false) "false"
+	display %Boolean; "false"
       >
       <!ELEMENT states (state+)>
         <!ELEMENT state (#PCDATA)>
           <!ATTLIST state
-            name (Needs-Reviewing|Pass|Fail|Non-Blocker|Not-Applicable) #REQUIRED
+            name %Resolutions; #REQUIRED
           >

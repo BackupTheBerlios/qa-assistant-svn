@@ -148,7 +148,7 @@ class GenericQA(gtk.Menu):
                     checklist.OUTPUT, None,
                     checklist.OUTPUTLIST, {'Needs-Reviewing':None,
                                            'Pass':None, 'Fail':None},
-                    checklist.DESC, 'Review items that you have comments on even though they aren\'t on the standard checklist.')
+                    checklist.DESC, '''Review items that you have comments on even though they aren't on the standard checklist.''')
             self.customItemsPath = self.app.checklist.tree.get_path(iter)
         
         resList = ['Needs-Reviewing', 'Pass', 'Fail', 'Non-Blocker', 'Not-Applicable']

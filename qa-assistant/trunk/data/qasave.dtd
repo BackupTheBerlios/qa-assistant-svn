@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!ENTITY % Resolutions '(Needs-Reviewing|Pass|Fail|Non-Blocker|Not-Applicable)'>
+<!ELEMENT qasave (checklist, properties?, entry+)>
+  <!ATTLIST qasave
+    version CDATA #FIXED '0.1'
+  >
+  <!ELEMENT checklist EMPTY>
+    <!ATTLIST checklist
+      name CDATA #REQUIRED
+      revision CDATA #REQUIRED
+    >
+  <!ELEMENT properties (property+)>
+    <!ELEMENT property (#PCDATA)>
+      <!ATTLIST property
+        name CDATA #REQUIRED
+      >
+  <!ELEMENT entry (states?)>
+    <!ATTLIST entry
+      name CDATA #REQUIRED
+      display (true|false) "false"
+      state %Resolutions; #REQUIRED
+    >
+      <!ELEMENT states (state+)>
+        <!ELEMENT state (#PCDATA)>
+          <!ATTLIST state
+            name %Resolutions; #REQUIRED
+          >

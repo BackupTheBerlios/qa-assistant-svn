@@ -202,7 +202,7 @@ class Review(gtk.VBox):
         self.hashes.set_text(hashBuf)
 
     def __update_data(self, treeStore, path, iter):
-        """Update internal list from changes to treeStore on row-changed."""
+        """Update internal list from treeStore when treeStore is changed."""
 
         # row-changed gets called once for each item that is updated, even
         # when there's a group.  So we have to wait until we get a proper
@@ -210,7 +210,7 @@ class Review(gtk.VBox):
         summary = treeStore.get_value(iter, checklist.SUMMARY)
         if self.addPaths.has_key(path) and summary:
             # New item
-            self.list.append(summary,
+            self.list.append((summary,
                               treeStore.get_value(iter, checklist.DISPLAY),
                               treeStore.get_value(iter, checklist.RESOLUTION),
                               treeStore.get_value(iter, checklist.OUTPUT)))
