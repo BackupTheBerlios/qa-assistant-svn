@@ -5,14 +5,16 @@
  */
 
 gchar *s = N_("QA Assistant");
-gchar *s = N_("Start a review from a Bugzilla Entry");
-gchar *s = N_("From Bug_zilla");
 gchar *s = N_("Start a review from an SRPM");
 gchar *s = N_("From _SRPM");
+gchar *s = N_("Start a review from a Bugzilla Entry");
+gchar *s = N_("From Bug_zilla");
 gchar *s = N_("Publish the report to a file");
 gchar *s = N_("_Publish Report");
 gchar *s = N_("Submit your report to Bugzilla");
 gchar *s = N_("Su_bmit Report");
+gchar *s = N_("Actions associated with this checklist");
+gchar *s = N_("QA A_ctions");
 gchar *s = N_("_Toggle Preview");
 gchar *s = N_("_Contents");
 gchar *s = N_("Create a new QA report");

@@ -15,14 +15,14 @@ import gtk, gobject
 _checklistFileVersion_='0.2'
 
 # TreeStore entries displayed on the screen
-ISITEM=0
-DISPLAY=1
-SUMMARY=2
-DESC=3
-RESOLUTION=4
-OUTPUT=5
-RESLIST=6
-OUTPUTLIST=7
+ISITEM=0     # Entry is an item as opposed to category
+DISPLAY=1    # Write the output to the review
+SUMMARY=2    # Unique title for the entry
+DESC=3       # Long description of what to do to verify the entry
+RESOLUTION=4 # Current resolution
+OUTPUT=5     # Current resolution's output
+RESLIST=6    # Python list of possible resolutions
+OUTPUTLIST=7 # Python hash of outputs keyed to resolution
 
 class Error(Exception):
     def __init__(self, msg):

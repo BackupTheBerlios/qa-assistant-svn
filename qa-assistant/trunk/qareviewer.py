@@ -169,6 +169,15 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         self.checkView.set_model(self.checklist.tree)
 
+        if self.checklist.type == 'SRPM':
+            from srpmqa import SRPMQA
+            qamenu = SRPMQA(self)
+        else:
+            from genericqa import GenericQA
+            qamenu = GenericQA(self)
+        self.QAMenuItem.set_submenu(qamenu)
+        qamenu.show_all()
+
     def __SRPM_into_properties(self, filename):
         msg = "Please select 'New => From SRPM'\nor 'New => From Bugzilla' to start the QA process."
         try:
