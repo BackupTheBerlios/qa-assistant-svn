@@ -23,6 +23,7 @@ qa_assistant_PYTHON = \
 		gnomeglade.py \
 		gpg.py \
 		optionrenderer.py \
+		preferences.py \
 		properties.py \
 		qareviewer.py \
 		review.py \
