@@ -1,0 +1,8 @@
+* Toshio Kuratomi <toshio[AT]tiki-lonuge.com>
+  Primary author and creator of bugs.
+
+* Ville Skyttä <ville.skytta[AT]iki.fi>
+  Implemented rpm2cpio in python
+
+* Stephen Kennedy <steve9000[AT]users.sf.net>
+  Wrote the gnomeglade.py module as part of meld, the GNOME diff tool
