@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE qasave SYSTEM 'qasave.dtd'>
+<qasave version='0.1'>
+  <checklist name='fedoraus' revision='0.1'>fedoraus.xml</checklist>
+  <properties>
+    <property name='TicketURL'>http://bugzilla.somebugzillaurl.com/cgi-bin/bugquery?11452</property>
+    <property name='SRPM'>file:///home/badger/rpmbuild/RPMS/Pyrex-0.9-1.fdr.0.src.rpm</property>
+  </properties>
+  <entries>
+    <entry name='Epoch' display='true' state='Fail'>
+      <states>
+        <state name='Fail'>Epoch is incorrect</state>
+        <state name='Pass'>Epoch is correct</state>
+      </states>
+    </entry>
+    <entry name='SRPM Signature' display='true' state='Pass'>
+      <states>
+        <state name='Fail'>This is a failur</state>
+      </states>
+    </entry>
+  </entries>
+</qasave>

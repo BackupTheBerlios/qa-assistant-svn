@@ -1,0 +1,151 @@
+%define pyver %(%{__python} -c "import sys; print sys.version[:3]")
+%{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+%{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
+
+Name:           qa-assistant
+Version:        @VERSION@
+Release:        0.fdr.1
+Epoch:          0
+Summary:        Graphical quality assurance report generator
+Group:          Development/Tools
+License:        GPL
+URL:            http://sourceforge.net/projects/qa-assistant
+Source0:        http://dl.sourceforge.net/qa-assistant/qa-assistant-%{version}.tar.bz2
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildArch:	noarch
+BuildRequires:  python-devel
+BuildRequires:	sed
+BuildRequires:	desktop-file-utils
+# Needed to get xmlcatalog
+BuildRequires:  libxml2
+BuildRequires:	pygtk2-devel >= 0:2.2.0
+BuildRequires:	pkgconfig
+BuildRequires:	gtk2-devel
+BuildRequires:	gnome-python2
+# Additional Python 2.2 requirement
+#BuildRequires:	python-optik
+#Requires:	python-optik
+Requires:	python-abi = %{pyver}
+Requires:	libxml2-python
+Requires:	gnome-python2
+Requires:	gnome-python2-gconf
+Requires:	pygtk2 >= 0:2.2.0
+Requires:	rpm-python
+Requires(post): /usr/bin/xmlcatalog
+Requires(postun): /usr/bin/xmlcatalog
+
+%description
+QA Assistant is a GNOME Application that presents the user with a graphical
+checklist.  When the user completes the checklist, they can output a review
+that lists the items they have selected with a comment as to whether the
+review has passed or failed.
+
+%prep
+%setup -q
+
+
+%build
+%configure
+make %{?_smp_mflags}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+# For GConf apps:
+export GCONF_DISABLE_MAKEFILE_SCHEMA_INSTALL=1
+make install DESTDIR=$RPM_BUILD_ROOT
+rm -f $RPM_BUILD_ROOT%{_datadir}/applications/qa-assistant.desktop
+desktop-file-install --vendor=fedora --dir=$RPM_BUILD_ROOT%{_datadir}/applications --add-category=X-Fedora qa-assistant.desktop
+
+# Remove the xmlcatalog b/c we have to generate at install time
+rm -rf $RPM_BUILD_ROOT/%{_sysconfdir}/xml
+
+# To pick up on translations
+# %find_lang %{name}
+ 
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+
+%post
+CATALOG=%{_datadir}/xml/qa-assistant/xmlcatalog
+#
+# Register the DTDs in the super catalog with the appropriate delegates
+#
+ROOTCATALOG=%{_sysconfdir}/xml/catalog
+
+if [ ! -r $ROOTCATALOG ]
+then
+    %{_bindir}/xmlcatalog --noout --create $ROOTCATALOG
+fi
+
+if [ -w $ROOTCATALOG ]
+then
+        %{_bindir}/xmlcatalog --noout --add "delegatePublic" \
+                "-//BadgerWare//DTD QA Assistant" \
+                "file://$CATALOG" $ROOTCATALOG
+        %{_bindir}/xmlcatalog --noout --add "delegateSystem" \
+                "http://qa-assistant.sf.net/dtds" \
+                "file://$CATALOG" $ROOTCATALOG
+        %{_bindir}/xmlcatalog --noout --add "delegateURI" \
+                "http://qa-assistant.sf.net/dtds" \
+                "file://$CATALOG" $ROOTCATALOG
+fi
+
+# For GConf apps
+export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
+gconftool-2 --makefile-install-rule \
+  %{_sysconfdir}/gconf/schemas/%{name}.schemas > /dev/null
+
+%preun
+# For GConf apps
+export GCONF_CONFIG_SOURCE=`gconftool-2 --get-default-source`
+gconftool-2 --makefile-uninstall-rule \
+  %{_sysconfdir}/gconf/schemas/%{name}.schemas >/dev/null || :
+
+%postun
+#
+# On removal, unregister the xmlcatalog from the supercatalog
+#
+if [ "$1" = 0 ]; then
+    ROOTCATALOG=%{_sysconfdir}/xml/catalog
+
+    if [ -w $ROOTCATALOG ]
+    then
+            %{_bindir}/xmlcatalog --noout --del \
+                    "-//BadgerWare//DTD QA Assistant" $ROOTCATALOG
+            %{_bindir}/xmlcatalog --noout --del \
+                    "http://qa-assistant.sf.net/dtds" $ROOTCATALOG
+            %{_bindir}/xmlcatalog --noout --del \
+                    "http://qa-asistant.sf.net/dtds" $ROOTCATALOG
+    fi
+fi
+
+%files
+%defattr(-,root,root,-)
+%doc AUTHORS COPYING ChangeLog NEWS README
+%doc PREFERENCES TODO
+%{_sysconfdir}/gconf/schemas/*
+%{_bindir}/*
+%{_datadir}/pixmaps/*
+%{_datadir}/applications/*
+%dir %{_datadir}/%{name}
+%{_datadir}/%{name}/data
+%{_datadir}/%{name}/glade
+%{_datadir}/%{name}/*.py
+%{_datadir}/%{name}/*.pyc
+%ghost %{_datadir}/%{name}/*.pyo
+%{_datadir}/xml/%{name}
+
+%changelog
+* Sun Nov 7 2004 Toshio Kuratomi <toshio-tiki-lounge-com> - 0:0.4.90.1-0.fdr.1
+- Update to development version 0.4.90.1
+
+* Sat Oct 16 2004 Toshio Kuratomi <toshio@tiki-lounge.com> - 0:0.4.1-0.fdr.1
+- Update to version 0.4.1
+
+* Sun Aug 8 2004 Toshio Kuratomi <toshio{here}tiki-lounge.com> - 0:0.4-0.fdr.3
+- Substitute macros for file paths in the install/uninstall scriptlets
+
+* Tue Apr 20 2004 Toshio Kuratomi <toshio[in]tiki-lounge.com> - 0:0.4-0.fdr.2
+- Initial Fedora Release.
