@@ -1,4 +1,4 @@
-AC_INIT([QA Assistant], [0.3], [abadger1999@sourceforge.net], qa-assistant)
+AC_INIT([QA Assistant], [0.4], [abadger1999@sourceforge.net], qa-assistant)
 AC_CONFIG_SRCDIR([qareviewer.py])
 AM_INIT_AUTOMAKE([gnu check-news dist-bzip2 -Wall])
 

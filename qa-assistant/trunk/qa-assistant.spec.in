@@ -13,6 +13,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:	noarch
 BuildRequires:  python-devel, sed
+BuildRequires:	desktop-file-utils
 Requires:       python, %{python_sitelib}
 Requires:	libxml2-python
 Requires:	gnome-python2
@@ -37,8 +38,8 @@ rm -rf $RPM_BUILD_ROOT
 # For GConf apps:
 export GCONF_DISABLE_MAKEFILE_SCHEMA_INSTAlL=1
 make install DESTDIR=$RPM_BUILD_ROOT
-###FIXME: Remove the desktop file and insert our own custom install-desktop
-# with proper vendor string
+rm -f $RPM_BUILD_ROOT%{_datadir}/applications/qa-assistant.desktop
+desktop-file-install --vendor=fedora --dir=$RPM_BUILD_ROOT%{_datadir}/applications --add-category=X-Fedora qa-assistant.desktop
 
 # To pick up on translations
 # %find_lang %{name}
@@ -74,5 +75,8 @@ rm -rf $RPM_BUILD_ROOT
 %ghost %{_datadir}/%{name}/*.pyo
 
 %changelog
+* Sun Apr 25 2004 Toshio Kuratomi <toshio@tiki-lonuge.com> - 0:0.4-0.fdr.1
+- Fix the desktop file install
+
 * Tue Apr 20 2004 Toshio Kuratomi <toshio@tiki-lounge.com> - 0:0.3-0.fdr.1
 - Initial release.

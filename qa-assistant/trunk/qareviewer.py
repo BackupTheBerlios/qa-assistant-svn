@@ -12,7 +12,7 @@ events, and send things off for future processing.
 """
 __programName__ = "qa-assistant"
 __programHumanName__ = "QA Assistant"
-__version__ = "0.3"
+__version__ = "0.4"
 __revision__ = "$Rev$"
 
 import libxml2

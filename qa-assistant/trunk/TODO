@@ -25,6 +25,8 @@ Extra GNOME Functionality:
 ==========================
 - Create preferences infrastructure : check PREFERENCES for ideas.
 
+- Druid on New
+
 Programming:
 ============
 - Command line argument parsing

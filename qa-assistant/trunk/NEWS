@@ -1,6 +1,11 @@
 QA Assistant -- A checklist reviewer to aid Quality Assurance
 ============
 
+0.4
+===
+
+* Some minor bugfixes to the python build process.
+
 0.3
 ===
 This release is largely an infrastructure and cosmetic enhancement.  The
