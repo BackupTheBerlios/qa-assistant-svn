@@ -88,6 +88,7 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
         oldValue = self.get_property('selectedoption')
         newValue = menuItem.get_children()[0].get_text()
         if oldValue != newValue:
+            self.set_property('selectedoption', newValue)
             self.emit('changed', newValue, iter)
 
     ### FIXME: Unused for now.  Eventually we should render the menu over the

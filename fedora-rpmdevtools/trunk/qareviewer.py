@@ -99,16 +99,39 @@ class QAReviewer(gnomeglade.GnomeApp):
         out = outputlist[newValue]
         self.checklist.tree.set(iter, checklist.OUTPUT, out)
 
-        ## FIXME:
+        category = self.checklist.tree.iter_parent(iter)
+        catRes = self.checklist.tree.get_value(category, checklist.RESOLUTION)
+
         # Check if the change makes the overall review into a pass or fail
-        if newValue == 'Pass' or newValue == 'N/A' or newValue == 'Needs Reviewing':
-            pass
-            # Check if all the checklist items agree
-        elif newValue == 'Fail':
-            pass
-            # One failure is enough to fail the whole section.
-            # Check if the head state is already fail.  If not, change
-        ### FIXME: Change the editorPane
+        if newValue == 'Fail':
+            if catRes == 'Fail':
+                return
+            ### FIXME: Check preferences for auto-display on fail
+            self.checklist.tree.set(iter, checklist.DISPLAY, True)
+        elif newValue == 'Needs Reviewing':
+            if catRes == 'Needs Reviewing':
+                return
+            if catRes == 'Pass':
+                self.checklist.tree.set(category, checklist.RESOLUTION,
+                                        newValue)
+                return
+            iter = self.checklist.tree.iter_children(category)
+            while iter:
+                nodeRes = self.checklist.tree.get_value(iter, checklist.RESOLUTION)
+                if nodeRes == 'Fail':
+                    return
+                iter = self.checklist.tree.iter_next(iter)
+        elif newValue == 'Pass' or newValue == 'N/A':
+            iter = self.checklist.tree.iter_children(category)
+            while iter:
+                nodeRes = self.checklist.tree.get_value(iter, checklist.RESOLUTION)
+                if nodeRes != 'Pass' and nodeRes != 'N/A':
+                    return
+                iter = self.checklist.tree.iter_next(iter)
+            newValue = 'Pass'
+
+        self.checklist.tree.set(category, checklist.RESOLUTION, newValue)
+        ### FIXME: Change the editorPane too
 
     def display_toggle(self, cell, path, *data):
         iter = self.checklist.tree.get_iter(path)

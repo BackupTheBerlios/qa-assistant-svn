@@ -1,0 +1,11 @@
+List of preference items to add once we have gconf2 preference infrastructure
+in place:
+
+- Automatically display failed reviews
+- Signing identity
+- keyserver to download new keys from
+- directory to unrpm into
+- text colours
+- submit to bugzilla or publish to file
+- default QA checklist to load
+

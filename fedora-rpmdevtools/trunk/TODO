@@ -2,19 +2,21 @@ Pressing New should prompt for a bugzilla # or URL
 Pressing save should dump the present state to an xml file
 Pressing open should load a dumped xml file
 
-Build Button should be added to toolbar nad menu
+Build Button should be added to toolbar and menu
 Pressing Build should build a review and prompt user for file to save as
 
 Submit Button should be added to toolbar and menu
 Pressing Submit will build the review and submit upstream and down.
 
-Remove the view menu.
+Add editorPane vs Output list to the view menu.
 
 Add a not yet implemented dialog for all menu items that don't yet work
 
 Add a New dialog to take input about bugzilla
 
-Create preferences that hold gpg username, default QAChecklist file,
+Add a New Dialog to take input about package
+
+Create preferences infrastructure : check PREFERENCES for ideas.
 
 Figure out the best way to add default paths to our data files.
 (Look at gnome-blog)
