@@ -117,10 +117,10 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
             itemList.append(item)
         for item in itemList:
             item.connect('toggled', self.alert_changes,
-                    event.x, event.y, data[0])
+                    int(event.x), int(event.y), data[0])
             menu.add(item)
             item.show()
-        path, column = tree.get_path_at_pos(event.x, event.y)[:2]
+        path, column = tree.get_path_at_pos(int(event.x), int(event.y))[:2]
         treeOrigin = tree.get_bin_window().get_origin()
         cellArea = tree.get_cell_area(path, column)
         self.x = treeOrigin[0] + cellArea.x

@@ -13,7 +13,7 @@
       found.</description>
     <entry name="SRPM GPG signed" display="true">
       <states>
-        <state name="Pass">GPG signature checked and found good</state>
+        <state name="Pass">Package signature verified: [ID] [Name]</state>
         <state name="Fail">Missing or Bad GPG Signature</state>
       </states>
       <description>The SRPM must be signed by the packager.  This gives you
@@ -184,6 +184,7 @@
       <states>
         <state name="Pass">Package sets up no default passwords</state>
         <state name="Fail">Package sets up an account with a default password</state>
+        <state name="Not-Applicable">Package does not set up accounts</state>
       </states>
       <description>Any package which needs to have an account created for it
         should set a non-valid password on the account so no one can login to

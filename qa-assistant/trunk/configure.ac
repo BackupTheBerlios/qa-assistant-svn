@@ -16,7 +16,9 @@ AM_GCONF_SOURCE_2
 dnl check for python
 AM_PATH_PYTHON
 
-PKG_CHECK_MODULES(PYGTK, pygtk-2.0)
+dnl Unfortunately, some fixes went into 2.2.0 that never made it into 2.0.
+dnl so we need at least that version.
+PKG_CHECK_MODULES(PYGTK, pygtk-2.0 >= 2.2.0)
 AC_SUBST(PYGTK_CFLAGS)
 AC_SUBST(PYGTK_LIBS)
 PKG_CHECK_MODULES(PYGNOME, gnome-python-2.0)

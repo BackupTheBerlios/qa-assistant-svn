@@ -30,10 +30,6 @@ class Properties:
         self.bugzillaURL = None
         self.bugzillaNumber = None
 
-        ### FIXME: Need to be set when we load the checklist, not here.
-        self.checklistName = 'fedoraus'
-        self.checklistRev = '0.1'
-
         ### FIXME: The following need to go into preferences (GConf)
         # Directories last searched (for FileSelect Dialogs)
         self.lastSRPMDir = './'
@@ -72,3 +68,10 @@ class Properties:
         except SRPM.SecurityError:
             excName, exc = sys.exc_info()[:2]
             raise self.SecurityError, (exc.id, exc.filename, exc.message)
+
+    def set(name, property):
+        """Set a property from the program. """
+        if hasattr(name):
+            setattr(name, property)
+        else:
+            raise AttributeError (1)

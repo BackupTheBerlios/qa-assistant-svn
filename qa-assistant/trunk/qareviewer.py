@@ -113,9 +113,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.grabBar.add(self.grabArrow)
         self.grabArrow.show()
 
-        self.reviewView = Review(self.checklist.tree, self.properties)
-        self.reviewView.show()
-        self.reviewPane.add(self.reviewView)
         self.reviewScroll.hide()
 
         dtdFile = os.path.join('data', 'qasave.dtd')
@@ -192,6 +189,15 @@ class QAReviewer(gnomeglade.GnomeApp):
             qamenu = GenericQA(self)
         self.QAMenuItem.set_submenu(qamenu)
         qamenu.show_all()
+        try:
+            self.reviewView.destroy()
+        except AttributeError:
+            # No problems as long as reviewView doesn't exist
+            pass
+        self.reviewView = Review(self.checklist.tree, self.properties)
+        self.reviewView.update_hash()
+        self.reviewView.show()
+        self.reviewPane.add(self.reviewView)
 
     def SRPM_into_properties(self, filename):
         '''Add an SRPM file into our properties structure.
@@ -378,7 +384,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         value = self.checklist.tree.get_value(iter, checklist.DISPLAY)
 
         if value:
-            self.checklist.tree.set(iter, checklist.DISPLAY, False) 
+            self.checklist.tree.set(iter, checklist.DISPLAY, False)
         else:
             self.checklist.tree.set(iter, checklist.DISPLAY, True)
 
@@ -386,6 +392,72 @@ class QAReviewer(gnomeglade.GnomeApp):
     # Menu/Toolbar callbacks
     #
 
+    def on_menu_open_activate(self, *extra):
+        """Open a saved review"""
+        fileSelect = gtk.FileSelection(title='Select the checklist file to load.')
+        if (os.path.isdir(self.properties.lastSaveFileDir) and
+                os.access(self.properties.lastSaveFileDir, os.R_OK|os.X_OK)):
+            fileSelect.set_filename(self.properties.lastSaveFileDir)
+
+        filename = None
+        response = fileSelect.run()
+        try:
+            if response == gtk.RESPONSE_OK:
+                filename = fileSelect.get_filename()
+        finally:
+            fileSelect.destroy()
+            del fileSelect
+
+        if filename:
+            ### FIXME: Check if file exists
+            self.properties.lastSaveFileDir = os.path.dirname(filename)+'/'
+            self.saveFile.set_filename(filename)
+            try:
+                newList = self.saveFile.load()
+            except IOError, msg:
+                ### FIXME: MSG Dialog that we were unable to load the file
+                pass
+
+            self.checklist = newList
+            ### FIXME: The following is copied from SRPM_into_properties
+            # It needs to be refactored to just have one copy somewhere.
+            self.__check_readiness()
+            ### End of SRPM into properties
+            
+            ### FIXME: This is copied from __load_checklist().
+            # __load_checklist needs to be split to have this method...
+            # sync_checklist which will perform this sync of checklistView to
+            # data.  And a load_checklist which is a special case of this
+            # function (and thus should be merged with it.)
+            self.checkView.set_model(self.checklist.tree)
+            
+            if self.checklist.type == 'SRPM':
+                from srpmqa import SRPMQA
+                qamenu = SRPMQA(self)
+            else:
+                from genericqa import GenericQA
+                qamenu = GenericQA(self)
+            self.QAMenuItem.set_submenu(qamenu)
+            qamenu.show_all()
+            self.reviewView.destroy()
+            self.reviewView = Review(self.checklist.tree, self.properties)
+            self.reviewView.update_hash()
+            self.reviewView.show()
+            self.reviewPane.add(self.reviewView)
+            ### End of __load_checklist copy.
+
+    def on_menu_save_activate(self, *extra):
+        """Save the current review to a file"""
+
+        if self.saveFile.filename:
+            try:
+                self.saveFile.publish()
+            except IOError, msg:
+                ### FIXME: MSG Dialog that we were unable to save this file
+                pass
+        else:
+            self.on_menu_save_as_activate(extra)
+        
     def on_menu_save_as_activate(self, *extra):
         """Save the current review to a file"""
        
@@ -485,12 +557,14 @@ class QAReviewer(gnomeglade.GnomeApp):
         # an unsigned int type
         # This hack munges current_event_time to match what event.time
         # provides but it's less than ideal.
+        # -- This has been fixed in 2.2.0 have to require that?
+        """
         time = gtk.get_current_event_time()
         offset = time - int(0x7FFFFFFF)
         if offset > 0:
             time = int(-2147483648 + offset)
-
-        self.new1_menu.popup(None, None, None, 0, time)
+        """
+        self.new1_menu.popup(None, None, None, 0, gtk.get_current_event_time())
         
     def on_menu_new_srpm_activate(self, *extra):
         """Open a new review based on the user selected SRPM"""
@@ -512,7 +586,10 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         if filename:
             self.properties.lastSRPMDir = os.path.dirname(filename)+'/'
+
+            # load the checklist data (Associates itself with checkView)
             self.SRPM_into_properties(filename)
+            self.__load_checklist()
 
     ### FIXME: Features we want to implement but haven't had the time yet:
     def on_menu_submit_activate(self, *extra):
@@ -523,26 +600,6 @@ Relative Priority: Publish will be the primary submission for now.  This is an e
         self.not_yet_implemented(msg)
         pass
 
-    def on_menu_open_activate(self, *extra):
-        """Open a saved review"""
-        msg = """Open a saved review. In the future, this function will allow us to access a review that we've already saved.
-
-Relative priority: after save functionality."""
-        
-        self.not_yet_implemented(msg)
-        self.saveFile.load()
-        pass
-
-    def on_menu_save_activate(self, *extra):
-        """Save the current review to a file"""
-        msg = """Saves a review to a file.  This is a snapshot of the review at this moment.  The publish/submit features will allow one to print the review out and submit to bugzilla.
-
-***Note*** 'Save as' is currently working.  Need a little extra logic to get 'save' itself to work.  Please use save as until then.
-        
-Relative priority: After load partial review from file."""
-        self.not_yet_implemented(msg)
-        pass
-        
     def on_menu_new_bugzilla_activate(self, *extra):
         """Open a new review with bugzilla report ID"""
         msg = """Associates this review with a bugzilla report.  The program needs to be able to use this to pick out information from a bugzilla report in order to autodownload packages and otherwise set up an environment for reviewing.  Although definitely cool, there's a good deal of work necessary for this to work.
@@ -578,7 +635,7 @@ Relative Priority: Low.  There's too much programming to do for me to spend too 
         pass
         
     ### FIXME: Part 2: Editing features are not currently encouraged.
-    # Have to recconcile these with our need to keep each checklist item in
+    # Have to reconcile these with our need to keep each checklist item in
     # its place.
     def on_menu_cut_activate(self, *extra):
         """Cut some text"""
