@@ -45,14 +45,24 @@ Features
 
 Requirements
 ------------
-* python 2.2 (2.3 is now the development platform.  Conditional code to use
+* python_ 2.2 (2.3 is now the development platform.  Conditional code to use
   python 2.2 is present but needs testing.)
-* python bindings for libxml2
-* pygtk version 2.2.0 or higher.
-* pygnome-gconf 2.0.0 or higher.
-* pygnome version 2.0.0 or higher.
-* python-rpm
+* python bindings for libxml2_
+* pygtk_ version 2.2.0 or higher.
+* `gnome-python-gconf`__ 2.0.0 or higher.
+* `gnome-python`__ version 2.0.0 or higher.
+* `python-rpm`_
 * Unix system to run on
+
+.. _python: http://www.python.org
+.. _libxml2: http://wwww.xmlsoft.org
+.. _pygtk: http://www.pygtk.org
+__ pygtk_
+__ pygtk_
+.. _python-rpm: http://www.rpm.org
+
+Getting the Code
+----------------
 
 The current code includes a checklist that works with the Quality Assurance
 process of Fedora.us, the contributed packages section of the Fedora Linux

@@ -85,3 +85,26 @@ the checklist object.
 
 We have a properties dict in the CheckList right now.
 What are we going to do with that?
+
+Functions
+---------
+
+Functions are tied into properties.  Both are declared by the checklist.
+Properties are defined in the checklist while functions are defined in code
+modules.  Functions can operate on Properties.  And they can take properties
+as arguments.
+
+So each Function module has to have access to the checklist's properties.
+How?
+
+Most functions are selectable from a menu entry.  How does this affect
+things?  We need to create a menu from the functions and assign the
+functions as callbacks.  The functions in the menu need to have access to
+the properties.  They also need to use functions on the review (publish) and
+gconf things (Enable/disable treetips)
+
+Create a QAMenu class that takes the checklist as its model.  When the 
+
+Functions that are not in the menu are functions used by the properties
+themselves.  These functions often need to specify dependency information on
+other properties.

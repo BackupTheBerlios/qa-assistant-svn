@@ -1,3 +1,47 @@
+2004-10-23 Toshio Kuratomi <toshio@tiki-lounge.com> - r131    
+    * qa-assistant.schemas: Rename key: show-checklist-descriptions ->
+      disable-checklist-descriptions because gconf returns false when a value
+      is unset so that makes a better default. 
+    * checklist.py: Use qaconst to import program-wide constants
+      (specifically GCONFPREFIX).
+    * qareviewer.py: Use qaconst to import program-wide constants. As part
+      of this, rename __programName -> PROGRAMNAME, and __programHumanName__ ->
+      HUMANPROGRAMNAME.
+    * PREFERENCES: Files and signing preferences are left to do.
+    * configure.ac: Add qaconst.py to the list of files to generate.
+    * properties.py: Remove properties that are now generated from gconf.
+    * genericqa.py: Use app.lastReviewDir instead of properties.lastReviewDir.
+    * treetips.py: Change the maximum timeout for treetips from one second to
+      one minute.
+    * checkview.py:
+      - Import program-wide constants from qaconst.
+      - Use gconf to set preferences on displaying the treetip help text.
+        + New function: __change_treetip_show() to toggle displaying the help
+          on and off.
+        + New function: __change_treetip_delay() to change how long the mouse
+          must hover before the tip pops up.
+      - Remove executable from the checkview.  Set Id and Rev keywords.
+    * qaconst.py.in: New file to hold program wide constants.
+    * Makefile.am: Add qaconst.py.in to the files.
+    
+2004-10-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r130    
+    * review.py:
+      - Merged the self.*Title variables that held gtk.Labels for the various
+        resolution categories into a self.reviewTitles dict.  This makes
+        iteration over it match with self.reviewBoxes and lends itself to
+        implementing customized headings for these labels.
+      - Rewrote the publish() method to function with the new widget internals.
+        This is not complete as CheckList still has to export data regarding
+        what the header should look like but it does publish a savefile that
+        is somewhat helpful.  (As opposed to being miserably broken before.)
+    * BUGS: Note to try optimizing away CheckList.set() calls.
+    * PREFERENCES: Note which objects the remaining preferences may be
+      implemented within.
+    * NEWS: Add note about the new Review widget.
+    * genericqa.py: Check the checklist's resolution to decide whether its
+      ready to publish or not instead of Review.
+    * ChangeLog: Update to (r129)
+    
 2004-10-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r129    
     * review.py: Minor reformatting to fit in 80 columns.
     * qa-assistant.schemas: Rename auto-display-failed key to no-auto-display
