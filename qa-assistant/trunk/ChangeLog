@@ -1,3 +1,9 @@
+2005-03-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r177    
+    * qa-assistant.spec.in: Rework scriptlets to handle gconf upgrade case.
+    
+2005-03-14 Toshio Kuratomi <toshio@tiki-lounge.com> - r176    
+    * ChangeLog: Update to (r175)
+    
 2005-03-14 Toshio Kuratomi <toshio@tiki-lounge.com> - r175    
     * src/propview.py: Show the label that says we don't have any properties.
     * README: Note we'll move to newer pygtk and gnome-python soon.
