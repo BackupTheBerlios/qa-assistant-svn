@@ -10,6 +10,7 @@ __revision__ = "$Rev$"
 
 import os, re, string
 import libxml2
+import gnome
 import checklist, gnomeglade
 
 _qaSaveFileVersion_ = '0.1'
