@@ -216,7 +216,7 @@ class CheckList (gtk.TreeStore):
                                  'Pass':None, 'Fail':None},
                     self.SUMMARY, category.prop('name'),
                     self.TEST, None)
-            self.entries[category.prop('name')] = newCat
+            self.entries[category.prop('name').lower()] = newCat
 
             # Entries are subheadings
             node = category.children
@@ -234,7 +234,7 @@ class CheckList (gtk.TreeStore):
                             self.SUMMARY, entry.name,
                             self.TEST, entry.test,
                             self.DESC, entry.desc)
-                    self.entries[entry.name] = entryIter
+                    self.entries[entry.namelower()] = entryIter
                     
                     # Construct the resolution from multiple states
                     outputList={'Needs-Reviewing': None}
@@ -286,8 +286,9 @@ class CheckList (gtk.TreeStore):
         '''
 
         # Make sure this entry isn't already listed.
-        if self.entries.has_key(summary):
-            raise error.DuplicateItem, ('%s is already present in the checklist.' % (self.entries[summary]))
+        sumLow = summary.lower()
+        if self.entries.has_key(sumLow):
+            raise error.DuplicateItem, ('%s is already present in the checklist.' % (self.entries[sumLow]))
 
         # Set up all the default values.
         if item == None:
@@ -309,7 +310,7 @@ class CheckList (gtk.TreeStore):
             newItem = self.append(self.customItemsIter)
         else:
             self.customItemsIter = self.append(None)
-            if summary == 'Custom Checklist Items':
+            if sumLow == 'custom checklist items':
                 newItem = self.customItemsIter
             else:
                 # Create the 'Custom Checklist Items' category
@@ -325,6 +326,7 @@ class CheckList (gtk.TreeStore):
                               "though they aren't on the standard checklist.",
                         self.TEST, None)
                 newItem = self.append(self.customItemsIter)
+                self.entries['custom checklist items'] = self.customItemsIter
         
         # Set up the new item
         self.set(newItem,
@@ -337,7 +339,7 @@ class CheckList (gtk.TreeStore):
                 self.RESLIST, resList,
                 self.OUTPUTLIST, outputList,
                 self.TEST, None)
-        self.entries[summary] = newItem
+        self.entries[sumLow] = newItem
 
     def publish(self, filename=None):
         '''Saves the current state of the `CheckList` into a savefile.
@@ -402,9 +404,9 @@ class CheckList (gtk.TreeStore):
         '''
        
         output = self.pangoize_output(resolution, output)
-        entryIter = self.entries[key]
+        entryIter = self.entries[key.lower()]
         outputList = self.get_value(entryIter, self.OUTPUTLIST)
-        outputList[key] = output
+        outputList[resolution] = output
     
     def unpangoize_output(self, output):
         '''Removes pango tags and unescapes pango special chars from output.

@@ -52,10 +52,6 @@ Programming Errors
     svn repository.  The repository or a tarball needs to be accessbile to run
     make dist-check, et al.
 
-* When checking for duplicates we probably want to treat things in a case
-  insensitive manner.  having "Upstream GPG Checked" and "upstream gpg checked"
-  probably doesn't make sense.
-
 Working: Need to test
 ---------------------
 * Creation of Custom checklist items is not being displayed in the CheckView
@@ -66,3 +62,6 @@ Working: Need to test
   signals as we do not track modifications to rows anymore and all adds go
   through add_entry so we can perform the add to self.entries there instead.
 * Need to migrate code to set the category state into checklist.py.
+* When checking for duplicates we probably want to treat things in a case
+  insensitive manner.  having "Upstream GPG Checked" and "upstream gpg checked"
+  probably doesn't make sense.

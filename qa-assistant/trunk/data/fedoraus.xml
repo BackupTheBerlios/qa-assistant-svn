@@ -2,18 +2,37 @@
 <!DOCTYPE checklist PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.3//EN" "http://qa-assistant.sf.net/dtds/checklist/0.3/checklist.dtd">
 <checklist version="0.3" name="fedoraus" revision="0.3">
   <properties>
-    <property name="SRPMfile" type="string"></property>
-    <property name="SRPMMD5sum" type="md5sum"></property>
-    <property name="ticketURL" type="url"></property>
+    <property name="ticketURL" type="url">
+      <require type="optional"/>
+    </property>
+    <property name="SRPMfile" type="file">
+      <require type="onload">
+        <arg>ticketURL</arg>
+        <function type="propset">srpm_from_ticket</function>
+      </require>
+    </property>
+    <property name="SRPMMD5sum" type="md5sum">
+      <require type="automatic">
+        <arg>SRPMfile</arg>
+        <function type="propset">srpm_md5</function>
+      </require>
+    </property>
+    <property name="fileMD5s" type="string">
+      <require type="automatic">
+        <arg>SRPMfile</arg>
+        <function type="propset">srpm_internal_md5s</function>
+      </require>
+    </property>
   </properties>
   <functions>
-    <function>from_srpm</function>
-    <function>from_ticket</function>
-    <function>separator</function>
-    <function>add_item</function>
-    <function>separator</function>
-    <function>publish</function>
-    <function>submit_ticket</function>
+    <function type="header">srpm_header</function>
+    <function type="user">from_srpm</function>
+    <function type="user">from_ticket</function>
+    <function type="user">separator</function>
+    <function type="user">add_item</function>
+    <function type="user">separator</function>
+    <function type="user">publish</function>
+    <function type="user">submit_ticket</function>
   </functions>
   <category name="Security of the build system">
     <description>Although many of the checklist items relate to security, the

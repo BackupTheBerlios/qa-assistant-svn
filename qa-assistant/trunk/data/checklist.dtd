@@ -24,7 +24,32 @@
      these types.
   -->
 <!ENTITY % PropType
-  '(string|url|number|md5sum|sha1sum)'
+  '(string|file|url|number|md5sum|sha1sum)'
+>
+
+<!-- types available for functions.  Determines the applications use. -->
+<!ENTITY % FunctionType
+  '(header|footer|propset|user)'
+>
+
+<!-- Requirement types for properties.  All properties need to be set to one
+     of these.  The requirement types allow us to know if the property is
+     needed and if so, when.
+
+     :onload: We need to load this property at the start of the Review.
+              Use this for items that cause the Review to not make sense
+              without.  This type must be entered by the user.
+     :onpublish: The property needs to be defined before we can publish a
+                 review.  This type may be entered by the user or by the
+                 system over the course of the review.
+     :automatic: This property is loaded through an automated test.  This
+                 type cannot be entered by the user.  It is optional.
+                 It will be loaded when
+                 the cust loads the properties that it depends on.
+     :optional: The property does not need to be entered.
+  -->
+<!ENTITY % RequireType
+  '(onload|onpublish|automatic|optional)'
 >
 
 <!-- Top level element
@@ -59,6 +84,7 @@
   <!-- Properties associated with the checklist such as filename,
        Issue tracking number, etc. -->
   <!ELEMENT properties (property+)>
+
     <!-- An individual property set on the checklist.
 
          Attributes:
@@ -66,25 +92,53 @@
          type: The type of the property
 
          Content: The property's value.  The application should validate
-                    the property's value against its type.
+                  the property's value against its type.
       -->
-    <!ELEMENT property (#PCDATA)>
+    <!ELEMENT property (require, value?)>
       <!ATTLIST property
         name CDATA #REQUIRED
         type %PropType; #REQUIRED
       >
+      
+      <!-- Requirements for the property.
 
+           Attributes:
+           :type: When and whether the property is required.
+
+           Content: A function to call to get the property.
+        -->
+      <!ELEMENT require (arg*, function?)>
+        <!ATTLIST require
+          type %RequireType; #REQUIRED
+        >
+        <!-- Another property that must be loaded before calling the function.
+
+             Contents: The name of the property.
+          -->
+        <!ELEMENT arg (#PCDATA)>
+
+      <!ELEMENT value (#PCDATA)>
+        
   <!-- List of functions this checklist requests from the checklist -->
   <!ELEMENT functions (function+)>
 
     <!-- Function requested by the program.
+
+         Attributes:
+         :type: How the application should use the requested functions.
+                user is a function invoked by the user (presented as a menu)
+                propset is a function to set a property.
+                header is a function to generate a header.
+                footer is a function to generate a footer.
          Content: The name of the function.  It's possible that we should
                     create a list of values that this can be.  But I don't
                     believe it's possible to effectively use such a list in
                     a DTD.  XML Schemas might allow this, though.
       -->
     <!ELEMENT function (#PCDATA)>
- 
+      <!ATTLIST function
+        type %FunctionType; #REQUIRED
+      >
   <!-- Metainfo for a group of entries.
     
         Attributes:
