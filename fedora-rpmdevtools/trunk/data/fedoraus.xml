@@ -1,0 +1,80 @@
+<?xml version='1.0' ?>
+<checklist version='0.1' name="fedoraus" revision="1.0">
+  <category name='Security'>
+    <help>Security Concerns</help>
+    <entry name='Canonical Source'>
+      <display default='true'/>
+      <states>
+        <state name='pass'>
+          <output>Source URL %s is canonical</output>
+        </state>
+        <state name='fail'>
+          <output>Source URL wrong; %s is the canonical URL</output>
+        </state>
+      </states>
+      <help>You should check to be sure the Source line contains a valid URL.
+        This helps ensure that the person creating the RPM is not downloading
+        a trojan source tarball from an unknown entity.</help>
+      <input>Source URL</input>
+    </entry>
+    <entry name='MD5Sum verified'>
+      <display default='true'/>
+      <states>
+        <state name='pass'>
+          <output>Upstream MD5Sum verified</output>
+        </state>
+        <state name='fail'>
+          <output>Upstream MD5Sum does not match!</output>
+        </state>
+      </states>
+      <help>You should always verify that the upstream source matches the
+        source provided in the SRPM.  One method of doing this is to download
+        the pristine source from a known canonical web site and take the MD5
+        hash of it with md5sum.  Comparing this hash to the hash of the
+        source in the SRPM should be identical.</help>
+      <output>Source matches with upstream.</output>
+    </entry>
+    <entry name='Upstream GPG Checked'>
+      <display default='false'/>
+      <states>
+        <state name='pass'>
+          <output>Good upstream GPG Signature: %s</output>
+        </state>
+        <state name='fail'>
+          <output>Upstream GPG Signatures do not match: %s</output>
+        </state>
+        <state name='n/a'>
+          <output>No upstream GPG</output>
+        </state>
+      </states>
+      <help>Whenever possible, you should check that the upstream tarball is
+        truly from a trusted source.  One method of doing this is to have the
+        upstream developers sign the release tarball with their gpg keys.
+        Another, related method is for the upstream developer gpg sign a
+        file with MD5sums of the source tarballs.  If the upstream developer
+        uses either of these methods, please be sure to verify the source by
+        checking the valdity of the gpg signatures.</help>
+      <input>GPG output</input>
+    </entry>
+  </category>
+  <category name="Spec">
+    <help>Potential spec file problems</help>
+    <entry name="BuildRoot">
+      <display default='false'/>
+      <states>
+        <state name='pass'>
+          <output>Buildroot has all required elements</output>
+        </state>
+        <state name='fail'>
+          <output>Buildroot lacks certain elements</output>
+        </state>
+      </states>
+      <help>The spec file's BuildRoot: must contain %{_tmppath} in as a prefix
+        so the local user can define where packages are temporarily installed.
+        It should also contain a unique identifier to prevent collisions
+        should multiple users be creating packages.  The Fedora suggested
+        BuildRoot is:
+        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)</help>
+    </entry>
+  </category>
+</checklist>
