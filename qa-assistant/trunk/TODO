@@ -52,7 +52,3 @@ Programming:
   (python 2.3's textwrap would do this for publish, not sure about viewing.)
 
 - Update to the fedora QAFormat output style
-
-Build Infrastructure:
-=====================
-- Write a spec file

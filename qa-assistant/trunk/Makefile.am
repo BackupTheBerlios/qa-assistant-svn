@@ -6,17 +6,18 @@ qa_assistantdir = $(datadir)/qa-assistant
 qa_assistant_PYTHON = \
 		SRPM.py \
 		checklist.py \
+		genericqa.py \
 		gnomeglade.py \
 		optionrenderer.py \
 		properties.py \
 		qareviewer.py \
 		review.py \
+		srpmqa.py \
 		treetips.py
 
 # Generated program files
 nodist_qa_assistantdir = $(datadir)/qa-assistant
 nodist_qa_assistant_PYTHON = \
-			qa-assistant \
 			paths.py
 
 iconsdir = $(datadir)/pixmaps
@@ -41,12 +42,15 @@ Desktop_DATA = $(Desktop_in_files:.desktop.in=.desktop)
 # Need to use INTLTOOL to do this when we i18n the code
 $(Desktop_DATA): $(Desktop_in_files)
 	cp $< $@
+
 EXTRA_DIST = \
 	PREFERENCES \
 	TODO \
 	qa-assistant.pyin \
 	paths.py.pyin \
 	autogen.sh \
+	qa-assistant.spec \
+	qa-assistant.spec.in \
 	$(datafiles_DATA) \
 	$(uifiles_DATA) \
 	$(Desktop_in_files)	\
@@ -55,6 +59,7 @@ EXTRA_DIST = \
 
 CLEANFILES= \
 	   $(nodist_qa_assistant_PYTHON) \
+	   qa-assistant \
 	   *.pyc \
 	   *.pyo \
 	   qa-assistant*.tar.*

@@ -16,4 +16,5 @@ AC_SUBST(PYGTK_LIBS)
 
 AC_OUTPUT([
 Makefile
+qa-assistant.spec
 ])

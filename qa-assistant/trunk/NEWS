@@ -11,9 +11,15 @@ string in the checklist Pane.
 * Colorized output for checklist items.
 * Now has an automake/autoconf build.  This means the package is now
   installable with standard ./configure ; make; make install steps
+* RPM spec file included and rpm's shipped with package.
 * When publishing a review, QA Assistant now checks to see if it's in an
   Incomplete state.
 * Fixed a bug that prevented editing of the output string in the checklist
+* Checklist actions now appear in the QA Actions menu instead of the File
+  menu.  (The sole exception is the New actions.  These will probably be
+  replaced with a Druid that walks one through selecting a checklist and
+  file to QA.  The current method of selecting an SRPM to QA will remain
+  on the QA Action menu for those who select a checklist manually.
 * Website and downloads moved to sourceforge.
   http://sourceforge.net/projects/qa-assistant
 * Anonymous Subversion repository 0.32 open at
