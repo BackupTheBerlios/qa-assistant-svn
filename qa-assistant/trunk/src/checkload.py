@@ -17,7 +17,7 @@ import gnome.ui
 from qaconst import *
 import error
 from checklist import CheckList
-from propview import PropertiesWidget
+from propview import PropertiesView
 
 #
 # Druid Modes
