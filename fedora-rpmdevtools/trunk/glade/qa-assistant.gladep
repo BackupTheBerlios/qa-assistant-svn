@@ -2,10 +2,10 @@
 <!DOCTYPE glade-project SYSTEM "http://glade.gnome.org/glade-project-2.0.dtd">
 
 <glade-project>
-  <name>Fedora QAReviewer</name>
-  <program_name>fedora-qareviewer</program_name>
+  <name>QA Assistant</name>
+  <program_name>qa-assistant</program_name>
   <use_widget_names>TRUE</use_widget_names>
   <gnome_help_support>TRUE</gnome_help_support>
   <output_translatable_strings>TRUE</output_translatable_strings>
-  <translatable_strings_file>fedora-qareviewer.strings</translatable_strings_file>
+  <translatable_strings_file>qa-assistant.strings</translatable_strings_file>
 </glade-project>

@@ -4,7 +4,7 @@
  * DO NOT compile it as part of your application.
  */
 
-gchar *s = N_("Fedora QAReviewer");
+gchar *s = N_("QA Assistant");
 gchar *s = N_("Start a review from a Bugzilla Entry");
 gchar *s = N_("From Bug_zilla");
 gchar *s = N_("Start a review from an SRPM");
@@ -18,15 +18,8 @@ gchar *s = N_("_Contents");
 gchar *s = N_("Create a new QA report");
 gchar *s = N_("Open an existing QA report");
 gchar *s = N_("Save your QA report");
-gchar *s = N_("*");
-gchar *s = N_("NEEDSWORK");
-gchar *s = N_("PUBLISH +1");
-gchar *s = N_("PUBLISH -1");
-gchar *s = N_("Good:");
-gchar *s = N_("Needswork:");
-gchar *s = N_("Non-blocker:");
 gchar *s = N_("© 2004 Toshio Kuratomi");
-gchar *s = N_("A tool to help write QA reviews of Fedora Contributed Software");
+gchar *s = N_("A tool to help write QA reviews of RPM Packaged Contributed Software");
 gchar *s = N_("translator_credits");
 gchar *s = N_("Not Yet Implemented");
 gchar *s = N_("<span weight='bold' size='larger'>Feature Not Yet Implemented</span>");

@@ -10,7 +10,7 @@
 The main program object.  From here we set up the user interface, receive
 events, and send things off for future processing.
 """
-__programName__ = "Fedora QA Reviewer"
+__programName__ = "QA Assistant"
 __version__ = "0.1"
 __revision__ = "$Revision$"
 
@@ -42,7 +42,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         ### FIXME: Properties is too hard-coded right now.  Needs some love.
         self.properties = Properties('fedoraus.xml', self.SRPM)
         
-        gladefile = 'glade/fedora-qareviewer.glade'
+        gladefile = 'glade/qa-assistant.glade'
         gnomeglade.GnomeApp.__init__(self, __name__, __version__, gladefile,
                 'ReviewerWindow')
 
@@ -95,8 +95,8 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.grabBar.remove(label)
         self.grabBar.add(self.grabArrow)
 
-        # Hide the editorPane until the user asks to see it.
-        self.mainDisplay.remove(self.editorPane)
+        # Hide the reviewPane until the user asks to see it.
+        self.mainDisplay.remove(self.reviewPane)
 
         ### FIXME: There are reasons to avoid show_all.  We aren't doing
         # anything that exposes those problems yet, but I should look into
@@ -180,7 +180,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.checklist.tree.set(category, checklist.RESOLUTION, newValue)
         path = self.checklist.tree.get_path(category)
         self.checklist.tree.row_changed(path, category)
-        ### FIXME: Change the editorPane too
+        ### FIXME: Change the reviewPane too
 
     def display_toggle(self, cell, path, *data):
         """Toggles outputting a message for the review.
@@ -201,13 +201,13 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         if value == True:
             self.checklist.tree.set(iter, checklist.DISPLAY, False) 
-            ### FIXME: Hide the displayed output elements in the editorPane
+            ### FIXME: Hide the displayed output elements in the reviewPane
             # Find widget by name
             # widget.destroy()
             pass
         else:
             self.checklist.tree.set(iter, checklist.DISPLAY, True)
-            ### FIXME: Display the output elements in the editorPane
+            ### FIXME: Display the output elements in the reviewPane
             # create testarea widget with name
             # fill textarea widget with checklist.OUTPUT
 
@@ -228,7 +228,7 @@ class QAReviewer(gnomeglade.GnomeApp):
     def on_menu_about_activate(self, *extra):
         """Show the about window."""
 
-        about = gtk.glade.XML('glade/fedora-qareviewer.glade', 'AboutWindow').get_widget('AboutWindow')
+        about = gtk.glade.XML('glade/qa-assistant.glade', 'AboutWindow').get_widget('AboutWindow')
         about.set_property('name', __programName__)
         about.set_property('version', __version__)
         about.show()
@@ -248,11 +248,11 @@ class QAReviewer(gnomeglade.GnomeApp):
         if self.grabArrow.get_property('arrow-type') == gtk.ARROW_LEFT:
             self.grabArrow.set(gtk.ARROW_RIGHT, gtk.SHADOW_NONE)
             self.checkView.remove_column(self.outputColumn)
-            self.mainDisplay.pack_end(self.editorPane)
+            self.mainDisplay.pack_end(self.reviewPane)
         else:
             self.grabArrow.set(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
             self.checkView.append_column(self.outputColumn)
-            self.mainDisplay.remove(self.editorPane)
+            self.mainDisplay.remove(self.reviewPane)
             
     ### FIXME: Features we want to implement but haven't had the time yet:
     def on_menu_publish_activate(self, *extra):
@@ -375,7 +375,7 @@ Relative Priority: _Low_.  Developers are going to use this, not end-users so a 
         return self.on_menu_view_toggle_preview_activate(self, *extra)
 
     def not_yet_implemented(self, msg = ""):
-        NYI = gtk.glade.XML('glade/fedora-qareviewer.glade', 'NYIDialog')
+        NYI = gtk.glade.XML('glade/qa-assistant.glade', 'NYIDialog')
         NYIDialog = NYI.get_widget('NYIDialog')
         NYIDialog.connect('response', lambda dialog, response: dialog.destroy())
         if msg:

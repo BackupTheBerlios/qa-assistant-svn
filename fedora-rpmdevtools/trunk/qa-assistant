@@ -1,6 +1,6 @@
 #! /usr/bin/python -tt
 #
-# File: fedora-qareviewer
+# File: qa-assistant
 # Author: Toshio Kuratomi <toshio@tiki-lounge.com>
 # Date: 29 Feb, 2004
 # Copyright: Toshio Kuratomi
@@ -8,8 +8,8 @@
 # Description: Graphical program to help write and submit a QA review for a
 # Fedora package.
 # Id: $Id$
-"""Generates a Fedora Style QA Review.
-Usage: fedora-qareviewer [OPTIONS] <SRC.RPM>
+"""Helps a reviewer generate a QA Report.
+Usage: qa-assistant [OPTIONS] <SRC.RPM>
     -h
     --help              This usage message
     --version           Outputs version and exits
@@ -20,12 +20,7 @@ be wrong with a package while allowing the user to also add entries for things
 the editor does not know about.
 """
 
-__programName__ = "fedora-qareviewer"
-__version__ = "0.1"
 __revision__ = "$Rev$"
-
-# 8K block size for now.
-BLOCKSIZE=8192
 
 import sys
 
@@ -34,12 +29,9 @@ from qareviewer import QAReviewer
 if __name__ == "__main__":
     # Setup gnome environment
     # Parse commandline
-    # Open the qachecklist
     application = QAReviewer(sys.argv);
     application.mainloop()
     sys.exit(0)
-    # class Editor
-    # class ChecklistWindow
     # class SaveFile
     # class ChecklistRulesFile
     # Initialize the sourceview
