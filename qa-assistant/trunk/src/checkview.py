@@ -62,13 +62,21 @@ class CheckView(gtk.TreeView):
         self.gconfClient.add_dir(GCONFPREFIX, gconf.CLIENT_PRELOAD_NONE)
         key = GCONFPREFIX + '/display/disable-checklist-descriptions'
         self.gconfClient.notify_add(key, self.__change_treetip_show)
-        if self.gconfClient.get_bool(key):
+        try:
+            disableTips = self.gconfClient.get_bool(key)
+        except gobject.GError:
+            disableTips = (
+                    self.gconfClient.get_default_from_schema(key).get_bool())
+        if disableTips:
             self.tips.disable()
         else:
             self.tips.enable()
         key = GCONFPREFIX + '/display/checklist-description-wait'
         self.gconfClient.notify_add(key, self.__change_treetip_delay)
-        tipDelay = self.gconfClient.get_int(key)
+        try:
+            tipDelay = self.gconfClient.get_int(key)
+        except gobject.GError:
+            tipDelay = self.gconfClient.get_default_from_schema(key).get_int()
         if tipDelay:
             self.tips.set_property('delay', tipDelay)
 

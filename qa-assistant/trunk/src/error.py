@@ -26,3 +26,5 @@ class InvalidChecklist(Error):
 class CannotAccessFile(Error):
     '''We were unable to access the given filename.'''
     pass
+
+### FIXME: gpg exceptions

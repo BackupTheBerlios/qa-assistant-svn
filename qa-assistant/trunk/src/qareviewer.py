@@ -309,7 +309,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         if self.logo:
             prefDialog.PreferencesDialog.set_property('icon', self.logo)
 
-        propDialog.show()
+        prefDialog.PreferencesDialog.show()
 
     def on_menu_view_toggle_preview_activate(self, *extra):
         """Toggles between checklist view and output view.

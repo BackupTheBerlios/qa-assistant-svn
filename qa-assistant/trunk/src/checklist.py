@@ -146,7 +146,11 @@ class CheckList (gtk.TreeStore):
         self.__init_colors('/display/minor-color')
         self.__init_colors('/display/notes-color')
         key = GCONFPREFIX + '/display/no-auto-display'
-        self.noAutoDisplay = self.gconfClient.get_bool(key)
+        try:
+            self.noAutoDisplay = self.gconfClient.get_bool(key)
+        except gobject.GError:
+            self.noAutoDisplay = (
+                    self.gconfClient.get_default_from_schema(key).get_bool())
         self.gconfClient.notify_add(key, self.__change_auto_display)
         
         libxml2.registerErrorHandler(self.__no_display_parse_error, None)

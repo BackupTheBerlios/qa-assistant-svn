@@ -53,6 +53,10 @@ Programming Errors
     svn repository.  The repository or a tarball needs to be accessbile to run
     make dist-check, et al.
 
+* Set the icon/logo properties on the DruidWindow and the
+  PreferencesDialog.PrefDialog so they display in taskbars with the correct
+  icons.
+
 Working: Need to test
 ---------------------
 * Using the save function (rather than save_as) doesn't seem to be saving the
