@@ -21,14 +21,13 @@ import libxml2
 import gtk
 import gnome
 
-import checklist
 import gnomeglade
 import error
 from properties import Properties
 from optionrenderer import OptionCellRenderer
 from review import Review
 from treetips import TreeTips
-from savefile import SaveFile
+from checklist import CheckList
 
 class QAReviewer(gnomeglade.GnomeApp):
     #
@@ -51,11 +50,6 @@ class QAReviewer(gnomeglade.GnomeApp):
                 gladefile, 'ReviewerWindow')
         self.program.set_property(gnome.PARAM_HUMAN_READABLE_NAME, __programHumanName__)
         
-        ### FIXME: Merge with checklist.
-
-        # Create a structure providing savefiles
-        self.saveFile = SaveFile(self, None)
-
         #
         # Create additional interface components
         #
@@ -81,35 +75,35 @@ class QAReviewer(gnomeglade.GnomeApp):
         renderer = gtk.CellRendererToggle()
         renderer.set_radio(False)
         column = gtk.TreeViewColumn('Display', renderer,
-                                    active=checklist.DISPLAY,
-                                    visible=checklist.ISITEM)
+                                    active=self.checklist.DISPLAY,
+                                    visible=self.checklist.ISITEM)
         renderer.connect('toggled', self.display_toggle)
         self.checkView.append_column(column)
 
         renderer = OptionCellRenderer()
         column = gtk.TreeViewColumn('Resolution', renderer,
-                                    optionlist=checklist.RESLIST,
-                                    selectedoption=checklist.RESOLUTION,
-                                    mode=checklist.ISITEM)
+                                    optionlist=self.checklist.RESLIST,
+                                    selectedoption=self.checklist.RESOLUTION,
+                                    mode=self.checklist.ISITEM)
         column.set_cell_data_func(renderer, self.__translate_option_mode)
         renderer.connect('changed', self.resolution_changed)
         self.checkView.append_column(column)
        
         renderer = gtk.CellRendererText()
         column = gtk.TreeViewColumn('Summary', renderer,
-                                    text=checklist.SUMMARY)
+                                    text=self.checklist.SUMMARY)
         self.checkView.append_column(column)
         
         renderer = gtk.CellRendererText()
         renderer.connect('edited', self.output_edited)
         column = gtk.TreeViewColumn('Output', renderer,
-                                    markup=checklist.OUTPUT,
-                                    visible=checklist.DISPLAY,
-                                    editable=checklist.DISPLAY)
+                                    markup=self.checklist.OUTPUT,
+                                    visible=self.checklist.DISPLAY,
+                                    editable=self.checklist.DISPLAY)
         self.outputColumn = column
         self.checkView.append_column(column)
 
-        self.tips = TreeTips(self.checkView, checklist.DESC)
+        self.tips = TreeTips(self.checkView, self.checklist.DESC)
 
         self.listPane.add(self.checkView)
         self.checkView.show()
@@ -166,7 +160,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.stderr.write("Unable to find checklist: %s\n" % (filename))
             sys.exit(1)
         try:
-            self.checklist = checklist.CheckList(checkFile)
+            self.checklist = CheckList(checkFile)
         except (libxml2.parserError, libxml2.treeError, error.InvalidChecklist), msg:
             ### FIXME: When we can select checklists via property, we need to
             # print error and recover.
@@ -196,7 +190,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.reviewView.update_hash()
         self.reviewView.show()
         self.reviewPane.add(self.reviewView)
-        self.saveFile.set_checklist(self.checklist)
 
     def SRPM_into_properties(self, filename):
         '''Add an SRPM file into our properties structure.
@@ -301,12 +294,12 @@ class QAReviewer(gnomeglade.GnomeApp):
         """Change the text of the output string"""
         rowIter = self.checklist.get_iter_from_string(row)
         path = self.checklist.get_path(rowIter)
-        name = self.checklist.get_value(rowIter, checklist.RESOLUTION)
+        name = self.checklist.get_value(rowIter, self.checklist.RESOLUTION)
         newValue = self.checklist.pangoize_output(name, newValue)
 
-        outDict = self.checklist.get_value(rowIter, checklist.OUTPUTLIST)
+        outDict = self.checklist.get_value(rowIter, self.checklist.OUTPUTLIST)
         outDict[name] = newValue
-        self.checklist.set(rowIter, checklist.OUTPUT, newValue)
+        self.checklist.set(rowIter, self.checklist.OUTPUT, newValue)
         self.checklist.row_changed(path, rowIter)
 
     ### FIXME: I believe this should go into checklist.  Possibly this whole
@@ -325,10 +318,10 @@ class QAReviewer(gnomeglade.GnomeApp):
         """
 
         # Set the checklist to the new resolution and output values
-        self.checklist.set(changedRow, checklist.RESOLUTION, newValue)
-        outputlist = self.checklist.get_value(changedRow, checklist.OUTPUTLIST)
+        self.checklist.set(changedRow, self.checklist.RESOLUTION, newValue)
+        outputlist = self.checklist.get_value(changedRow, self.checklist.OUTPUTLIST)
         out = outputlist[newValue]
-        self.checklist.set(changedRow, checklist.OUTPUT, out)
+        self.checklist.set(changedRow, self.checklist.OUTPUT, out)
         
         # Signal that this row has been changed
         path = self.checklist.get_path(changedRow)
@@ -336,12 +329,12 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         # Load category information to check if it needs updating too.
         category = self.checklist.iter_parent(changedRow)
-        catRes = self.checklist.get_value(category, checklist.RESOLUTION)
+        catRes = self.checklist.get_value(category, self.checklist.RESOLUTION)
 
         if newValue == 'Fail' or newValue == 'Non-Blocker':
             ### FIXME: Check preferences for auto-display on fail
             # Auto display to review if it's a fail
-            self.checklist.set(changedRow, checklist.DISPLAY, True)
+            self.checklist.set(changedRow, self.checklist.DISPLAY, True)
 
         # Check if the change makes the overall review into a pass or fail
         if newValue == 'Fail':
@@ -356,7 +349,7 @@ class QAReviewer(gnomeglade.GnomeApp):
                 entryIter = self.checklist.iter_children(category)
                 while changedRow:
                     nodeRes = self.checklist.get_value(entryIter,
-                            checklist.RESOLUTION)
+                            self.checklist.RESOLUTION)
                     if nodeRes == 'Fail':
                         return
                     changedRow = self.checklist.iter_next(entryIter)
@@ -366,14 +359,14 @@ class QAReviewer(gnomeglade.GnomeApp):
             newValue = 'Pass'
             entryIter = self.checklist.iter_children(category)
             while entryIter:
-                nodeRes = self.checklist.get_value(entryIter, checklist.RESOLUTION)
+                nodeRes = self.checklist.get_value(entryIter, self.checklist.RESOLUTION)
                 if nodeRes == 'Needs-Reviewing':
                     newValue = 'Needs-Reviewing'
                 elif nodeRes == 'Fail':
                     return
                 entryIter = self.checklist.iter_next(entryIter)
 
-        self.checklist.set(category, checklist.RESOLUTION, newValue)
+        self.checklist.set(category, self.checklist.RESOLUTION, newValue)
         path = self.checklist.get_path(category)
         self.checklist.row_changed(path, category)
 
@@ -391,12 +384,12 @@ class QAReviewer(gnomeglade.GnomeApp):
         """ 
         
         entryIter = self.checklist.get_iter(path)
-        value = self.checklist.get_value(rowIter, checklist.DISPLAY)
+        value = self.checklist.get_value(entryIter, self.checklist.DISPLAY)
 
         if value:
-            self.checklist.set(entryIter, checklist.DISPLAY, False)
+            self.checklist.set(entryIter, self.checklist.DISPLAY, False)
         else:
-            self.checklist.set(entryIter, checklist.DISPLAY, True)
+            self.checklist.set(entryIter, self.checklist.DISPLAY, True)
 
     #
     # Menu/Toolbar callbacks
@@ -421,11 +414,11 @@ class QAReviewer(gnomeglade.GnomeApp):
         if filename:
             ### FIXME: Check if file exists
             self.properties.lastSaveFileDir = os.path.dirname(filename)+'/'
-            self.saveFile.set_filename(filename)
             try:
-                newList = self.saveFile.load()
+                newList = CheckList(filename)
             except IOError, msg:
                 ### FIXME: MSG Dialog that we were unable to load the file
+                ### FIXME: Handle CheckList loading exceptions.
                 pass
 
             try:
@@ -445,8 +438,11 @@ class QAReviewer(gnomeglade.GnomeApp):
             # data.  And a load_checklist which is a special case of this
             # function (and thus should be merged with it.)
             self.checkView.set_model(self.checklist)
-            
-            if self.checklist.type == 'SRPM':
+           
+            ### FIXME: This is tre broken.  But it will have to do for now.
+            # Later we will implement loading functions from the XML file.
+            #if self.checklist.type == 'SRPM':
+            if True:
                 from srpmqa import SRPMQA
                 qamenu = SRPMQA(self)
             else:
@@ -463,15 +459,14 @@ class QAReviewer(gnomeglade.GnomeApp):
             self.reviewView.update_hash()
             self.reviewView.show()
             self.reviewPane.add(self.reviewView)
-            self.saveFile.set_checklist(self.checklist)
             ### End of __load_checklist copy.
 
     def on_menu_save_activate(self, *extra):
         """Save the current review to a file"""
 
-        if self.saveFile.filename:
+        if self.checklist.filename:
             try:
-                self.saveFile.publish()
+                self.checklist.publish()
             except IOError, msg:
                 ### FIXME: MSG Dialog that we were unable to save this file
                 pass
@@ -499,11 +494,11 @@ class QAReviewer(gnomeglade.GnomeApp):
             ### FIXME: Check if file exists
             # If so, prompt to overwrite
             self.properties.lastSaveFileDir = os.path.dirname(filename)+'/'
-            self.saveFile.set_filename(filename)
             try:
-                self.saveFile.publish()
+                self.checklist.publish(filename)
             except IOError, msg:
                 ### FIXME: MSG Dialog that we were unable to save the file
+                ### FIXME: Check for checklist exceptions
                 pass
                 
     def on_menu_quit_activate(self, *extra):
@@ -610,8 +605,6 @@ class QAReviewer(gnomeglade.GnomeApp):
             # load the checklist data (Associates itself with checkView)
             self.SRPM_into_properties(filename)
             self.__load_checklist()
-            # Reset savefile so we don't accidentally overwrite something.
-            self.saveFile.set_filename(None)
 
     ### FIXME: Features we want to implement but haven't had the time yet:
     def on_menu_submit_activate(self, *extra):

@@ -11,8 +11,6 @@ __revision__ = "$Rev$"
 import os
 import gtk
 
-import checklist
-
 class GenericQA(gtk.Menu):
 
     def __init__(self, app):

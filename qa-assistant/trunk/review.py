@@ -219,13 +219,13 @@ class Review(gtk.VBox):
         # row-changed gets called once for each item that is updated, even
         # when there's a group.  So we have to wait until we get a proper
         # summary (our key value) to add the entry to the list
-        summary = treeStore.get_value(updateIter, checklist.SUMMARY)
+        summary = treeStore.get_value(updateIter, self.checklist.SUMMARY)
         if self.addPaths.has_key(path) and summary:
             # New item
             self.list.append((summary,
-                treeStore.get_value(updateIter, checklist.DISPLAY),
-                treeStore.get_value(updateIter, checklist.RESOLUTION),
-                treeStore.get_value(updateIter, checklist.OUTPUT)))
+                treeStore.get_value(updateIter, self.checklist.DISPLAY),
+                treeStore.get_value(updateIter, self.checklist.RESOLUTION),
+                treeStore.get_value(updateIter, self.checklist.OUTPUT)))
             del self.addPaths[path]
         elif len(path) > 1:
             # Update an old item
@@ -234,12 +234,14 @@ class Review(gtk.VBox):
                 if self.list.get_value(listIter, self.__SUMMARY) == summary:
                     self.list.set(listIter,
                             self.__DISPLAY,
-                            treeStore.get_value(updateIter, checklist.DISPLAY),
+                            treeStore.get_value(updateIter,
+                                self.checklist.DISPLAY),
                             self.__RESOLUTION,
                             treeStore.get_value(updateIter,
-                                checklist.RESOLUTION),
+                                self.checklist.RESOLUTION),
                             self.__OUTPUT,
-                            treeStore.get_value(updateIter, checklist.OUTPUT))
+                            treeStore.get_value(updateIter,
+                                self.checklist.OUTPUT))
                     break
                 listIter = self.list.iter_next(listIter)
         else:
@@ -277,10 +279,10 @@ class Review(gtk.VBox):
             entryIter = treeStore.iter_children(category)
             while entryIter:
                 self.list.append((treeStore.get_value(entryIter,
-                    checklist.SUMMARY),
-                    treeStore.get_value(entryIter, checklist.DISPLAY),
-                    treeStore.get_value(entryIter, checklist.RESOLUTION),
-                    treeStore.get_value(entryIter, checklist.OUTPUT)))
+                    self.checklist.SUMMARY),
+                    treeStore.get_value(entryIter, self.checklist.DISPLAY),
+                    treeStore.get_value(entryIter, self.checklist.RESOLUTION),
+                    treeStore.get_value(entryIter, self.checklist.OUTPUT)))
                 entryIter = treeStore.iter_next(entryIter)
             category = treeStore.iter_next(category)
 
@@ -333,13 +335,13 @@ class Review(gtk.VBox):
         catIter = treeStore.get_iter_first()
         moreWork = False
         while catIter:
-            value = treeStore.get_value(catIter, checklist.RESOLUTION)
+            value = treeStore.get_value(catIter, self.checklist.RESOLUTION)
             if value == 'Fail':
                 self.resolution.set_text('NEEDSWORK')
                 return
             elif value == 'Needs-Reviewing':
                 moreWork = True
-             catIter = treeStore.iter_next(catIter)
+            catIter = treeStore.iter_next(catIter)
 
         if moreWork:
             self.resolution.set_text('Incomplete Review')

@@ -19,17 +19,6 @@ import gobject
 
 import error
 
-# TreeStore entries displayed on the screen
-ISITEM=0     # Entry is an item as opposed to category
-DISPLAY=1    # Write the output to the review
-SUMMARY=2    # Unique title for the entry
-DESC=3       # Long description of what to do to verify the entry
-RESOLUTION=4 # Current resolution
-OUTPUT=5     # Current resolution's output
-RESLIST=6    # Python list of possible resolutions
-OUTPUTLIST=7 # Python hash of outputs keyed to resolution
-TEST=8       # Python class that holds any automated test information
-
 class CheckList (gtk.TreeStore):
     '''Holds the data associated with the checklist.
 
@@ -73,9 +62,22 @@ class CheckList (gtk.TreeStore):
     # checklist identifying strings
     formatVersion='0.3'
 
-    publicID = '-//BaderWare//DTD QA Assistant Checklist File ' + formatVersion + '//EN'
-    canonicalURL = 'http://qa-assistant.sf.net/dtds/checklist/' + formatVersion + '/checklist.dtd'
+    publicID = '-//BaderWare//DTD QA Assistant Checklist File ' \
+            + formatVersion + '//EN'
+    canonicalURL = 'http://qa-assistant.sf.net/dtds/checklist/' \
+            + formatVersion + '/checklist.dtd'
     
+    # TreeStore entries displayed on the screen
+    ISITEM=0     # Entry is an item as opposed to category
+    DISPLAY=1    # Write the output to the review
+    SUMMARY=2    # Unique title for the entry
+    DESC=3       # Long description of what to do to verify the entry
+    RESOLUTION=4 # Current resolution
+    OUTPUT=5     # Current resolution's output
+    RESLIST=6    # Python list of possible resolutions
+    OUTPUTLIST=7 # Python hash of outputs keyed to resolution
+    TEST=8       # Python class that holds any automated test information
+
     class __Entry:
         '''Private class.  Holds entry information until ready to output.'''
     class __Test:
@@ -162,12 +164,13 @@ class CheckList (gtk.TreeStore):
             self.revision = 0
         
         # Extract properties from the CheckList file
-        properties = root.xpathEval2('/checklist/properties')
+        properties = root.xpathEval2('/checklist/properties/property')
         for p in properties:
+            ### FIXME: Have to save p.prop('type') as well
             self.properties[p.prop('name')] = p.content
 
         # Extract functions for the QA menu
-        functions = root.xpathEval2('/checklist/functions')
+        functions = root.xpathEval2('/checklist/functions/function')
         for function in functions:
             self.functions.append(function.content)
 
@@ -177,14 +180,14 @@ class CheckList (gtk.TreeStore):
         for category in categories:
             newCat = self.append(None)
             self.set(newCat,
-                    ISITEM, False,
-                    RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
-                    RESOLUTION, 'Needs-Reviewing',
-                    OUTPUT, None,
-                    OUTPUTLIST, {'Needs-Reviewing':None,
+                    self.ISITEM, False,
+                    self.RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
+                    self.RESOLUTION, 'Needs-Reviewing',
+                    self.OUTPUT, None,
+                    self.OUTPUTLIST, {'Needs-Reviewing':None,
                                  'Pass':None, 'Fail':None},
-                    SUMMARY, category.prop('name'),
-                    TEST, None)
+                    self.SUMMARY, category.prop('name'),
+                    self.TEST, None)
             self.entries[category.prop('name')] = newCat
 
             # Entries are subheadings
@@ -193,16 +196,16 @@ class CheckList (gtk.TreeStore):
                 if node.name == 'description':
                     # Set DESCRIPTION of the heading
                     desc = string.join(string.split(node.content))
-                    self.set(newCat, DESC, desc)
+                    self.set(newCat, self.DESC, desc)
                 elif node.name == 'entry':
                     entry = self.__xml_to_entry(node)
                     entryIter=self.append(newCat)
                     self.set(entryIter,
-                            ISITEM, True,
-                            DISPLAY, entry.display,
-                            SUMMARY, entry.name,
-                            TEST, entry.test,
-                            DESC, entry.desc)
+                            self.ISITEM, True,
+                            self.DISPLAY, entry.display,
+                            self.SUMMARY, entry.name,
+                            self.TEST, entry.test,
+                            self.DESC, entry.desc)
                     self.entries[entry.name] = entryIter
                     
                     # Construct the resolution from multiple states
@@ -217,10 +220,10 @@ class CheckList (gtk.TreeStore):
                             resolutionList.append(entry.states[i]['name'])
                         
                     self.set(entryIter,
-                            RESLIST, resolutionList,
-                            OUTPUTLIST, resolutions,
-                            RESOLUTION, 'Needs-Reviewing',
-                            OUTPUT, resolutions['Needs-Reviewing'])
+                            self.RESLIST, resolutionList,
+                            self.OUTPUTLIST, resolutions,
+                            self.RESOLUTION, 'Needs-Reviewing',
+                            self.OUTPUT, resolutions['Needs-Reviewing'])
                 else:
                     # DTD validation should make this ignorable.
                     pass
@@ -287,29 +290,29 @@ class CheckList (gtk.TreeStore):
             else:
                 # Create the 'Custom Checklist Items' category
                 self.set(self.customItemsIter,
-                        SUMMARY, 'Custom Checklist Items',
-                        ISITEM, False,
-                        RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
-                        RESOLUTION, 'Needs-Reviewing',
-                        OUTPUT, None,
-                        OUTPUTLIST, {'Needs-Reviewing':None,
+                        self.SUMMARY, 'Custom Checklist Items',
+                        self.ISITEM, False,
+                        self.RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
+                        self.RESOLUTION, 'Needs-Reviewing',
+                        self.OUTPUT, None,
+                        self.OUTPUTLIST, {'Needs-Reviewing':None,
                                      'Pass':None, 'Fail':None},
-                        DESC, "Review items that you have comments on even " \
+                        self.DESC, "Review items that you have comments on even " \
                               "though they aren't on the standard checklist.",
-                        TEST, None)
+                        self.TEST, None)
                 newItem = self.append(self.customItemsIter)
         
         # Set up the new item
         self.set(newItem,
-                SUMMARY, summary,
-                DESC, desc,
-                ISITEM, item,
-                DISPLAY, display,
-                RESOLUTION, resolution,
-                OUTPUT, output,
-                RESLIST, resList,
-                OUTPUTLIST, outputList,
-                TEST, None)
+                self.SUMMARY, summary,
+                self.DESC, desc,
+                self.ISITEM, item,
+                self.DISPLAY, display,
+                self.RESOLUTION, resolution,
+                self.OUTPUT, output,
+                self.RESLIST, resList,
+                self.OUTPUTLIST, outputList,
+                self.TEST, None)
         return newItem
 
     def publish(self, filename=None):
@@ -334,7 +337,7 @@ class CheckList (gtk.TreeStore):
         root.setProp('version', self.formatVersion)
         root.setProp('name', self.name)
         self.revision += 1
-        root.setProp('revision', self.revision)
+        root.setProp('revision', str(self.revision))
         
         # Output base checklist information
         node = root.newTextChild(None, 'base', self.baseFilename)
@@ -350,15 +353,14 @@ class CheckList (gtk.TreeStore):
 
         # Output functions
         functions = root.newChild(None, 'functions', None)
-        for func in self.functions.keys():
-            node = functions.newChild(None, 'function', self.functions[func])
+        for func in self.functions:
+            node = functions.newTextChild(None, 'function', func)
         
         # Output entries
         self.foreach(self.__create_entry, root)
 
         # Write the file
         doc.saveFormatFileEnc(filename, 'UTF-8', True)
-
         doc.freeDoc()
 
     ### FIXME: Function not used anywhere.  Consider removing it.
@@ -376,7 +378,7 @@ class CheckList (gtk.TreeStore):
        
         output = self.pangoize_output(resolution, output)
         entryIter = self.entries[key]
-        outputList = self.get_value(entryIter, OUTPUTLIST)
+        outputList = self.get_value(entryIter, self.OUTPUTLIST)
         outputList[key] = output
     
     def unpangoize_output(self, output):
@@ -393,7 +395,7 @@ class CheckList (gtk.TreeStore):
         '''
         
         # Remove the span tags
-        self.__unspan.match(output).expand(r'\g<1>\g<3>\g<5>')
+        output = self.__unspan.match(output).expand(r'\g<1>\g<3>\g<5>')
         # Unescape special chars
         output = string.replace(output, '&amp;', '&')
         output = string.replace(output, '&lt;', '<')
@@ -443,8 +445,8 @@ class CheckList (gtk.TreeStore):
         because the SUMMARY value might not be the first thing added.
         '''
 
-        if self.addPaths.has_key(path) and tree.get_value(entryIter, SUMMARY):
-            name = tree.get_value(entryIter, SUMMARY)
+        if self.addPaths.has_key(path) and tree.get_value(entryIter, self.SUMMARY):
+            name = tree.get_value(entryIter, self.SUMMARY)
             self.entries[name] = entryIter
             del self.addPaths[path]
 
@@ -522,9 +524,11 @@ print 'Automated test error: "%s" is an invalid argument because it is not a pro
 sys.exit(4)
 ''' % (argument)
                             entry.test.language = 'python' 
+                            entry.test.minlangver = None
+                            entry.test.maxlangver = None
                             break
 
-                        entry.test.arguments.append(arguments)
+                        entry.test.arguments.append(argument)
                     elif testFields.name == 'code':
                         entry.test.language = testFields.prop('language') \
                                 or None
@@ -565,18 +569,18 @@ sys.exit(4)
         '''
 
         # Check if we're adding an entry or a category.
-        if tree.get_value(entryIter, ISITEM):
+        if tree.get_value(entryIter, self.ISITEM):
             # Entry node
             entry = root.lastChild().newChild(None, 'entry', None)
-            if tree.get_value(entryIter, DISPLAY):
+            if tree.get_value(entryIter, self.DISPLAY):
                 entry.setProp('display', 'false')
             else:
                 entry.setProp('display', 'true')
-            entry.setProp('state', tree.get_value(entryIter, RESOLUTION))
+            entry.setProp('state', tree.get_value(entryIter, self.RESOLUTION))
 
             # state nodes
-            resolutions = tree.get_value(entryIter, RESLIST)
-            outputs = tree.get_value(entryIter, OUTPUTLIST)
+            resolutions = tree.get_value(entryIter, self.RESLIST)
+            outputs = tree.get_value(entryIter, self.OUTPUTLIST)
             states = entry.newChild(None, 'states', None)
             for res in resolutions:
                 content = outputs[res]
@@ -586,7 +590,7 @@ sys.exit(4)
                 state.setProp('name', res)
                 
             # test node
-            test = tree.get_value(entryIter, TEST)
+            test = tree.get_value(entryIter, self.TEST)
             if test:
                 testNode = entry.newChild(None, 'test', None)
                 for arg in test.arguments:
@@ -602,6 +606,6 @@ sys.exit(4)
             entry = root.newChild(None, 'category', None)
 
         # Common to both categories and entries:
-        entry.setProp('name', tree.get_value(entryIter, SUMMARY))
+        entry.setProp('name', tree.get_value(entryIter, self.SUMMARY))
         descNode = entry.newTextChild(None, 'description',
-                tree.get_value(entryIter, DESC))
+                tree.get_value(entryIter, self.DESC))
