@@ -11,6 +11,12 @@ Checklist Reviewer to Aid Quality Assurance
 
 ..contents::
 
+Version 0.4.1
+=============
+This is a bugfix release.
+* Fix a bug in loading saved checklists that caused the custom category to
+  be displayed as an item.
+
 Version 0.4
 ===========
 This release marks completeness of core features.  Everything necessary for

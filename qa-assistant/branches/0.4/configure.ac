@@ -4,7 +4,7 @@ dnl Date: 27 April, 2004
 dnl Description: Controls the configure process for qa-assistant
 dnl $Id$
 
-AC_INIT([QA Assistant], [0.4], [abadger1999@sourceforge.net], qa-assistant)
+AC_INIT([QA Assistant], [0.4.1], [abadger1999@sourceforge.net], qa-assistant)
 AC_CONFIG_SRCDIR([qareviewer.py])
 AM_INIT_AUTOMAKE([gnu check-news dist-bzip2 -Wall])
 
