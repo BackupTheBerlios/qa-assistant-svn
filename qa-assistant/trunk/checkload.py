@@ -20,7 +20,6 @@ import gobject
 import gnome.ui
 
 from qaconst import *
-import gnomeglade
 import error
 from checklist import CheckList
 
@@ -35,6 +34,10 @@ class NewDruid(gtk.Window):
     '''Druid to walk through starting a new review
 
     '''
+    __FILENAME = 0
+    __CHECKNAME = 1
+    __CHECKSUMMARY = 2
+
     def __init__(self, app, mode=None):
         # Create the druid
         self.app = app
@@ -57,7 +60,9 @@ class NewDruid(gtk.Window):
                     checklistDirName)
             checklists = []
             for directory in qaDataDir:
-                checklists.extend(os.listdir(directory))
+                files = os.listdir(directory)
+                for oneFile in files:
+                    checklists.append(os.path.join(directory, oneFile))
             self.build_selector(checklists)
         if mode == START or mode == LOAD:
             # Create the sequence of pages for selecting a checklist to load
@@ -67,13 +72,8 @@ class NewDruid(gtk.Window):
         self.build_properties()
 
         # Create end page
-        endPage = gnome.ui.DruidPageEdge(gnome.ui.EDGE_FINISH)
-        endPage.set_title('Ready to Begin')
-        endPage.set_logo(app.logo)
-        endPage.set_text('You have finished entering the required information.'
-                ' Press Apply if the following summary is correct.')
-        self.druidWidget.add(endPage)
-        
+        self.build_end()
+
         if mode == LOAD:
             # Disable going back from loaderPage b/c it's the first page
             self.druidWidget.set_buttons_sensitive(False, True, True, True)
@@ -87,7 +87,6 @@ class NewDruid(gtk.Window):
         else:
             # coming back from propertiesPage has to determine whether it came
             # from selectorPage or loadPage.
-            self.propBackPage = self.loaderPage
             self.propertiesPage.connect('back', self.properties_back)
 
     #
@@ -172,11 +171,14 @@ class NewDruid(gtk.Window):
                 gobject.TYPE_STRING)
         for filename in checklists:
             checkIter = checkStore.append(None)
-            checkStore.set(checkIter, 0, filename,
-                    1, 'Nice name not yet implemented',
-                    2, 'Summaries not yet implemented')
-                    
+            checkStore.set(checkIter, self.__FILENAME, filename,
+                    self.__CHECKNAME, 'Nice name not yet implemented',
+                    self.__CHECKSUMMARY, 'Summaries not yet implemented')
+                   
         checkList = gtk.TreeView(checkStore)
+        self.selectorSelection = checkList.get_selection()
+        self.selectorSelection.set_mode(gtk.SELECTION_SINGLE)
+
         renderer = gtk.CellRendererText()
         column = gtk.TreeViewColumn('filename', renderer, text=0)
         checkList.append_column(column)
@@ -244,14 +246,53 @@ class NewDruid(gtk.Window):
         # adapt to whatever properties we find in the checklist.
         propertiesPage.connect('prepare', self.properties_create)
 
-    #
-    # Configure data callbacks
-    #
-    
+    def build_end(self):
+        '''
+        '''
+        endPage = gnome.ui.DruidPageEdge(gnome.ui.EDGE_FINISH)
+        endPage.set_title('Ready to Begin')
+        endPage.set_logo(self.app.logo)
+        endPage.set_text('You have finished entering the required information.'
+                ' Press Apply if the following summary is correct.')
+        self.druidWidget.add(endPage)
+        endPage.connect('finish', self.finish)
+
     def properties_create(self, page, druid):
-        pass
         ### FIXME:
-        # load checklist and then build a property entering page.
+        # Use self.newList to create the entry page for properties we need
+        # to load.
+        pass
+
+    def finish(self, page, druid):
+        '''
+
+        '''
+        try:
+            self.app.checklist.destroy()
+        except AttributeError:
+            # No problems as long as checklist no longer exists.
+            pass
+        self.app.checklist = self.newList
+
+        ### FIXME: The following might be better done in QAReviewer but first
+        # We need to figure out how to notify QA Reviewer that the checklist
+        # has changed.  Probably the easiest way is to set the checklist to
+        # be a GProperty in QA Reviewer.  But that might mean some recoding
+        # of QA Reviewer.  I think I'll wait for pygtk-2.4.0 which might
+        # allow us to do this without serious hardship.
+        self.app.checkView.set_model(self.app.checklist)
+        self.app.checkView.show()
+
+        ### FIXME: Need to substitute checklist.function loading instead.
+        from srpmqa import SRPMQA
+        qamenu = SRPMQA(self.app)
+        self.app.QAMenuItem.set_submenu(qamenu)
+        qamenu.show_all()
+
+        self.app.reviewView.set_model(self.app.checklist)
+        self.app.reviewView.show()
+
+        self.destroy()
 
     #
     # Navigation Callbacks
@@ -262,63 +303,69 @@ class NewDruid(gtk.Window):
 
         '''
         druid.set_page(self.propBackPage)
-        self.propBackPage = self.loaderPage
         return True
 
     def loader_next(self, page, druid):
-        pass
-        ### FIXME: Make sure the file is valid.  If it is go on to the next
-        # page.  If not, popup a message on this page and force the user
-        # to keep trying.
+        '''Check that the filename we get from the user is a valid checklist.
 
+        Arguments:
+        :page: Druid page we're on.
+        :druid: Druid widget.
         '''
         try:
-            newList = CheckList(filename)
+            self.newList = CheckList(self.browseEntry.get_text())
         except error.InvalidChecklist, ex_instance:
-            print type(ex_instance)
-            print dir(ex_instance)
             errorDialog = gtk.MessageDialog(self.app.ReviewerWindow,
                     gtk.DIALOG_DESTROY_WITH_PARENT,
                     gtk.MESSAGE_WARNING,
                     gtk.BUTTONS_CLOSE,
                     'We were unable to load the specified file.'
-                    ' The error given was: ' + ex_instance.msg)
+                    ' The error given was:\n' + ex_instance.msg +
+                    '\n\nPlease select another file.')
             errorDialog.set_title('Unable to load file')
             errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
             response = errorDialog.run()
             errorDialog.destroy()
-            return
+            #self.browseEntry.set_text('')
+            druid.set_page(page)
+            return True
 
-        try:
-            self.app.checklist.destroy()
-        except AttributeError:
-            # No problems as long as checklist no longer exists.
-            pass
-        self.app.checklist = newList
-
-        ### FIXME: This should all be done in QAReviewer
-        self.app.checkView.set_model(self.checklist)
-        self.app.checkView.show()
-
-        from srpmqa import SRPMQA
-        qamenu = SRPMQA(self)
-        self.QAMenuItem.set_submenu(qamenu)
-        qamenu.show_all()
-
-        self.reviewView.set_model(self.checklist)
-        self.reviewView.show()
-        '''
-    def selector_next(self, page, druid):
         druid.set_page(self.propertiesPage)
         self.propBackPage = page
         return True
-        pass
-        ### FIXME: Make sure the file is valid.  If it is go on to the next
-        # page.  If not, popup a message. This is a pretty serious error as the
-        # distributed checklists should always be valid.  However,
-        # site-local addons might not get upgraded at the same time....
-        # 
-        # Remember to Check that a selection has been made at all
+
+    def selector_next(self, page, druid):
+        '''Moves from the selector page to the next page.
+
+        Arguments:
+        :page: Druid page we're on.
+        :druid: Druid widget.
+        '''
+        (model, selectedRow) = self.selectorSelection.get_selected()
+        ### FIXME: Be sure that selectedRow is a valid iter.... otherwise
+        # we have the case where the user did not select a file
+        try:
+            self.newList = CheckList(model.get_value(selectedRow,
+                self.__FILENAME))
+        except error.InvalidChecklist, ex_instance:
+            errorDialog = gtk.MessageDialog(self.app.ReviewerWindow,
+                    gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_WARNING,
+                    gtk.BUTTONS_CLOSE,
+                    'We were unable to load the specified file.'
+                    ' The error given was:\n' + ex_instance.msg +
+                    '\n\nPlease select another file.')
+            errorDialog.set_title('Unable to load file')
+            errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
+            response = errorDialog.run()
+            errorDialog.destroy()
+            #self.browseEntry.set_text('')
+            druid.set_page(page)
+            return True
+
+        druid.set_page(self.propertiesPage)
+        self.propBackPage = page
+        return True
 
     def choice_next(self, page, druid, newSelectorButton):
         '''Decide if we want a new checklist or load an old one.
@@ -348,6 +395,7 @@ class NewDruid(gtk.Window):
         if self.mode == START:
             druid.set_page(self.choicePage)
             return True
+        return False
 
     def disable_back(self, page, druid, backPage):
         '''Disable the back button for the page.

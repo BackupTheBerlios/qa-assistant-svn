@@ -12,8 +12,8 @@ __revision__ = '$Rev$'
 class Error(Exception):
     '''Base class for Exceptions in QA Assistant.'''
     def __init__(self, msg):
+        Exception.__init__(self, msg)
         self.msg = msg
-        self.args = (msg)
 
 class DuplicateItem(Error):
     '''An item duplicates a value already present in a checklist.'''

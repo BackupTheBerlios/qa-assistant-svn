@@ -116,8 +116,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             # ReviewerWindow to be insensitive.
             # If no checklist is loaded, only file::New and file::Load should
             # work.... (?)
-            self.druid = checkload.NewDruid(self, checkload.START)
-            self.druid.show_all()
+            checkload.NewDruid(self, checkload.START).show_all()
             ### FIXME: Note that the druid must destroy itself when it is
             # finished.
             # If there's no checklist on the commandline, popup the Druid that
@@ -223,66 +222,13 @@ class QAReviewer(gnomeglade.GnomeApp):
     # Menu/Toolbar callbacks
     #
 
+    def on_menu_new_activate(self, *extra):
+        '''Start a new review.'''
+        checkload.NewDruid(self, checkload.NEW).show_all()
+
     def on_menu_open_activate(self, *extra):
-        '''Open a saved review'''
-        fileSelect = gtk.FileSelection(title='Select the checklist file to load.')
-        if (os.path.isdir(self.lastSaveFileDir) and
-                os.access(self.lastSaveFileDir, os.R_OK|os.X_OK)):
-            fileSelect.set_filename(self.lastSaveFileDir)
-
-        filename = None
-        response = fileSelect.run()
-        try:
-            if response == gtk.RESPONSE_OK:
-                filename = fileSelect.get_filename()
-        finally:
-            fileSelect.destroy()
-            del fileSelect
-
-        if filename:
-            ### FIXME: Check if file exists
-            self.lastSaveFileDir = os.path.dirname(filename)+'/'
-            try:
-                newList = CheckList(filename)
-            except IOError, msg:
-                ### FIXME: MSG Dialog that we were unable to load the file
-                ### FIXME: Handle CheckList loading exceptions.
-                pass
-
-            try:
-                self.checklist.destroy()
-            except AttributeError:
-                # No problems as long as checklist no longer exists.
-                pass
-            self.checklist = newList
-            ### FIXME: The following is copied from SRPM_into_properties
-            # It needs to be refactored to just have one copy somewhere.
-            self.__check_readiness()
-            ### End of SRPM into properties
-            
-            ### FIXME: This is copied from __load_checklist().
-            # __load_checklist needs to be split to have this method...
-            # sync_checklist which will perform this sync of checklistView to
-            # data.  And a load_checklist which is a special case of this
-            # function (and thus should be merged with it.)
-            self.checkView.set_model(self.checklist)
-            self.checkView.show()
-
-            ### FIXME: This is tre broken.  But it will have to do for now.
-            # Later we will implement loading functions from the XML file.
-            #if self.checklist.type == 'SRPM':
-            if True:
-                from srpmqa import SRPMQA
-                qamenu = SRPMQA(self)
-            else:
-                from genericqa import GenericQA
-                qamenu = GenericQA(self)
-            self.QAMenuItem.set_submenu(qamenu)
-            qamenu.show_all()
-
-            self.reviewView.set_model(self.checklist)
-            self.reviewView.show()
-            ### End of __load_checklist copy.
+        '''Open a saved review.'''
+        checkload.NewDruid(self, checkload.LOAD).show_all()
 
     def on_menu_save_activate(self, *extra):
         """Save the current review to a file"""
@@ -391,8 +337,8 @@ class QAReviewer(gnomeglade.GnomeApp):
        
     def on_toolbar_new_activate(self, button, *extra):
         """Popup the menu to select a new review from bugzilla or SRPM"""
-
-        self.new1_menu.popup(None, None, None, 0, gtk.get_current_event_time())
+        self.on_menu_new_activate()
+        #self.new1_menu.popup(None, None, None, 0, gtk.get_current_event_time())
         
     def on_menu_new_srpm_activate(self, *extra):
         """Open a new review based on the user selected SRPM"""

@@ -157,23 +157,29 @@ class CheckList (gtk.TreeStore):
             raise error.InvalidChecklist('%s was not an XML file' % (path))
 
         if ctxt.isValid() == False:
-            raise error.InvalidChecklist('File does not validate against ' \
+            raise error.InvalidChecklist('File does not validate against '
                     'the checklist DTD')
 
         root = checkFile.getRootElement()
         if root.name != 'checklist':
-            raise error.InvalidChecklist('File is not a valid checklist ' \
+            raise error.InvalidChecklist('File is not a valid checklist '
                     'policy file')
         if root.prop('version') != self.formatVersion:
-            raise error.InvalidChecklist('Checklist file is not a known ' \
+            raise error.InvalidChecklist('Checklist file is not a known '
                     'version')
        
         # Extract the name and revision of the CheckList
         self.name = root.prop('name')
         if not self.name:
-            raise error.InvalidChecklist('Checklist file does not specify ' \
+            raise error.InvalidChecklist('Checklist file does not specify '
                     'a name for itself')
         self.revision = root.prop('revision') or '0'
+
+        summary = root.xpathEval2('/checklist/summary')
+        if summary:
+            self.summary = summary[0].content
+        else:
+            raise error.InvalidChecklist('Checklist does not have a summary')
 
         # Create GtkTreeModel struct to store info in.
         gtk.TreeStore.__init__(self, gobject.TYPE_BOOLEAN,
@@ -433,7 +439,10 @@ class CheckList (gtk.TreeStore):
         root.setProp('name', self.name)
         self.revision += 1
         root.setProp('revision', str(self.revision))
-        
+       
+        # Output summary node
+        summary = root.newChild(None, 'summary', self.summary)
+
         # Output base checklist information
         node = root.newTextChild(None, 'base', self.baseFilename)
         node.setProp('name', self.baseName)
