@@ -1,3 +1,242 @@
+2004-08-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r89    
+    * AUTHORS: Reformat into ReStructured Text.
+    * README:
+      - Reformat into ReStructured Test.
+      - Change to be a little more clear.
+      - Add $Date$ substitution.
+    * PREFERENCES:
+      - Reformat into ReStructured Test.
+      - Add $Date$ substitution.
+    * TODO:
+      - Add $Date$ and $Rev$ substitution.
+    * NEWS:
+      - Reformat into ReStructured Test.
+      - Add $Date$ substitution.
+    
+2004-08-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r88    
+    * savefile.py: Add a reference to the application so we can
+      use locate_file().
+    * qareviewer.py: Move savefile initialization after GnomeApp creation
+      so we can use it there.
+    
+2004-08-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r87    
+    * savefile.py: import gnome because we're using gnome.program_get()
+      to get the gnome app to use locate_file with.
+    
+2004-08-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r86    
+    * properties.py: Remove the saveDTD from properties.
+    * genericqa.py:
+      - Create resList and outputList for allowable resolutions.
+      - Use resList to create the resolutions in the Option Box.
+      - Use return value from checklist.add_entry() to set Custom Item
+        resolution.
+    * savefile.py:
+      - Remove DTD path as it's all done with catalogs now.
+      - Unescape <, >, & before saving.
+      - Change back to GnomeApp.program.locate_file()
+    * gnomeglade.py: Move locate_file() back into the GnomeApp class.
+      When locate_file() makes its way into pygtk it's going to be a
+      method of GnomeProgram.
+    * checklist.py:
+      - duplicateItemError: New exception used when attempting to add an
+        item that is already allocated.
+      - add_entry(): returns an iter to the new entry.  not sure if this
+        should be a permanent part of the API or just a quick hack to get
+        resoution changing working.
+    * qareviewer.py:
+      - Remove all the DTD handling stuff as it's now done with xml catalogs
+        instead.
+      - Change back to GnomeApp.program.locate_file().
+      - Note that resolution_changed should probably move to the checklist.
+      - Reset the savefile name to None when we load a new SRPM so we don't
+        accidentally overwrite a different saved review.
+    * TODO: Note to look into salvaging uninstalled_file lookups.
+    * SRPM.py: Catch IOError when opening the SRPM fails.  Then we can spit
+      an error about the file being inaccessible.
+    * Makefile.am: Remove the dtd's name from rewriteSystem and rewriteURI
+      as those methods add the dtd filename themselves.
+    
+2004-08-02 Toshio Kuratomi <toshio@tiki-lounge.com> - r85    
+    * savefile.py: Change canonical URL to include a dtds directory.
+    * review.py: Justify the hash output on the left side of the output.
+    * data/checklist.dtd: Change canonical URL to include a dtds directory.
+    * data/fedoraus.xml: Change the DOCTYPE to a full PUBLIC ID and
+      canonical URL.
+    * data/qasave.dtd: Add a dtds directory to the canonical URL.
+    
+2004-08-02 Toshio Kuratomi <toshio@tiki-lounge.com> - r84    
+    * review.py:
+      - Import the textwrap module.
+      - self.textwrap: New attribute holding a textwrapper to output reviews.
+      - publish(): Modified to use self.textwrap to cut lines at 70 columns.
+    * configure.ac:
+      - Require Python 2.2 or above.
+      - If python 2.2, check for an external textwrap module.
+    * TODO:
+      - Add note to look into display textwrapping in the review and
+        treeview widgets.
+      - Remove save/load as it is complete.
+      - Remove Review.publish wordwrapping as it's done.
+      - Remove DTD catalogs as they're done.
+    * NEWS:
+      - ReStructuredText reformatting
+      - Add textwrap to the list of new things.
+    
+2004-08-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r83    
+    * configure.ac: Changes to enable installing DTDs
+      - Add SUBST'd vars for CHECKLIST and QASAVE versions.
+      - Find out where xmlcatalog is installed.
+    * TODO: Add note to write proper checks for file existence.
+    * qa-assistant.spec.in: Updates to get the DTDs properly installed in
+      the system catalog.
+    * Makefile.am:
+      - Move the DTDs to $(datadir)/xml/qa-assistant/checklist or qasave.
+      - Create an xmlcatalog for the dtds at installtime.
+      - Add the new catalog to the system supercatalog.
+    * NEWS: Add note that the DTDs are now installed into the system catalog.
+    
+2004-08-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r82    
+    * savefile.py: Create new entries into the checklist when we have Custom
+      Checklist Items in the savefile.
+    * genericqa.py: Move code to create Custom Items out of genericqa and
+      into checklist.py using the new checklist.add_entry() method.
+    * checklist.py:
+      - Create customItemsPath attribute holding the gtk.tree path to the
+        custom items category.
+      - add_entry(): new method that adds an entry to the Custom Items
+        Category of the review checklist.
+    
+2004-07-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r81    
+    * savefile.py:
+      - set_checklist(): method to set the checklist whenever it changes.
+        dirty hack that will go away when we merge with checklist as we'll
+        then be able to reference `self`.
+      - __xml_to_entry(): Fix the Output List to be a dict rather than a list.
+    * qareviewer.py:
+      - __init__(): Create saveFile before checklist so that __load_checklist
+        can access the saveFile.
+      - Remove the TreeModel from the arguments to the output_edited callback
+        because arguments passed in are set at definition time, not runtime,
+        leading to stale data.
+      - on_menu_open_activate(): Make sure we destroy the old checklist
+        before creating a new one.
+      - on_menu_open_activate(): Ditto for reviewView
+    
+2004-07-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r80    
+    * savefile.py: Add is item property to savefile.
+    * review.py: Unescape <, >, & when publishing.
+    * README:
+      - Reformat to ReStructured Text.
+      - Note python 2.3 as development platform.
+      - Note pygtk-2.2.0 is a requirement
+    * checklist.py: Escape <, >, & in output strings.
+    * data/qasave.dtd: Add an item attribute to entry.
+    
+2004-07-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r79    
+    * Merge the savefile branch back to the mainline.
+    * properties.py:
+      - Remove cheklistName and checklistRev as these are now set on
+        checklist load now. (r75)
+      - Create a set method to set a property if it exists. (r78)
+    * savefile.py:
+      - Start using publicID and canonicalURL. (r75)
+      - Save the whole checklist here instead of just the tree data. (r75)
+      - Fix external subset reference. (r75)
+      - Set checklist name and revision in the checklist rather than through
+        properties. (r75)
+      - Create entries element around the <entry> list. (r75)
+      - Call freeDoc() so we don't leak memory. (r75)
+      - Create a load method. (r75)
+      - Set SaveFile.filename to None until it's set. (r76)
+      - Pass the new checklist to __xml_to_entry so it can colorize the
+        output.  Need to remove when we combine with checklist. (r76)
+      - Whitespace fix. (r77)
+      - When loading the SRPM property use properties.load_SRPM(). (r78)
+      - Use the properties.set() interface. (r78)
+      - Set _qaSaveFileVersion_ to 0.1.
+    * optionrenderer.py: Cast event.x/y to int() when calling alert_changes
+      because gtk.get_path_at_pos has deprecated taking floats. (r76)
+    * treetips.py: Cast event.x/y to int's when calling __treetip_show
+      because gtk.get_path_at_pos has deprecated taking floats. (r76)
+    * qareviewer.py:
+      - Create a save menu callback. (r76)
+      - Sync the view of the checklist when we load a save file. (r77)
+      - Move the menu save handler to mirror menu placement. (r77)
+      - Move creation of the Review widget to __load_checklist(). (r78)
+      - Revert workaround for gtk.menu.popup time bug as it's fixed in
+        pygtk-2.2.0. (r78)
+      - Loading a new review from SRPM now calls __load_checklist(). (r78)
+      - Create an open menu callback to load a save file. It has copies
+        of code in __load_checklist to work so cleanup is necessary. (r78)
+    * configure.ac: Require pygtk >= 2.2.0 because it fixes the
+      gtk.menu.popup time bug. (r78)
+    * TODO:
+      - XML save/checklist merge note. (r77)
+      - Textwrap in optik note. (r78)
+      - Treetip display note. (r78)
+      - Save-load header bug note. (r78)
+      - Savefiles implemented.  Woo-hoo! (r78)
+      - Reformat to RestructuredText (so we can generate docs with python's
+        docutils package.) (r78)
+    * SRPM.py: Bugfix: SRPM.hashes() now returns a copy instead of the
+      actual hashes. (r78)
+    * data/fedoraus.xml:
+      - Change output for Package signature verified. (r77)
+      - Add Not-Applicable state to Default Password entry. (r77)
+    * NEWS: Add fact that save format will change to the release notes. (r78)
+    
+2004-06-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r73    
+    * gnomeglade.py: Move utility functions __uninstalled_file and
+      locate_file to the toplevel.  Make uninstalled_file public.
+    * PREFERENCES: Note the difference between a preference and a property.
+    * qareviewer.py: Switch to toplevel gnomeglade.locate_file() and
+      gnomeglade.uninstalled_file()
+    * data/checklist.dtd: Add a public identifier and canonical URL.
+    * data/sample-save.xml: Move list of <entry> into new toplevel <entries>.
+    * data/qasave.dtd:
+      - Add a public identifier and canonical URL.
+      - Move list of <entry> into a new toplevel <entries> tag.
+      - Add comments.
+    * Makefile.am:
+      - Add savefile.py.
+      - Fix comment typos.
+    * autogen.sh: Add --force-missing to automake invokation.
+    
+2004-05-12 Toshio Kuratomi <toshio@tiki-lounge.com> - r72    
+    * properties.py:
+      - Add the save DTD filename.
+      - Separate things for future preferences from properties.
+    * genericqa.py:
+      - Fix the dialogs in the publish callback to have a default response.
+      - msgDialog to closes gracefully when closed via the window manager.
+      - Fix remembered directories to point to the ReviewDir, not the SRPMDir.
+      - Rearrange things with the FileSelectDialog to run as little as possible
+        under the try:finally: block.
+      - Setup infrastructure to test if we succeed or fail to write the file.
+      - Check for a new category resolution when adding entries to the Custom
+        Checklist Items.
+    * savefile.py: New object to hold savefile routines.  Currently saves but
+      still needs to load.
+    * ChangeLog: Update to r71
+    * review.py: When we update a Category, we still have to check if there
+      are resolution changes that affect the review as a whole.
+    * qareviewer.py:
+      - Add the qasave.dtd file to the properties.
+      - Fix looking for properties.checklist (filename) instead of
+        checklistName (symbolic name)
+      - Remove the publish callback as it's now in genericqa.py
+      - Create on_menu_save_as_activate modelled on genericqa.py:publish
+        (review).
+      - Rearrange things with the FileSelectDialog when loading an SRPM to
+        run as little as possible under the try:finally: block.
+    * TODO: Note that libxml2 has some guidelines for good xml definitions
+      that we need to look at.
+    * data/qasave.dtd: <checklist> is no longer empty.  Instead it contains
+      the filename of the checklist.
+    * data/sample-save.xml: <checklist> now contians the filename of the
+      checklist.
+    * NEWS: Add saving and loading to the new features.
+    
 2004-04-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r71    
     * genericqa.py: Add Rev and Id keyword expansion.
     * treetips.py: Add Rev and Id keyword expansion.
