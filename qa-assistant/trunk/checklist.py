@@ -234,7 +234,7 @@ class CheckList (gtk.TreeStore):
                             self.SUMMARY, entry.name,
                             self.TEST, entry.test,
                             self.DESC, entry.desc)
-                    self.entries[entry.namelower()] = entryIter
+                    self.entries[entry.name.lower()] = entryIter
                     
                     # Construct the resolution from multiple states
                     outputList={'Needs-Reviewing': None}
