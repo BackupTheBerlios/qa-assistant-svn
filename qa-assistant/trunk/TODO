@@ -7,8 +7,6 @@ glade/GUI:
 
 - Add a New dialog to take input about bugzilla
 
-- Add a New Dialog to take input about SRPM
-
 - Pressing save should dump the present state to an xml file
 
 - Pressing open should load a dumped xml file
@@ -58,9 +56,6 @@ Programming:
     and use fedora-startqa in the backend.  (Look through their SRPM stuff --
     it might be better code than I have... If we can put it into a SRPM class
     like I have, then it could be callable from either my script or theirs.)
-
-- SRPM.py needs some more work.  Two known problem areas related to unarchiving
-  when a directory of that name.
 
 - review.publish needs to do wordwrapping of lines.  Look into whether a
   textBuffer object has the necessary wordwrapping even without a textView.

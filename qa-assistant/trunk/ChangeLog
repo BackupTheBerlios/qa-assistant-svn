@@ -1,3 +1,67 @@
+2004-04-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r41    
+    * properties.py: 
+      - Move SRPM loading into Properties class
+      - Implement persistent directories for FileSelect Dialogs
+    * review.py:
+      - Move MD5Sums to the top of the review
+      - Note to connect to properties signals when implemented
+      - hash label creation moved to function __update_hash
+      - update_hash function created as stopgap until properties has gsignals
+    * qareviewer.py:
+      - Move SRPM loading to properties.py
+      - translate_option_mode() => __translate_option_mode()
+      - Reorder __init__(): commandline parsing at the bottom
+      - Get rid of ReviewWindow.show_all().  Per widget show method instead.
+      - __load_checklist()  loads the checklist from the data file
+      - __SRPM_into_properties() loads a new SRPM file into the properties
+        structure
+      - __check_readiness() figures out whether we've got an SRPM and are ready
+        to load a checklist or need to display a label that says we aren't ready
+        to do anything yet.
+      - Implement persistent directories for FileSelect Dialogs
+      - Implement New From SRPM menu item
+    * TODO: Move notes from qa-assistant into the TODO
+    * qa-assistant: Move TODO comments into the TODO
+    * glade/qa-assistant.glade: Create startLabel which displays a message when
+      we don't have an SRPM targetted (So the user won't start filling in a
+      checklist by mistake.)
+    
+2004-04-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r40    
+    * treetips.py: Fix timeoutID to keep from popping up tooltips when we aren't
+      hovering over a tooltip item.
+    * checklist.py: Remove extraneous whitespace from the xml content nodes.
+      May revisit this in the future.
+    * TODO: Note that python textwrap may be able to solve the wordwrapping in
+      Review issue.
+    
+2004-04-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r39    
+    * properties.py: Remove #! line and version as this isn't the main script.
+    * treetips.py: Class to do tooltips on a treeview row.
+    * optionrenderer.py: Remove on_start_editing as we're not going to support
+      that.
+    * review.py:
+      - Change '-' bullets to '*' (Better for gpg)
+      - Move MD5Sums to beginning of review to be more like fedora-startqa
+    * README: Start of an introduction to QA Assistant
+    * qareviewer.py:
+      - Increment the version to 0.2
+      - Set up the TreeTips on our TreeView
+    * TODO: Tooltips are taken care of
+    * NEWS: Start keeping a NEWS file for 0.2
+    
+2004-04-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r38    
+    * properties.py, review.py, qareviewer.py, SRPM.py: Fix $$Rev instead of
+      $$Revision for keyword expansion
+    * optionrender.py:
+      - Fix the $$Rev instead of $$Revision keyword
+      - Cache the cell's height and width in an internal variable
+      - __compute_menu_position now used to display the menu as if it came from
+        the dropdown box.
+    * ChangeLog: updated to Rev 37
+    * TODO: Add menu for checklist actions note
+    * data/fedoraus.xml: Changed the name of MD5Sum verified to upstream source
+      verified
+    
 2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r37    
     * data/fedoraus.xml: Add Non-Blocker status to Buildroot.
     * ChangeLog: Update

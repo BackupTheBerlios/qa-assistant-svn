@@ -52,7 +52,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         # Create a treeview for our listPane
         self.checkView = gtk.TreeView()
         self.checkView.set_rules_hint(True)
-        ### FIXME: Other optional methods of TreeView configuration here.
         
         # load the checklist data (Associates itself with checkView)
         self.__load_checklist()
@@ -136,7 +135,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.checkView.set_model(self.checklist.tree)
 
     def __SRPM_into_properties(self, filename):
-        msg = "Please use New => From SRPM or New => From Bugzilla to start the QA process."
+        msg = "Please select 'New => From SRPM'\nor 'New => From Bugzilla' to start the QA process."
         try:
             self.properties.load_SRPM(filename)
         except Properties.FileError, message:
@@ -144,6 +143,13 @@ class QAReviewer(gnomeglade.GnomeApp):
         except Properties.SecurityError, message:
             ### FIXME: 
             # Set up a review based on the security error
+            # Information needed from SRPM:
+            # nice message suitable for sticking into a review
+            # MD5Sum of file
+            # Also -- there are two types of Security Errors right now:
+            # SRPM problems and general unrpm problems related to race
+            # conditions.  Need to separate:  SecurityError
+            # MalFormedSRPMError
             # Dialog to display review and ask user if they want to publish
             # If user selects then publish it to file
             # [DIALOG]
@@ -157,7 +163,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             # Everything from here to pass is a hack and needs to go
             self.startLabel.set_text("SECURITY Error processing SRPM: %s" % (message))
             del self.properties.SRPM
-            self.propertie.SRPM = None
+            self.properties.SRPM = None
             pass
         else:
             self.__load_checklist()

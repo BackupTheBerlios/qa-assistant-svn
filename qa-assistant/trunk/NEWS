@@ -3,13 +3,23 @@ QA Assistant -- A checklist reviewer to aid Quality Assurance
 
 0.2
 ===
-* Optionrenderer now looks more like a combo box.
-* Speedups to Optionrenderer code
+This version concentrates on tidying up usability problems in the first
+release.  Tooltip-like help for checklist items and loading SRPMS from the
+menu are the major enhancements.
+
+* Ability to start an SRPM QA from the menu
 * Description of a checklist item displayed in a tooltip
+* Optionrenderer now looks more like a combo box
+* Speedups to Optionrenderer code
+* Directory remembering for the File Selection dialogs
+* Published reviews now use '*' bullets instead of '-' to be more GPG friendly
+* Move hashes to top of review in anticipation of fedora-startqa format
+* Better handling of errors on loading SRPMs
 
 0.1
 ===
-* Initial Release
+Initial Release
+
 * Extensible via an XML checklist definition
 * GUI driven checklist
 * Publishes a review

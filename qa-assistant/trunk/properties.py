@@ -8,10 +8,9 @@
 """
 __revision__ = "$Rev$"
 
-import SRPM
-
-### FIXME: We should be passing through Exceptions instead of this.
 import sys
+
+import SRPM
 
 class Properties:
     class SecurityError(SRPM.SecurityError):
@@ -54,12 +53,11 @@ class Properties:
         """
         try:
             self.SRPM = SRPM.SRPM(filename)
-        ### FIXME: Pass these through to the calling program.
+        # Pass these through to the calling program as Property exceptions
+        # rather than SRPM exceptions
         except SRPM.FileError, message:
             self.SRPM = None
             raise self.FileError(message.__str__())
-        except SRPM.SecurityError, message:
-            ### FIXME:  Write a Review with PUBLISH -1 and security
-            # violation message
-            raise self.SecurityError, message
-        ### FIXME: There are exceptions that SRPM isn't catching yet.
+        except SRPM.SecurityError:
+            excName, exc = sys.exc_info()[:2]
+            raise self.SecurityError, (exc.id, exc.filename, exc.message)
