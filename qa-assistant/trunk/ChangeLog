@@ -1,3 +1,22 @@
+2004-10-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r121    
+    * review.py:
+      - Allow a new Review to be created without specifying a CheckList.
+      - BugFix: set newly created labels to use pango markup.
+      - BugFix: attempt to remove the VBox widgets from self.reviewBoxes
+        instead of their names.
+    * BUGS: Noticed that save_as works, but save does not.
+    * qareviewer.py:
+      - Stop loading checklist on startup.  Yay!
+      - Create CheckView and Review on startup and add them to our window.
+      - Get rid of the hacks that destroyed and recreated CheckView and Review
+        widgets when loading a new checklist.  We can now do this with a simple
+        set_model() call.
+      - Make sure we're show()'ing the checkView when we load a new CheckList.
+      - Get rid of pygtk 2.0 bug work around.
+    * ChangeLog: update to (r120)
+    * checkview.py: Rename a variable from checklist to cl to fix problem
+      where I was bashing the checklist namespace.
+    
 2004-10-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r120    
     * review.py:
       - Note that publish doesn't work.

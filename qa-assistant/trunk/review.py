@@ -54,6 +54,8 @@ class Review(gtk.VBox):
         self.add(self.footer)
 
         # Set display properties on the widgets
+        self.header.set_selectable(True)
+        self.footer.set_selectable(True)
         self.set_property('homogeneous', False)
         self.header.set_property('xalign', 0.0)
         self.passTitle.set_property('xalign', 0.0)
@@ -161,6 +163,7 @@ class Review(gtk.VBox):
                 value = gtk.Label(treeStore.get_value(treeIter, checklist.OUTPUT))
                 value.set_use_markup(True)
                 value.set_line_wrap(True)
+                value.set_selectable(True)
                 value.set_property('xalign', 0.0)
                 self.displayList[key] = value
                 self.entries[sum] = key
@@ -251,6 +254,7 @@ class Review(gtk.VBox):
                 label = gtk.Label(treeStore.get_value(updateIter, checklist.OUTPUT))
                 label.set_use_markup(True)
                 label.set_property('xalign', 0.0)
+                label.set_selectable(True)
                 label.set_line_wrap(True)
                 self.displayList[key] = label
                 if key[0] == 'Needs-Reviewing' or key[0] == 'Not-Applicable':

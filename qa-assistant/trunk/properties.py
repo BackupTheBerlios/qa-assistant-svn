@@ -18,13 +18,12 @@ class Properties:
     class FileError(SRPM.FileError):
         pass
 
-    def __init__(self, checklist=None):
+    def __init__(self):
         """Create a new properties box."""
 
         ### FIXME: we really need to take this information from the user
         # instead of setting it here.  But I just want to get something
         # working right now.
-        self.checklist = checklist
         self.SRPM = None
 
         ### FIXME: The following need to go into preferences (GConf)

@@ -174,14 +174,6 @@
 		      </child>
 
 		      <child>
-			<widget class="GtkImageMenuItem" id="clear">
-			  <property name="visible">True</property>
-			  <property name="stock_item">GNOMEUIINFO_MENU_CLEAR_ITEM</property>
-			  <signal name="activate" handler="on_menu_clear_activate" last_modification_time="Mon, 01 Mar 2004 01:31:48 GMT"/>
-			</widget>
-		      </child>
-
-		      <child>
 			<widget class="GtkMenuItem" id="separator2">
 			  <property name="visible">True</property>
 			</widget>

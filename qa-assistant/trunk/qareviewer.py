@@ -40,8 +40,11 @@ class QAReviewer(gnomeglade.GnomeApp):
         """
 
         # Create the properties for this checklist
-        ### FIXME: Properties is hard-coded right now.  Needs some love.
-        self.properties = Properties('fedoraus.xml')
+        ### FIXME: Properties is hard-coded right now.
+        # We need to distribute the remaining code in here to:
+        # Property values -> GConf2
+        # Methods -> SRPMQA... except that's getting radically changed too.
+        self.properties = Properties()
 
         # Load the interface
         gladefile = 'glade/qa-assistant.glade'
@@ -64,7 +67,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         if iconFile:
             self.ReviewerWindow.set_property('icon', gnomeglade.load_pixbuf(iconFile))
 
-        # load the checklist data (Associates itself with checkView)
+        # Create the views onto the checklist
         self.checkView = CheckView()
         self.listPane.add(self.checkView)
         self.reviewView = Review()
@@ -78,6 +81,12 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.grabArrow.show()
 
         self.reviewScroll.hide()
+
+        # Create our Clipboard
+        self.clipboard = gtk.Clipboard(gtk.gdk.display_get_default(),
+                'CLIPBOARD')
+        self.clipPrimary = gtk.Clipboard(gtk.gdk.display_get_default(),
+                'PRIMARY')
 
         #
         # Command line initialization
@@ -99,14 +108,8 @@ class QAReviewer(gnomeglade.GnomeApp):
     # Helper Functions
     # 
 
-    def __load_checklist(self):
-        ### FIXME: When calling this function to load a new checklist, we
-        # need to be careful.  There was a bug where loading a new checklist
-        # was causing editing of cells to no longer work.  I think we have
-        # to reload our checklistPane everytime we load a new checklist....
-        # -- Some restructuring of code to do there.
-        # -- May only need to make sure self.checklist is set correctly?
-        filename = os.path.join('data', self.properties.checklist)
+    def __load_checklist(self, checklist):
+        filename = os.path.join('data', checklist)
         checkFile = gnomeglade.uninstalled_file(filename)
         if checkFile == None:
             filename = os.path.join(__programName__, filename)
@@ -422,7 +425,7 @@ class QAReviewer(gnomeglade.GnomeApp):
 
             # load the checklist data (Associates itself with checkView)
             self.SRPM_into_properties(filename)
-            self.__load_checklist()
+            self.__load_checklist('fedoraus.xml')
             self.checkView.set_model(self.checklist)
 
     ### FIXME: Features we want to implement but haven't had the time yet:
@@ -468,31 +471,33 @@ Relative Priority: Low.  There's too much programming to do for me to spend too 
         self.not_yet_implemented(msg)
         pass
         
-    ### FIXME: Part 2: Editing features are not currently implemented.
-    # Have to reconcile these with our need to keep each checklist item in
-    # its place.
-    # Looking at the pygtk clipboard info, it doesn't look too hard to
-    # implement this in the current scheme because we use separate widgets for
-    # each item.
     def on_menu_cut_activate(self, *extra):
-        """Cut some text"""
-        self.not_yet_implemented()
-        pass
+        '''Cut some text'''
+        owner = self.clipPrimary.get_owner()
+        if owner:
+            if isinstance(owner, gtk.Editable):
+                owner.cut_clipboard()
+            else:
+                ### FIXME: Is this behaviour consistent?
+                # Or are apps supposed to fail if editing of the selection is
+                # not allowed?
+                selectionText = self.clipPrimary.wait_for_text()
+                if selectionText:
+                    self.clipboard.set_text(selectionText, -1)
 
     def on_menu_copy_activate(self, *extra):
-        """Copy some text"""
-        self.not_yet_implemented()
-        pass
+        '''Copy from the current selection into the clipboard.'''
+        if self.clipPrimary.get_owner():
+            selectionText = self.clipPrimary.wait_for_text()
+            if selectionText:
+                self.clipboard.set_text(selectionText, -1)
 
     def on_menu_paste_activate(self, *extra):
-        """Paste some text"""
-        self.not_yet_implemented()
-        pass
-
-    def on_menu_clear_activate(self, *extra):
-        """Clear some text"""
-        self.not_yet_implemented()
-        pass
+        '''Copy from tne clipboard into the selection.'''
+        entry = self.ReviewerWindow.focus_widget
+        if isinstance(entry, gtk.Editable):
+            print entry
+            entry.paste_clipboard()
 
     # 
     # Other GUI callbacks
