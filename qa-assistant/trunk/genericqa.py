@@ -19,6 +19,7 @@ class GenericQA(gtk.Menu):
     def __init__(self, app):
         gtk.Menu.__init__(self)
         self.app = app
+        self.customItemsPath = None
         addItem = gtk.MenuItem('Add Check_list Item')
         addItem.connect('activate', self.add_item_to_checklist_callback)
         self.append(addItem)
@@ -134,18 +135,12 @@ class GenericQA(gtk.Menu):
                 return
 
         newItemDialog.destroy()
-        myItemsNode = None
-        iter = self.app.checklist.tree.get_iter_first()
-        while iter:
-            if self.app.checklist.tree.get_value(iter, checklist.SUMMARY) == 'Custom Checklist Items':
-                myItemsNode = iter
-                break
-            iter = self.app.checklist.tree.iter_next(iter)
-
-        if not myItemsNode:
+        if self.customItemsPath:
+            iter = self.app.checklist.tree.get_iter(self.customItemsPath)
+        else:
             # Create the 'Custom Checklist Items' category
-            myItemsNode = self.app.checklist.tree.append(None)
-            self.app.checklist.tree.set(myItemsNode,
+            iter = self.app.checklist.tree.append(None)
+            self.app.checklist.tree.set(iter,
                     checklist.SUMMARY, 'Custom Checklist Items',
                     checklist.ISITEM, False,
                     checklist.RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
@@ -154,13 +149,14 @@ class GenericQA(gtk.Menu):
                     checklist.OUTPUTLIST, {'Needs-Reviewing':None,
                                            'Pass':None, 'Fail':None},
                     checklist.DESC, 'Review items that you have comments on even though they aren\'t on the standard checklist.')
-            
-        newItem = self.app.checklist.tree.append(myItemsNode)
+            self.customItemsPath = self.app.checklist.tree.get_path(iter)
+        
         resList = ['Needs-Reviewing', 'Pass', 'Fail', 'Non-Blocker', 'Not-Applicable']
         outputList = {}
         for name in resList:
             outputList[name] = None
         outputList[res] = output
+        newItem = self.app.checklist.tree.append(iter)
         self.app.checklist.tree.set(newItem,
                 checklist.DESC, None,
                 checklist.ISITEM, True,
@@ -170,5 +166,3 @@ class GenericQA(gtk.Menu):
                 checklist.OUTPUT, output,
                 checklist.RESLIST, resList,
                 checklist.OUTPUTLIST, outputList)
-        path = self.app.checklist.tree.get_path(newItem)
-        self.app.checklist.tree.row_inserted(path, newItem)

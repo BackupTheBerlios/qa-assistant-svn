@@ -45,14 +45,14 @@ class Review(gtk.VBox):
 
     def __init__(self, tree, properties):
         gobject.GObject.__init__(self)
-        self.tree = tree
         self.properties = properties
+        self.addPaths = {}
 
         self.set_property('homogeneous', False)
         self.resolution = gtk.Label()
         self.resolution.set_property('justify', gtk.JUSTIFY_LEFT)
         self.resolution.set_property('xalign', 0.0)
-        self.__resolution_check()
+        self.__resolution_check(tree)
         ### FIXME: Do something about packing
         self.add(self.resolution)
 
@@ -67,7 +67,7 @@ class Review(gtk.VBox):
         ### FIXME: Allow editing the OUTPUT from this Widget.  Need to emit
         # row-changed signals that are picked up by the TreeStore (or else
         # change both listStore and treeStore)
-        self.__generate_data()
+        self.__generate_data(tree)
        
         self.goodLabel=gtk.Label('Good:')
         self.goodLabel.set_property('justify', gtk.JUSTIFY_LEFT)
@@ -129,8 +129,8 @@ class Review(gtk.VBox):
         self.noteComments.append_column(column)
         self.add(self.noteComments)
 
-        self.tree.connect('row-changed', self.__update_data)
-        self.tree.connect('row-inserted', self.__add_data)
+        tree.connect('row-changed', self.__update_data)
+        tree.connect('row-inserted', self.__add_data)
         ### FIXME: Need to connect to a signal when the SRPM changes.
         # self.properties.connect('hash-change', self.__update_hash)
 
@@ -204,29 +204,46 @@ class Review(gtk.VBox):
     def __update_data(self, treeStore, path, iter):
         """Update internal list from changes to treeStore on row-changed."""
 
-        name = self.tree.get_value(iter, checklist.SUMMARY)
-        listIter = self.list.get_iter_first()
-        while listIter:
-            if self.list.get_value(listIter, self.__SUMMARY) == name:
-                self.list.set(listIter,
-                  self.__DISPLAY, treeStore.get_value(iter, checklist.DISPLAY),
-                  self.__RESOLUTION,
-                  treeStore.get_value(iter, checklist.RESOLUTION),
-                  self.__OUTPUT, treeStore.get_value(iter, checklist.OUTPUT))
-                break
-            listIter = self.list.iter_next(listIter)
+        # row-changed gets called once for each item that is updated, even
+        # when there's a group.  So we have to wait until we get a proper
+        # summary (our key value) to add the entry to the list
+        summary = treeStore.get_value(iter, checklist.SUMMARY)
+        if self.addPaths.has_key(path) and summary:
+            # New item
+            self.list.append(summary,
+                              treeStore.get_value(iter, checklist.DISPLAY),
+                              treeStore.get_value(iter, checklist.RESOLUTION),
+                              treeStore.get_value(iter, checklist.OUTPUT)))
+            del self.addPaths[path]
+        elif len(path) > 1:
+            # Update an old item
+            listIter = self.list.get_iter_first()
+            while listIter:
+                if self.list.get_value(listIter, self.__SUMMARY) == summary:
+                    self.list.set(listIter,
+                            self.__DISPLAY,
+                            treeStore.get_value(iter, checklist.DISPLAY),
+                            self.__RESOLUTION,
+                            treeStore.get_value(iter, checklist.RESOLUTION),
+                            self.__OUTPUT,
+                            treeStore.get_value(iter, checklist.OUTPUT))
+                    break
+                listIter = self.list.iter_next(listIter)
+        else:
+            # Don't care about Cateogries (toplevel items)
+            return
 
-        self.__resolution_check()
+        self.__resolution_check(treeStore)
 
     def __add_data(self, treeStore, path, iter):
-        """Update the internal list whenever the tree adds a new entry."""
+        """Let update know it will be handling an add soon."""
 
-        self.list.append((self.tree.get_value(iter, checklist.SUMMARY),
-                          self.tree.get_value(iter, checklist.DISPLAY),
-                          self.tree.get_value(iter, checklist.RESOLUTION),
-                          self.tree.get_value(iter, checklist.OUTPUT)))
+        # If it's not a Category (toplevel) row then add it to our list of
+        # aditions.
+        if len(path) > 1:
+            self.addPaths[path] = True
 
-    def __generate_data(self):
+    def __generate_data(self, tree):
         """Create the internal list from the present state of tree.
         
         Take data from the TreeModel and put it into a ListStore.  We only
@@ -242,16 +259,16 @@ class Review(gtk.VBox):
                                   gobject.TYPE_BOOLEAN,
                                   gobject.TYPE_STRING,
                                   gobject.TYPE_STRING)
-        category = self.tree.get_iter_first()
+        category = tree.get_iter_first()
         while category:
-            iter = self.tree.iter_children(category)
+            iter = tree.iter_children(category)
             while iter:
-                self.list.append((self.tree.get_value(iter, checklist.SUMMARY),
-                              self.tree.get_value(iter, checklist.DISPLAY),
-                              self.tree.get_value(iter, checklist.RESOLUTION),
-                              self.tree.get_value(iter, checklist.OUTPUT)))
-                iter = self.tree.iter_next(iter)
-            category = self.tree.iter_next(category)
+                self.list.append((tree.get_value(iter, checklist.SUMMARY),
+                              tree.get_value(iter, checklist.DISPLAY),
+                              tree.get_value(iter, checklist.RESOLUTION),
+                              tree.get_value(iter, checklist.OUTPUT)))
+                iter = tree.iter_next(iter)
+            category = tree.iter_next(category)
 
     def __filter_good(self, column, cell, model, iter):
         """Only display comments which have DISPLAY and RESOLUTION=pass."""
@@ -293,22 +310,22 @@ class Review(gtk.VBox):
         else:
             cell.set_property('visible', False)
             
-    def __resolution_check(self):
+    def __resolution_check(self, tree):
         """Checks the treeStore to decide the recommendation for this review
 
         This depends on the category status being correct so if there are
         bugs, be sure to check there as well.
         """
-        iter = self.tree.get_iter_first()
+        iter = tree.get_iter_first()
         moreWork = False
         while iter:
-            value = self.tree.get_value(iter, checklist.RESOLUTION)
+            value = tree.get_value(iter, checklist.RESOLUTION)
             if value == 'Fail':
                 self.resolution.set_text('NEEDSWORK')
                 return
             elif value == 'Needs-Reviewing':
                 moreWork = True
-            iter = self.tree.iter_next(iter)
+            iter = tree.iter_next(iter)
 
         if moreWork:
             self.resolution.set_text('Incomplete Review')
