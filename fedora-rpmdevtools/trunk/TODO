@@ -1,0 +1,27 @@
+Pressing New should prompt for a bugzilla # or URL
+Pressing save should dump the present state to an xml file
+Pressing open should load a dumped xml file
+
+Build Button should be added to toolbar nad menu
+Pressing Build should build a review and prompt user for file to save as
+
+Submit Button should be added to toolbar and menu
+Pressing Submit will build the review and submit upstream and down.
+
+Remove the view menu.
+
+Add a not yet implemented dialog for all menu items that don't yet work
+
+Add a New dialog to take input about bugzilla
+
+Create preferences that hold gpg username, default QAChecklist file,
+
+Figure out the best way to add default paths to our data files.
+(Look at gnome-blog)
+
+Figure out how we are going to track entries into the editor.  We want
+people to be able to shift text around from Needswork and Non-blocker, and
+to add to them but we want to keep track of what entry is associated with what
+entry id.
+
+In our xml file, we must give each entry a unique id.
