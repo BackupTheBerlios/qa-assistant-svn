@@ -1,3 +1,59 @@
+2005-03-09 Toshio Kuratomi <toshio@tiki-lounge.com> - r173    
+    * src/qareviewer.py: Enable the properties menu entry.
+    * src/propview.py:
+      - __init__(): Set spacing for the widget to 7.
+      - create_layout(): Show all the widgets so we don't have to use
+        PropertiesDialog.show_all() in order to get the widget to display.
+      - New class PropertiesDialog that displays a PropertiesView in a window.
+    * src/checkload.py: Do a show of the PropertiesView instead of show_all.
+    
+2005-03-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r172    
+    * README: Update libxml2 version requirement to 2.5.0.
+    * configure.ac: Add a check for libxml2 2.5.0 or higher.
+    * TODO: Remove Druid note as it's completed.
+    * Makefile.am: Add the noinst_DATA files to EXTRA_DIST so they'll be
+      included in the tarball.
+    
+2005-03-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r171    
+    * src/checkload.py:
+      - Import libxml2.
+      - __init__(): Only include .xml files in the list of checklists.
+      - build_selector(): Implement a pretty name::summary for checklist
+        display that utilizes the libxml2.newTextReader() interface.
+    
+2005-03-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r170    
+    * src/checklist.py: Move appending SaveFile to a CheckList name attribute
+      to when we save the file rather than when we load it.  This is slightly
+      less efficient but prevents us from changing the name too early.
+    
+2005-03-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r169    
+    * data/sample-save.xml: Remove sample-save.xml as we don't use the qasave
+      file type anymore.
+    
+2005-03-05 Toshio Kuratomi <toshio@tiki-lounge.com> - r168    
+    * src/treetips.py: __init__(), __compute_tooltip_position(): Changed
+      docstrings to conform to the docutils convention for inline function
+      documentation.
+    * src/checklist.py: publish(): Changed to only output a properties node
+      if there are property nodes to fill it with.  This conforms with the
+      published DTD.
+    * src/propview.py:
+      - Added toplevel documentation.
+      - __init__(): Changed to always create a layout.
+      - create_layout():
+        + Create a label stating there are no properties to set on a checklist
+          if this is so.
+        + Output a label of <No value> when an auto prop is not set.
+        + Call _change_property() to set the new property value when the
+          entrty is changed.
+      - _change_property(): Set the model from the entry.
+    * src/checkload.py: Another place to change PropertiesWidget to
+      PropertiesView.
+    * ChangeLog: Update to (r167)
+    * data/minimal-valid.xml: Add a minimal checklist to test that we don't
+      fail when we have the minimum specification from the DTD.
+    * Makefile.am: Add the minimal-valid.xml as a non-install data file.
+    
 2005-02-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r167    
     * src/checkload.py: Rename PropertiesWidget object to PropertiesView.
     
