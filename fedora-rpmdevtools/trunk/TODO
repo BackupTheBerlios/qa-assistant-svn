@@ -37,7 +37,7 @@ Extra GNOME Functionality:
 
 Programming:
 ============
-- Process command line argument parsing
+- Command line argument parsing
 
 - Enhance tracking entries into the editor.  We want
   people to be able to shift text around from Needswork and Non-blocker, and
@@ -51,6 +51,10 @@ Programming:
   + checkheader
   + checksig
   + verify source against spec file/canonical URL
+  + look at the new fedora-startqa for more ideas.  Perhaps we can coordinate
+    and use fedora-startqa in the backend.  (Look through their SRPM stuff --
+    it might be better code than I have... If we can put it into a SRPM class
+    like I have, then it could be callable from either my script or theirs.)
 
 - SRPM.py needs some more work.  Two known problem areas related to unarchiving
   when a directory of that name.
