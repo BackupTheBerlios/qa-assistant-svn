@@ -1,0 +1,121 @@
+============
+QA Assistant
+============
+
+Checklist Reviewer to Aid Quality Assurance
+-------------------------------------------
+
+:Author: Toshio Kuratomi
+:Contact: toshio-tiki-lounge.com
+:Date: $Date$
+:Revision: $Rev$
+
+.. contents::
+
+Version 0.4.90.2
+================
+*This is a development release.*  It's like a snapshot but with a tad more
+care put in.  It is likely to have major bugs.  Things that you see here
+may change radically before the actual release.  This includes the definition
+of the DTDs and other versioned properties (which may not have their versions
+bumped again before the real release -- so you may need to completely
+uninstall the development version before installing the new release.)
+
+The main reason for the development release is so people unable to use the
+subversion archive can see where the code is headed for the 0.5 release.
+
+This release has a rewritten checklist display that should be both prettier
+to look at and more easily programmed against.  Most changes are aimed at
+making the checklists more extensible.
+
+* CheckList and SaveFile formats have been combined into the checklist 0.3 dtd.
+* Preliminary support for automated tests embedded within the XML files.
+* Made the checklist code more generic.  We are no longer tied to Quality
+  Assurance of SRPM files.
+* Now able to set preferences in the program.
+* You are now able to sign the review with gnupg.
+* A Druid to walk through starting a review.
+* The Review widget is now much nicer to look at.
+* CheckList is now a subclass of gtk.TreeStore.
+
+Version 0.4.1
+=============
+This is a bugfix release.
+
+* Fix a bug in loading saved checklists that caused the custom category to
+  be displayed as an item.
+* Fix for distuninstallcheck which was picking up on the XML catalogs.
+* Cut and paste has been added.
+
+Version 0.4
+===========
+This release marks completeness of core features.  Everything necessary for
+writing a review from within QA Assistant is now available.  I'm now using
+qa-assistant to write QA reports for the fedora.us system.
+
+* You can now add your own checklist items to a review.  Use the
+  "QA Actions::Add checklist item" menu item when you want to add a comment
+  that the standard checklist does not support.
+* Saving and loading of in-progress reviews is now supported.
+* Output reviews now do textwrap of long lines so GPG signing and submitting
+  to bugzilla works better.
+* DTDs are now entered into the system catalog.  XML validation now uses the
+  catalogs to retrieve DTDs rather than saving filesystem path information.
+* Some minor bugfixes to the python build process.
+* Fix output entry when the output contains angle brackets "<>"
+
+The save and checklist formats used in this release are not permanent.
+Talks with Erik LaBianca are expected to lead to a new combined format
+that will allow embedding tests for items within the checklist.
+
+The next release of qa-assistant is going to concentrate on rewriting the
+checklist and review widgets to address basic architectural shortcomings
+revealed when implementing the load/save functionality.  If necessary, I
+will create an 0.4.x branch to fix bugs while this work continues.
+
+Version 0.3
+===========
+This release is largely an infrastructure and cosmetic enhancement.  The
+program now has a build and install process and there was some work to
+make the current resolution to a checklist item more apparent at a glance.
+The major "new" feature was to correct a bug that prevented the reviewer
+from editing the output.
+
+* Displays the SRPM that's being reviewed in the titlebar and statusbar
+* Colorized output for checklist items.
+* Now has an automake/autoconf build.  This means the package is now
+  installable with standard ./configure ; make; make install steps
+* RPM spec file included and rpm's shipped with package.
+* When publishing a review, QA Assistant now checks to see if it's in an
+  Incomplete state.
+* Fixed a bug that prevented editing of the output string in the checklist
+* Checklist actions now appear in the QA Actions menu instead of the File
+  menu.  (The sole exception is the New actions.  These will probably be
+  replaced with a Druid that walks one through selecting a checklist and
+  file to QA.  The current method of selecting an SRPM to QA will remain
+  on the QA Action menu for those who select a checklist manually.
+* Website and downloads moved to sourceforge.
+  http://sourceforge.net/projects/qa-assistant
+
+Version 0.2
+===========
+This version concentrates on tidying up usability problems in the first
+release.  Tooltip-like help for checklist items and loading SRPMS from the
+menu are the major enhancements.
+
+* Ability to start an SRPM QA from the menu and the toolbar
+* Description of a checklist item displayed in a tooltip
+* Optionrenderer now looks more like a combo box
+* Speedups to Optionrenderer code
+* Directory remembering for the File Selection dialogs
+* Published reviews now use '*' bullets instead of '-' to be more GPG friendly
+* Move hashes to top of review in anticipation of fedora-startqa format
+* Better handling of errors on loading SRPMs
+
+Version 0.1
+===========
+Initial Release
+
+* Extensible via an XML checklist definition
+* GUI driven checklist
+* Publishes a review

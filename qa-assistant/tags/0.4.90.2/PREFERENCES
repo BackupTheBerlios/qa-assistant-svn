@@ -1,0 +1,159 @@
+Preferences to Add Via GConf
+============================
+
+:Author: Toshio Kuratomi <toshio-tiki-lounge.com>
+:Date: $Date$
+
+.. contents::
+
+Preferences
+-----------
+Preferences are set on the app.  They could be implemented as GConf
+variables.
+
+Person
+(Probably happen in the review widget, publish function.)
+* Whether to sign [s] [d] [c]
+* Signing identity [s] [d] [c]
+* Path to gpg binary [s] [d] [c]
+
+Files
+(Probably happen in the main program)
+* Directory to unrpm into [s] [d]
+
+Display
+(Happen in the checklist.)
+* Automatically display failed reviews [s] [c] [d]
+* Text colours [s] [c] [d]
+
+  (These can probably be implemented in the checkview and cause settings
+  to change on the checkview's treetip.)
+* Tooltip DESCRIPTION enable/disable [s] [c] [d]
+* Tooltip timeout [s] [c] [d]
+
+Status Key:
+  [s] In schema
+  [c] Used in Code
+  [d] Settable via preferences dialog
+
+Coding wise we need three things:
+
+1) We need to write the gconf schema file describing the keys.
+   [Done]
+
+2) Write code to make use of the values.
+  * Where should the GConfClient reside?  If each place that uses it has a
+    copy, it's wasteful but modular.  OTOH, gconf.client_get_default() doesn't
+    seem to create a new client, just get a reference to a main gconf client.
+    The app keeps a copy of it, then it needs to pass the client to the other
+    modules somehow. [Going with each module that uses it]
+    [Test then Done]
+
+3) We need to have a dialog box that has entries for all the properties.
+   This can be a glade dialog as the box should be the same for all checklists.
+   The dialog needs to take input about all the preferences listed here.
+   When the submit button is pressed, put the information into the gconf
+   database and change the effect of the values on the program.
+   [Test then Done]
+
+http://developer.gnome.org/doc/API/2.0/gconf/
+
+(These are program properties.  It should start out as the current working
+directory everytime the program starts and change as the program progresses.
+The passphrase will be asked for every time.)
+* File directories [done]
+* user/gpg-pasphrase  [done]
+
+(Hmmm is this a gpg option instead?)
+* Keyserver to download new keys from
+
+Druid
+-----
+In the new scheme of things we need to know what checklist to load before we
+can do useful things.  Once we know what checklist to load, we should be able
+to invoke functions to take onLoad information from users.
+
+The Druid will have the following pathways:
+1) Info screen.
+2) (A) Load savefile (B) New checklist
+3A) Open a file chooser with the CWD for the user to pick from
+3B) Open a selector of the system installed checklists
+4pre) Load checklist
+4) Display a properties dialog to get the properties that the checklist
+   requires (onLoad) if any.
+5) Start the program.
+
+When loading a new checklist after the program is started, we should skip
+1 & 2 and go directly to 3A.
+
+When loading a saved checklist we want to popup a file selector (could be
+the Druid page or the Druid file selector could be the load checklist file
+selector.)  Then proceed to 4pre.
+
+Properties
+----------
+Properties are set on the checklist.  The checklist type should provide a
+set of properties that are legal.  Perhaps implement as GObject values on
+the checklist object (Can't do this as it isn't extensible.  The checklist
+may have arbitrary properties.  Specifying in GObject makes them a
+"compiletime" rather than run-time setting.)
+
+* MD5Sums
+* Bugzilla URL
+* SRPM to check
+* QA checklist loaded
+
+We have a properties dict in the CheckList right now.
+What are we going to do with that?
+
+We need the following attributes on functions:
+
+* automatic/userinput/useroverride
+* onLoad(Mandatory before we start)/onPublish(mandatory before we end)/optional
+
+The current checklist.dtd encapsulates these in the following ways.  As
+RequireTypes:
+
+* onLoad (start, user)
+* onPublish (end, user)
+* automatic (when its dependencies resolve, automatic)
+* optional (optional, user)
+
+overrides are implemented as user invocable functions.
+
+Functions
+---------
+
+Functions are tied into properties.  Both are declared by the checklist.
+Properties are defined in the checklist while functions are defined in code
+modules.  Functions can operate on Properties.  And they can take properties
+as arguments.
+
+So each Function module has to have access to the checklist's properties.
+How?
+
+Most functions are selectable from a menu entry.  How does this affect
+things?  We need to create a menu from the functions and assign the
+functions as callbacks.  The functions in the menu need to have access to
+the properties.  They also need to use functions on the review (publish) and
+gconf things (Enable/disable treetips)
+
+Create a QAMenu class that takes the checklist as its model.  When the 
+
+Functions that are not in the menu are functions used by the properties
+themselves.  These functions often need to specify dependency information on
+other properties.
+
+Other things that get set depending on the checklist:
+
+* Application's title bar: app.set_title()
+* Appplication's status bar: app.mainWinAppBar.push()
+  - Ideas for statusbar info:
+    + The main identifier of the review (SRPM name)
+    + Number of pass/fail/needs-reviewing/etc
+
+* So we don't have to inline all our code, we probably want to have a method
+  to callout to other code.  Maybe there should be a certain set of standard
+  functions.  Then we can add per checklist functions in a separate file.  The
+  checklist can let us know which functions its using via a name/sha1sum pair.
+  They can then reference the functions in that external file.
