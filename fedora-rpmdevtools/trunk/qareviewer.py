@@ -16,6 +16,9 @@ import gtk
 import checklist
 import gnomeglade
 
+class CellRendererEnum(gtk.CellRenderer):
+    """ Renders a multi-state as a combo box. """ 
+
 class QAReviewer(gnomeglade.GnomeApp):
     def __init__(self, arguments):
         """Creates a new QA reviewer window.
@@ -35,39 +38,46 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.exit(1)
 
         # Create a treeview for our listPane
-        checkView = gtk.TreeView(self.checklist.tree)
+        self.checkView = gtk.TreeView(self.checklist.tree)
+        self.checkView.set_rules_hint(True)
         ### FIXME: Other optional methods of TreeView configuration here.
         
         renderer = gtk.CellRendererToggle()
-        column = gtk.TreeViewColumn('Display?', renderer, active=checklist.DISPLAY)
+        renderer.set_radio(False)
+        column = gtk.TreeViewColumn('Display', renderer, active=checklist.DISPLAY)
         column.set_clickable(True)
-        checkView.append_column(column)
+        self.checkView.append_column(column)
 
         ### FIXME: Add a renderer for enumerations as passed via RESOLUTION
+        # We can render toggles with multiple buttons depending on the
+        # resolution
         # renderer = CellRendererEnum()
         # column = gtk.TreeViewColumn('pass/fail', renderer, initial=RESOLUTION)
         # column.set_?clickable?(True)
         # checkView.append_column(column)
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('pass/fail/n\\a', renderer, text=checklist.RESOLUTION)
+        column = gtk.TreeViewColumn('pass/fail', renderer, text=checklist.RESOLUTION)
         column.set_clickable(True)
-        checkView.append_column(column)
+        self.checkView.append_column(column)
         
         renderer = gtk.CellRendererText()
         column = gtk.TreeViewColumn('Description', renderer, text=checklist.SUMMARY)
-        checkView.append_column(column)
+        self.checkView.append_column(column)
         
-        ### FIXME
-        # See if we can mess with adding/subtracting the last column when we
-        # click a button.  Then we can show/hide the editorPane
-        
-        self.listPane.add(checkView)
+        column = gtk.TreeViewColumn('Output', renderer, text=checklist.OUTPUT)
+        self.outputColumn = column
+        self.checkView.append_column(column)
+
+        self.listPane.add(self.checkView)
 
         self.grabArrow=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
         self.grabArrow.set_size_request(4,4)
         label=self.grabBar.get_child()
         self.grabBar.remove(label)
         self.grabBar.add(self.grabArrow)
+
+        # Hide the editorPane until the user asks to see it.
+        self.mainDisplay.remove(self.editorPane)
 
         self.ReviewerWindow.show_all()
 
@@ -99,12 +109,12 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         if self.grabArrow.get_property('arrow-type') == gtk.ARROW_LEFT:
             self.grabArrow.set(gtk.ARROW_RIGHT, gtk.SHADOW_NONE)
-            ### FIXME:
-            # Hide the editorPane and reveal the last column of the listPane
+            self.checkView.remove_column(self.outputColumn)
+            self.mainDisplay.pack_end(self.editorPane)
         else:
             self.grabArrow.set(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
-            ### FIXME:
-            # Reveal the editorPane and hide the last column of the listPane
+            self.checkView.append_column(self.outputColumn)
+            self.mainDisplay.remove(self.editorPane)
 
     def on_delete_event(self, *extra):
         """Delete a window.
