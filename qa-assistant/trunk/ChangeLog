@@ -1,3 +1,23 @@
+2005-01-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r154    
+    * src/error.py: Add an exception NotGPGCompatible for when the user
+      specifies a gpg program that isn't gpg call compatible.
+    * src/preferences.py: create_gpg_ids_list(): If we have an old list of
+      identities and the gpg command isn't giving us a new list, keep the
+      old list.
+    * src/review.py: Handle the case where the gpg command has been specified
+      incorrectly.
+    * src/gpg.py:
+      - list_secret_keys(), sign_buffer(): Check that the specified file
+        could possibly be a program before attempting to invoke it.
+      - list_secret_keys(), sign_buffer(): raise a NotGPGCompatible error
+        when the program doeosn't respond to our commandline options the way
+        we expect.
+      - All GPGError exceptions take a msg argument.  Give a message argument
+        each time we raise one.
+    
+2005-01-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r153    
+    * ChangeLog: update to (r152).
+    
 2005-01-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r152    
     * src/preferences.py:
       - __init__(), set_gpg_identity(): Fix signing combo to properly set
