@@ -83,8 +83,7 @@ class Preferences(gnomeglade.Component):
         if descWait < spinMin or descWait > spinMax:
             descWait = self.gconfClient.get_default_from_schema(key)
         self.DescWaitSpin.set_value(descWait)
-        ### FIXME: value-changed is emitted too often.  Maybe focus is better?
-        self.DescWaitSpin.connect('value-changed', self.set_desc_wait)
+        self.DescWaitSpin.connect('focus-out-event', self.set_desc_wait)
         
         # Set Review Output and setup callback for change
         noAutoDisplay = self.gconfClient.get_bool(
@@ -116,12 +115,10 @@ class Preferences(gnomeglade.Component):
         pass
 
         # files/user-state-dir
-         
+        # files/gpg-path
         # Connect to signals:
         # user/use-gpg
         # user/gpg-identity
-        #
-        # display/checklist-description-wait
         #
         # files/user-state-dir
         # 
@@ -129,7 +126,7 @@ class Preferences(gnomeglade.Component):
         # If Help is pressed, we need to popup Not Yet Implemented.
     
     #
-    # Preferences callbacks
+    # GConf setting callbacks
     #
     
     def set_display_color(self, button, key):
@@ -164,10 +161,9 @@ class Preferences(gnomeglade.Component):
             self.gconfClient.set_bool(GCONFPREFIX +
                     '/display/disable-checklist-descriptions', True)
 
-    def set_desc_wait(self, spinButton):
+    def set_desc_wait(self, spinButton, event):
         '''
         '''
-        print spinButton.get_value_as_int()
         self.gconfClient.set_int(GCONFPREFIX + '/display/checklist-description-wait',
         spinButton.get_value_as_int())
 

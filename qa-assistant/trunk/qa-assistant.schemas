@@ -129,6 +129,20 @@
       </locale>
     </schema>
     <schema>
+      <key>/schemas/apps/qa-assistant/files/gpg-path</key>
+      <applyto>/apps/qa-assistant/files/gpg-path</applyto>
+      <owner>qa-assistant</owner>
+      <type>string</type>
+      <default>/usr/bin/gpg</default>
+      <locale name="C">
+        <short>Path to the gpg program</short>
+        <long>
+	  Set this value to the path to the gpg binary.  On most systems this
+	  is /usr/bin/gpg.
+        </long>
+      </locale>
+    </schema>
+    <schema>
       <key>/schemas/apps/qa-assistant/files/user-state-dir</key>
       <applyto>/apps/qa-assistant/files/user-state-dir</applyto>
       <owner>qa-assistant</owner>

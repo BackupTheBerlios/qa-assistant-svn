@@ -53,8 +53,6 @@ Programming Errors
     svn repository.  The repository or a tarball needs to be accessbile to run
     make dist-check, et al.
 
-* the display tooltip after preference item syncs too often.
-
 Working: Need to test
 ---------------------
 * Using the save function (rather than save_as) doesn't seem to be saving the

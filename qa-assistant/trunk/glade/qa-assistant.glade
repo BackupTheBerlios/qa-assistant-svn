@@ -1268,7 +1268,7 @@ Contributors:
 	      <child>
 		<widget class="GtkLabel" id="label28">
 		  <property name="visible">True</property>
-		  <property name="label" translatable="yes">&lt;span weight=&quot;bold&quot;&gt;Directories&lt;/span&gt;</property>
+		  <property name="label" translatable="yes">&lt;span weight=&quot;bold&quot;&gt;Files&lt;/span&gt;</property>
 		  <property name="use_underline">False</property>
 		  <property name="use_markup">True</property>
 		  <property name="justify">GTK_JUSTIFY_LEFT</property>
@@ -1287,13 +1287,16 @@ Contributors:
 	      </child>
 
 	      <child>
-		<widget class="GtkHBox" id="hbox7">
+		<widget class="GtkTable" id="table7">
 		  <property name="visible">True</property>
+		  <property name="n_rows">2</property>
+		  <property name="n_columns">3</property>
 		  <property name="homogeneous">False</property>
-		  <property name="spacing">0</property>
+		  <property name="row_spacing">3</property>
+		  <property name="column_spacing">3</property>
 
 		  <child>
-		    <widget class="GtkLabel" id="label29">
+		    <widget class="GtkLabel" id="label35">
 		      <property name="visible">True</property>
 		      <property name="label" translatable="yes">     </property>
 		      <property name="use_underline">False</property>
@@ -1307,14 +1310,65 @@ Contributors:
 		      <property name="ypad">0</property>
 		    </widget>
 		    <packing>
-		      <property name="padding">0</property>
-		      <property name="expand">False</property>
-		      <property name="fill">False</property>
+		      <property name="left_attach">0</property>
+		      <property name="right_attach">1</property>
+		      <property name="top_attach">0</property>
+		      <property name="bottom_attach">1</property>
+		      <property name="x_options">fill</property>
+		      <property name="y_options"></property>
 		    </packing>
 		  </child>
 
 		  <child>
-		    <widget class="GtkLabel" id="label30">
+		    <widget class="GtkLabel" id="label36">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">     </property>
+		      <property name="use_underline">False</property>
+		      <property name="use_markup">False</property>
+		      <property name="justify">GTK_JUSTIFY_LEFT</property>
+		      <property name="wrap">False</property>
+		      <property name="selectable">False</property>
+		      <property name="xalign">0</property>
+		      <property name="yalign">0</property>
+		      <property name="xpad">0</property>
+		      <property name="ypad">0</property>
+		    </widget>
+		    <packing>
+		      <property name="left_attach">0</property>
+		      <property name="right_attach">1</property>
+		      <property name="top_attach">1</property>
+		      <property name="bottom_attach">2</property>
+		      <property name="x_options">fill</property>
+		      <property name="y_options"></property>
+		    </packing>
+		  </child>
+
+		  <child>
+		    <widget class="GtkLabel" id="label37">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">Path to GPG</property>
+		      <property name="use_underline">False</property>
+		      <property name="use_markup">False</property>
+		      <property name="justify">GTK_JUSTIFY_LEFT</property>
+		      <property name="wrap">False</property>
+		      <property name="selectable">False</property>
+		      <property name="xalign">0</property>
+		      <property name="yalign">0</property>
+		      <property name="xpad">0</property>
+		      <property name="ypad">0</property>
+		    </widget>
+		    <packing>
+		      <property name="left_attach">1</property>
+		      <property name="right_attach">2</property>
+		      <property name="top_attach">0</property>
+		      <property name="bottom_attach">1</property>
+		      <property name="x_options">fill</property>
+		      <property name="y_options"></property>
+		    </packing>
+		  </child>
+
+		  <child>
+		    <widget class="GtkLabel" id="label38">
 		      <property name="visible">True</property>
 		      <property name="label" translatable="yes">State directory</property>
 		      <property name="use_underline">False</property>
@@ -1328,54 +1382,78 @@ Contributors:
 		      <property name="ypad">0</property>
 		    </widget>
 		    <packing>
-		      <property name="padding">0</property>
-		      <property name="expand">True</property>
-		      <property name="fill">True</property>
+		      <property name="left_attach">1</property>
+		      <property name="right_attach">2</property>
+		      <property name="top_attach">1</property>
+		      <property name="bottom_attach">2</property>
+		      <property name="x_options">fill</property>
+		      <property name="y_options"></property>
 		    </packing>
 		  </child>
 
 		  <child>
-		    <widget class="GtkAlignment" id="alignment1">
+		    <widget class="GnomeFileEntry" id="StateDirEntry">
 		      <property name="visible">True</property>
-		      <property name="xalign">0</property>
-		      <property name="yalign">0</property>
-		      <property name="xscale">0</property>
-		      <property name="yscale">0</property>
-		      <property name="top_padding">0</property>
-		      <property name="bottom_padding">0</property>
-		      <property name="left_padding">0</property>
-		      <property name="right_padding">0</property>
+		      <property name="max_saved">10</property>
+		      <property name="browse_dialog_title" translatable="yes">Select a User State Directory</property>
+		      <property name="directory_entry">True</property>
+		      <property name="modal">False</property>
+		      <property name="use_filechooser">True</property>
 
-		      <child>
-			<widget class="GnomeFileEntry" id="fileentry1">
+		      <child internal-child="entry">
+			<widget class="GtkEntry" id="StateDirEntry">
 			  <property name="visible">True</property>
-			  <property name="max_saved">10</property>
-			  <property name="browse_dialog_title" translatable="yes">Select a User State Directory</property>
-			  <property name="directory_entry">True</property>
-			  <property name="modal">False</property>
-			  <property name="use_filechooser">True</property>
-
-			  <child internal-child="entry">
-			    <widget class="GtkEntry" id="StateDirEntry">
-			      <property name="visible">True</property>
-			      <property name="tooltip" translatable="yes">This is a directory where QA Assistant will save temporary files when performing automated actions on the checklist</property>
-			      <property name="can_focus">True</property>
-			      <property name="editable">True</property>
-			      <property name="visibility">True</property>
-			      <property name="max_length">0</property>
-			      <property name="text" translatable="yes"></property>
-			      <property name="has_frame">True</property>
-			      <property name="invisible_char" translatable="yes">*</property>
-			      <property name="activates_default">False</property>
-			    </widget>
-			  </child>
+			  <property name="tooltip" translatable="yes">This is a directory where QA Assistant will save temporary files when performing automated actions on the checklist</property>
+			  <property name="can_focus">True</property>
+			  <property name="editable">True</property>
+			  <property name="visibility">True</property>
+			  <property name="max_length">0</property>
+			  <property name="text" translatable="yes"></property>
+			  <property name="has_frame">True</property>
+			  <property name="invisible_char" translatable="yes">*</property>
+			  <property name="activates_default">False</property>
 			</widget>
 		      </child>
 		    </widget>
 		    <packing>
-		      <property name="padding">0</property>
-		      <property name="expand">True</property>
-		      <property name="fill">True</property>
+		      <property name="left_attach">2</property>
+		      <property name="right_attach">3</property>
+		      <property name="top_attach">1</property>
+		      <property name="bottom_attach">2</property>
+		      <property name="y_options"></property>
+		    </packing>
+		  </child>
+
+		  <child>
+		    <widget class="GnomeFileEntry" id="GPGPathEntry">
+		      <property name="visible">True</property>
+		      <property name="max_saved">10</property>
+		      <property name="browse_dialog_title" translatable="yes">Select the program to sign with</property>
+		      <property name="directory_entry">False</property>
+		      <property name="modal">False</property>
+		      <property name="use_filechooser">True</property>
+
+		      <child internal-child="entry">
+			<widget class="GtkEntry" id="entry2">
+			  <property name="visible">True</property>
+			  <property name="tooltip" translatable="yes">Path to the GPG program used to sign the review</property>
+			  <property name="can_focus">True</property>
+			  <property name="editable">True</property>
+			  <property name="visibility">True</property>
+			  <property name="max_length">0</property>
+			  <property name="text" translatable="yes"></property>
+			  <property name="has_frame">True</property>
+			  <property name="invisible_char" translatable="yes">*</property>
+			  <property name="activates_default">False</property>
+			</widget>
+		      </child>
+		    </widget>
+		    <packing>
+		      <property name="left_attach">2</property>
+		      <property name="right_attach">3</property>
+		      <property name="top_attach">0</property>
+		      <property name="bottom_attach">1</property>
+		      <property name="y_options"></property>
 		    </packing>
 		  </child>
 		</widget>
