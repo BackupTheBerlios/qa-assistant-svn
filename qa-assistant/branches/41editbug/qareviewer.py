@@ -70,20 +70,18 @@ class QAReviewer(gnomeglade.GnomeApp):
         gnomeglade.GnomeApp.__init__(self, __name__, __version__, gladefile,
                 'ReviewerWindow')
 
-        # load the checklist data
-        try:
-            self.checklist = checklist.CheckList('data/'+self.properties.checklistName)
-        except (libxml2.parserError, libxml2.treeError, checklist.Error), msg:
-            ### FIXME: When we can select checklists via property, we need to
-            # print error and recover.
-            sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
-            sys.exit(1)
+        #
+        # Create additional interface components
+        #
 
         # Create a treeview for our listPane
-        self.checkView = gtk.TreeView(self.checklist.tree)
+        self.checkView = gtk.TreeView()
         self.checkView.set_rules_hint(True)
         ### FIXME: Other optional methods of TreeView configuration here.
         
+        # load the checklist data (Associates itself with checkView)
+        self.__load_checklist()
+
         renderer = gtk.CellRendererToggle()
         renderer.set_radio(False)
         column = gtk.TreeViewColumn('Display', renderer,
@@ -138,6 +136,17 @@ class QAReviewer(gnomeglade.GnomeApp):
     #
     # Helper Functions
     # 
+    def __load_checklist(self):
+        try:
+            self.checklist = checklist.CheckList('data/'+self.properties.checklistName)
+        except (libxml2.parserError, libxml2.treeError, checklist.Error), msg:
+            ### FIXME: When we can select checklists via property, we need to
+            # print error and recover.
+            sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
+            sys.exit(1)
+
+        self.checkView.set_model(self.checklist.tree)
+
     def __translate_option_mode(self, column, cell, model, iter):
         """Translate from header/item value to mode type.
 
