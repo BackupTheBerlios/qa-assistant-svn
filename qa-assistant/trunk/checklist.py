@@ -47,7 +47,7 @@ class CheckList:
 
     def __init__(self, path, props):
 
-        self.customItemsPath = None
+        self.customItemsIter = None
         self.props = props
         self.addPaths = {}
         libxml2.registerErrorHandler(self.__no_display_parse_error, None)
@@ -158,8 +158,8 @@ class CheckList:
         Keyword arguments:
         item -- entry is an item rather than a category. (default True)
         display -- display the entry in output review. (default True)
-        desc -- long description about how to determine if the item
-                item has passed or failed. (default None)
+        desc -- long description about how to determine if the item has
+                passed or failed the test. (default None)
         resolution -- state that the entry is in. (default Needs-Reviewing)
         output -- output string for the entry. (default None)
         resList -- list of valid resolutions. (default Needs-Reviewing, Pass,
@@ -190,17 +190,15 @@ class CheckList:
                 outputList[res] = None
             outputList[resolution] = output
        
-        if self.customItemsPath:
-            iter = self.tree.get_iter(self.customItemsPath)
-            newItem = self.tree.append(iter)
+        if self.customItemsIter:
+            newItem = self.tree.append(self.customItemsIter)
         else:
-            iter = self.tree.append(None)
+            self.customItemsIter = self.tree.append(None)
             if summary == 'Custom Checklist Items':
-                self.customItemsPath = self.tree.get_path(iter)
-                newItem = iter
+                newItem = self.customItemsIter
             else:
                 # Create the 'Custom Checklist Items' category
-                self.tree.set(iter,
+                self.tree.set(self.customItemsIter,
                     SUMMARY, 'Custom Checklist Items',
                     MODIFIED, True,
                     ISITEM, False,
@@ -210,8 +208,7 @@ class CheckList:
                     OUTPUTLIST, {'Needs-Reviewing':None,
                                            'Pass':None, 'Fail':None},
                     DESC, '''Review items that you have comments on even though they aren't on the standard checklist.''')
-                self.customItemsPath = self.tree.get_path(iter)
-                newItem = self.tree.append(iter)
+                newItem = self.tree.append(self.customItemsIter)
         
         # Set up the new item
         self.tree.set(newItem,

@@ -10,6 +10,10 @@ Checklist Reviewer to Aid Quality Assurance
 :Date: $Date$
 
 ..contents::
+Version 0.5
+===========
+This release has a rewritten checklist display that should be both prettier
+to look at and more easily programmed against.
 
 Version 0.4
 ===========
@@ -31,6 +35,11 @@ qa-assistant to write QA reports for the fedora.us system.
 The save and checklist formats used in this release are not permanent.
 Talks with Erik LaBianca are expected to lead to a new combined format
 that will allow embedding tests for items within the checklist.
+
+The next release of qa-assistant is going to concentrate on rewriting the
+checklist and review widgets to address basic architectural shortcomings
+revealed when implementing the load/save functionality.  If necessary, I
+will create an 0.4.x branch to fix bugs while this work continues.
 
 Version 0.3
 ===========
