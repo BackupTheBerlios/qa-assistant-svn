@@ -1,3 +1,16 @@
+2004-10-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r125    
+    * qareviewer.py:
+      - Bump version to 0.4.1
+      - Get references to the clipboards in __init__()
+      - Get rid of a debugging print statement in the paste function.
+    
+2004-10-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r124    
+    * qareviewer.py: Implement cut, copy, and paste.  Backport from (r122)
+    * NEWS: Note that cut and paste works.
+    
+2004-10-02 Toshio Kuratomi <toshio@tiki-lounge.com> - r116    
+    * ChangeLog: Update to r105.
+    
 2004-09-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r106    
     * Makefile.am: Fix distuninstallcheck to no ignore the XML catalogs as
       they shouldn't be removed with the program.
