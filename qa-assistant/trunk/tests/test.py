@@ -22,11 +22,13 @@ sys.path.extend((os.path.join(srcdir, '..'), srcdir))
 
 import testcreation
 import testchecklist
+import testtreetips
 
 if __name__ == '__main__':
     createSuite = testcreation.suite()
     checkSuite = testchecklist.suite()
-    suite = unittest.TestSuite((createSuite, checkSuite))
+    treetipSuite = testtreetips.suite()
+    suite = unittest.TestSuite((createSuite, treetipSuite, checkSuite))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if result.wasSuccessful():
         sys.exit(0)

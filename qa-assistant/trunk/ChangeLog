@@ -1,3 +1,45 @@
+2004-10-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r117    
+    * review.py:
+      - Check that we're being passed a CheckList type.
+      - Use gtk.VBox.__init__ instead of GObject.__init__.
+      - No longer use gobject.type_register() because we don't define our
+        own __gproperties__.
+    * checklist.py:
+      - A beginning for signal addition.
+      - Remove set_output_string()
+    * tests/testcreation.py:
+      - Add tests for the Review widget.
+      - Push CheckView creation back to normal precedence.  Our reimplemented
+        TreeTips don't depend on CheckView but CheckView does depend on
+        TreeTips.
+      - Create two more success tries as treetips should now take a normal
+        gtk.TreeView and No arguments whatsoever.
+      - Push TreeTips precedence up as it is needed for CheckView.
+      - Failure test now looks for TypeError as we check that the widget
+        supports our needed signals rather than explicit types.
+    * treetips.py:
+      - Remove random numbers.  We should be able to get timeout IDs from a
+        simple counter (self.unique) instead.
+      - Add many __gproperties__ supported by gtk.Tooltips.
+      - Add view and column __gproperties__ for the treeview and column that
+        we draw our data from.
+      - Make __init__ able to handle the no argument case.
+      - Remove check for whether we're passed a gtk.TreeView.  Instead, we
+        check if we get an object with the proper __gsignals__.
+      - Rename some internal variables to use the publicly available
+        __gproperties__ names instead.
+      - Add self.enable() and self.disable() methods to mirror Tooltips.
+      - do_get_property() and do_set_property() methods to work with the
+        __gproperties__.
+      - Using the self.enabled gproperty, it should now be possible to turn
+        treetips off.
+      - gobject.type_register() as we now define our own __gproperties__.
+    
+2004-10-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r115    
+    * ChangeLog: Update to r114
+    * genericqa.py: Fix one place where we were setting the outputList to
+      none values instead of empty string.
+    
 2004-10-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r114    
     * Warning: This commit should display the checklist on the screen fine but
       will not publish a review to file.  It also will not display any header

@@ -4,9 +4,11 @@
 
 #TESTS = test.py
 TESTS = testcreation.py \
-	testchecklist.py
+	testtreetips.py \
+	testchecklist.py 
 EXTRA_DIST = test.py \
 	     testchecklist.py \
+	     testtreetips.py \
 	     testcreation.py
 CLEANFILES = \
 	     *.pyc \

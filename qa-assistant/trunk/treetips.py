@@ -122,8 +122,8 @@ class TreeTips(gtk.Widget):
         At this moment, only delay is a writable property.
         '''
         if prop.name == 'delay':
-            self.delay = prop.value
-        if prop.name == 'view':
+            self.delay = value
+        elif prop.name == 'view':
             try:
                 value.connect('leave-notify-event', self.__tree_leave_notify)
                 value.connect('motion-notify-event', self.__tree_motion_notify)
@@ -132,7 +132,7 @@ class TreeTips(gtk.Widget):
                         'implements leave-notify-event and motion-notify-event '
                         'gsignals')
             self.view = value
-        if prop.name == 'column':
+        elif prop.name == 'column':
             self.column = value
         else:
             raise AttributeError, 'unknown or read only property %s' % prop.name

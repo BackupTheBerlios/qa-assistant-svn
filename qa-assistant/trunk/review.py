@@ -163,6 +163,7 @@ class Review(gtk.VBox):
                 key  = (treeStore.get_value(treeIter, checklist.RESOLUTION),
                         lastEntry)
                 value = gtk.Label(treeStore.get_value(treeIter, checklist.OUTPUT))
+                value.set_line_wrap(True)
                 value.set_property('xalign', 0.0)
                 self.displayList[key] = value
                 self.entries[sum] = key
@@ -254,6 +255,7 @@ class Review(gtk.VBox):
                 label = gtk.Label(treeStore.get_value(updateIter, self.checklist.OUTPUT))
                 label.set_use_markup(True)
                 label.set_property('xalign', 0.0)
+                label.set_line_wrap(True)
                 self.displayList[key] = label
                 if key[0] == 'Needs-Reviewing' or key[0] == 'Not-Applicable':
                     self.reviewBoxes['Notes'].add(label)
