@@ -19,6 +19,10 @@ class Properties:
         self.SRPM = SRPM
         # self.bugzillaURL
         # self.bugzillaNumber
+        # Directories last searched (for FileSelect Dialogs)
+        self.lastSRPMDir = './'
+        self.lastSaveFileDir = './'
+        self.lastReviewDir = './'
         pass
 
     def dialog(self):

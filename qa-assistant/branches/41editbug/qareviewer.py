@@ -16,7 +16,7 @@ __revision__ = "$Rev$"
 
 import libxml2
 import gtk
-import sys
+import sys, os
 
 import SRPM
 import checklist
