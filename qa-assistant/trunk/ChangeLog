@@ -1,3 +1,53 @@
+2004-10-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r129    
+    * review.py: Minor reformatting to fit in 80 columns.
+    * qa-assistant.schemas: Rename auto-display-failed key to no-auto-display
+      so that having it unset or the default value of false triggers the
+      auto-displaying of negative entries.  This is because gconf defaults to
+      false when a bool is unset.
+    * checklist.py:
+      - Remove addPaths as we don't use it anymore.
+      - New Private var __GCONFPREFIX for the app prefix.
+      - Comment variables in __init__().
+      - New self.colors dict to keep track of thecolors we're setting via
+        gconf.
+      - Load the colors from gconf.
+      - Decide whether to autoDisplay on negative reviews from gconf.
+      - Start moving from using self.set to gtk.TreeStore.set when we can as
+        self.set is much more expensive than gtk.TreeStore.set.
+      - Change all OUTPUT strings from None to empty string.
+      - Put pangoize into self.set().  Remove it from all other calls.
+      - Pangoize a string when it goes into OUTPUT, not into OUTPUTLIST.
+      - Get rid of do_resolution_changed's print.  We may get rid of this
+        altogether.  I think everything we'd put in here is now being done
+        in the set() method.
+      - set() method reworked to assure resolution happens before OUTPUT and
+        pangoize happens before the set is done.  The whole set() method
+        feels significantly slower than gtk.TreeStore.set().  We need to
+        use the base class method when possible instead of self.set().
+      - New function: __change_auto_display() to handle auto display on fail
+        being changed in gconf.
+      - New function: __init_colors() to initialize colors from gconf.
+      - New function: __color_changed() to change colors when changed in
+        gconf.
+      - New function: __change_color() to change the colors of displayed
+        OUTPUT strings when the colors are changed in gconf.
+    * qareviewer.py: Change references to last*Dir from using a properties
+      class to storing as a variable in the QAReviewer class.  Preparatory
+      to getting rid of Properties altogether.
+    * PREFERENCES: Go into more detail abo9ut what needs to be done and check
+      off the ones that have been finished.
+    * NEWS: Add gconf note.  Move cut 'n paste to 0.4.1.
+    * genericqa.py: Remove call to pangoize.
+    * treetips.py: Use tuples in except clauses to correct an uncaught syntax
+      error.
+    * ChangeLog: Update to r123.
+    * README: Note requirement for pygnome-gconf 2.0.0 or higher.
+    * checkview.py: Change checklist and cl local variables to checkModel in
+      display_toggle() and output_edited() to not conflict with checklist
+      module.
+    * qa-assistant.spec.in: Correct a syntax error in the spec and update the
+      changelog.
+    
 2004-10-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r123    
     * qa-assistant.schemas: First cut at encoding preferences into a GConf
       schema.

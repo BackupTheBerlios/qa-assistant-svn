@@ -23,6 +23,7 @@ visible but not end-user visible:
 * Support for automated tests embedded within the XML files.
 * Made the checklist code more generic.  We are no longer so strictly tied to
   Quality Assurance of SRPM files.
+* The Review widget is now much nicer to look at.
 * Now using gconf for saving preferences.
 
 Version 0.4.1

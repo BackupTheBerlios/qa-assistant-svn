@@ -21,6 +21,8 @@ Programming Errors
 ------------------
 * Using the save function (rather than save_as) doesn't seem to be saving the
   file.
+* Use gtk.TreeStore.set instead of self.set in checklist.  Significant
+  performance boost.
 * Need to hook the properties into the checklist.  Right now things are just
   one step beyond a placeholder.
 * The new CheckView Code is not interacting with qareviewer quite right.

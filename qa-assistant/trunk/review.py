@@ -40,17 +40,19 @@ class Review(gtk.VBox):
         self.reviewBoxes = {}
 
         self.header = gtk.Label()
-        self.passTitle = gtk.Label('Good:')
-        self.failTitle = gtk.Label('Needswork:')
-        self.minorTitle = gtk.Label('Minor:')
-        self.notesTitle = gtk.Label('Notes:')
-        self.footer = gtk.Label()
-
         self.add(self.header)
-        self.add(self.passTitle)
-        self.add(self.failTitle)
-        self.add(self.minorTitle)
-        self.add(self.notesTitle)
+
+        self.reviewTitles = {}
+        for titles in ('Pass', 'Fail', 'Non-Blocker', 'Notes'):
+            self.reviewTitles[titles] = gtk.Label()
+            self.reviewTitles[titles].set_property('xalign', 0.0)
+            self.add(self.reviewTitles[titles])
+        self.reviewTitles['Pass'].set_text('Good:')
+        self.reviewTitles['Fail'].set_text('Needswork:')
+        self.reviewTitles['Non-Blocker'].set_text('Minor:')
+        self.reviewTitles['Notes'].set_text('Notes:')
+
+        self.footer = gtk.Label()
         self.add(self.footer)
 
         # Set display properties on the widgets
@@ -58,10 +60,6 @@ class Review(gtk.VBox):
         self.footer.set_selectable(True)
         self.set_property('homogeneous', False)
         self.header.set_property('xalign', 0.0)
-        self.passTitle.set_property('xalign', 0.0)
-        self.failTitle.set_property('xalign', 0.0)
-        self.minorTitle.set_property('xalign', 0.0)
-        self.notesTitle.set_property('xalign', 0.0)
         self.footer.set_property('xalign', 0.0)
 
         # Copy data from the checklist into internal structures and add to
@@ -73,52 +71,38 @@ class Review(gtk.VBox):
         """Display the new widget"""
         self.show_all()
 
-    ## FIXME: This definitly doesn't work.
-    # Part of the problem is resolution is now a property on the CheckList
-    # Another piece of the problem is the hashes are properties in the
-    # CheckList's properties structure.
-    # I want to make these available through some sort of header method but I
-    # haven't designed that yet.
-    # - The remainder of the problem is easy, simply translating from the old
-    # gtk.ListStores into our internal lists.
     def publish(self, filename):
-        """Write the review to a file."""
+        '''Write the review to a file.
 
-        buffer = [self.resolution.get_text()+"\n"]
-        resIter = self.list.get_iter_first()
-        goodList = []
-        workList = []
-        minorList = []
-        notesList = []
-        while resIter:
-            if self.list.get_value(resIter, self.__DISPLAY):
-                res = self.list.get_value(resIter, self.__RESOLUTION)
-                value = self.list.get_value(resIter, self.__OUTPUT)
-                if value != None:
+        Arguments:
+        :filename: filename to write to.
+
+        Write the review out to a file.
+        '''
+
+        ## FIXME: Get header information from the checklist
+        # I want to make these available through some sort of header method
+        # on the checklist but I haven't designed that yet.
+
+        ### FIXME: This is probably going to change in favor of a checklist
+        # header method.  As it currently stands, it still needs to be
+        # translated into PUBLISH +1, NEEDSWORK, etc.
+        outBuf = [self.checklist.resolution + '\n']
+        # Loop through the review areas:
+        for box in ('Pass', 'Fail', 'Non-Blocker', 'Notes'):
+            reviewBox = self.reviewBoxes[box]
+            tempOutBuf = ''
+            # Add items from this review category to the output buffer.
+            for entryLabel in reviewBox.get_children():
+                value = entryLabel.get_text()
+                if value:
                     value = self.checklist.unpangoize_output(value)
-                    value = self.textwrap.fill(value) + '\n'
-                    if res == 'Pass':
-                        goodList.append(value)
-                    elif res == 'Fail':
-                        workList.append(value)
-                    elif res == 'Non-Blocker':
-                        minorList.append(value)
-                    elif res == 'Not-Applicable' or res == 'Needs-Reviewing':
-                        notesList.append(value)
-            resIter = self.list.iter_next(resIter)
-            
-        buffer+=("\n", "MD5Sums:\n", self.hashes.get_text())
-        if len(goodList) > 0:
-            buffer+=["\n", "Good:\n"] + goodList
-        if len(workList) > 0:
-            buffer+=["\n", "Needswork:\n"] + workList
-        if len(minorList) > 0:
-            buffer+=["\n", "Minor:\n"] + minorList
-        if len(notesList) > 0:
-            buffer+=["\n", "Notes:\n"] + notesList
+                    tempOutBuf += self.textwrap.fill(value) + '\n'
+            if tempOutBuf:
+                outBuf += self.reviewTitles[box].get_text() + '\n' + tempOutBuf
 
         outfile = file(filename, 'w')
-        outfile.writelines(buffer)
+        outfile.writelines(outBuf)
         outfile.close()
 
     def submit(self):

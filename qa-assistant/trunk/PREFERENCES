@@ -12,16 +12,22 @@ Preferences are set on the app.  They could be implemented as GConf
 variables.
 
 Person
+(Probably happen in the main program.)
 * Whether to sign [s]
 * Signing identity [s]
 
 Display
+(Happen in the checklist.)
 * Automatically display failed reviews [s] [c]
 * Text colours [s] [c]
+
+  (These can probably be implemented in the checkview and cause settings
+  to change on the checkview's treetip.)
 * Tooltip DESCRIPTION enable/disable [s]
 * Tooltip timeout [s]
 
 Files
+(Probably happen in the main program)
 * Directory to unrpm into [s]
 
 Status Key:

@@ -31,7 +31,7 @@ class GenericQA(gtk.Menu):
         """Publish a review to a file."""
  
         # Check that the review is in a completed state
-        if self.app.reviewView.resolution.get_text() == 'Incomplete Review':
+        if self.app.checklist.resolution == 'Needs-Reviewing':
             msgDialog = gtk.MessageDialog(self.app.ReviewerWindow,
                     gtk.DIALOG_DESTROY_WITH_PARENT,
                     gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
