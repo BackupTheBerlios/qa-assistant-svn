@@ -231,7 +231,7 @@ class SaveFile:
             if state.name == 'state':
                 resName = state.prop('name')
                 entry.reslist.append(resName)
-                entry.outlist[resName] = newList.colorize_output(resName,
+                entry.outlist[resName] = newList.pangoize_output(resName,
                             state.content)
                 if resName == entry.res:
                     entry.out = entry.outlist[resName]
@@ -264,16 +264,11 @@ class SaveFile:
             resolutions = tree.get_value(iter, checklist.RESLIST)
             if resolutions:
                 outputs = tree.get_value(iter, checklist.OUTPUTLIST)
-                unspan = re.compile(r'([^<]*)(<span[^>]*>)?([^<]*)(</span>)?(.*)')
                 states = entry.newChild(None, 'states', None)
             for res in resolutions:
                 content = outputs[res]
                 if content:
-                    content = unspan.match(content).expand(r'\g<1>\g<3>\g<5>')
-                    # Unescape special chars
-                    content = string.replace(content, '&amp;', '&')
-                    content = string.replace(content, '&lt;', '<')
-                    content = string.replace(content, '&gt;', '>')
+                    content = self.checklist.unpangoize_output(content)
                 state = states.newChild(None, 'state', None)
                 state.setProp('name', res)
                 state.addContent(content)

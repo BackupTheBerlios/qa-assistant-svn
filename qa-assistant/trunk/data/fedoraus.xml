@@ -1,7 +1,21 @@
 <?xml version='1.0' ?>
-<!DOCTYPE checklist PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.2//EN" "http://qa-assistant.sf.net/dtds/checklist/0.2/checklist.dtd">
-<checklist version='0.2' name="fedoraus" revision="0.2" type="SRPM">
-  <category name='Security of the build system'>
+<!DOCTYPE checklist PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.3//EN" "http://qa-assistant.sf.net/dtds/checklist/0.3/checklist.dtd">
+<checklist version="0.3" name="fedoraus" revision="0.3">
+  <properties>
+    <property name="SRPMfile" type="string"></property>
+    <property name="SRPMMD5sum" type="md5sum"></property>
+    <property name="ticketURL" type="string"></property>
+  </properties>
+  <functions>
+    <function>from_srpm</function>
+    <function>from_ticket</function>
+    <function>separator</function>
+    <function>add_item</function>
+    <function>separator</function>
+    <function>publish</function>
+    <function>submit_ticket</function>
+  </functions>
+  <category name="Security of the build system">
     <description>Although many of the checklist items relate to security, the
       ones listed in this section are important to check before you proceed
       to the other checklist items.  These checks help to prevent compromise
@@ -16,6 +30,16 @@
         <state name="Pass">Package signature verified: [ID] [Name]</state>
         <state name="Fail">Missing or Bad GPG Signature</state>
       </states>
+      <test>
+        <argument>SRPMfile</argument>
+        <code language="sh">
+# If any of the following tests succeed we can exit with success
+# Need to parse the commands to create a suitable output string
+#fedora-rpmchecksig $1
+#rpm --checksig $1
+#tgpg $1
+        </code>
+      </test>
       <description>The SRPM must be signed by the packager.  This gives you
         an association to a gpg key which you can then use in tracking down
         who packaged the code.  It's even better if the gpg key is known to

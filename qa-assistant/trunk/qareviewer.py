@@ -15,12 +15,15 @@ __programHumanName__ = "QA Assistant"
 __version__ = "0.4"
 __revision__ = "$Rev$"
 
+import sys
+import os
 import libxml2
-import gtk, gnome
-import sys, os
+import gtk
+import gnome
 
 import checklist
 import gnomeglade
+import error
 from properties import Properties
 from optionrenderer import OptionCellRenderer
 from review import Review
@@ -164,7 +167,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.exit(1)
         try:
             self.checklist = checklist.CheckList(checkFile)
-        except (libxml2.parserError, libxml2.treeError, checklist.Error), msg:
+        except (libxml2.parserError, libxml2.treeError, error.InvalidChecklist), msg:
             ### FIXME: When we can select checklists via property, we need to
             # print error and recover.
             sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
@@ -172,7 +175,11 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         self.checkView.set_model(self.checklist)
 
-        if self.checklist.type == 'SRPM':
+        ### FIXME: We need to assemble the qamenu from the list of requested
+        # checklist.functions instead of from the type variable.  Currently
+        # breaking it totally by making it always pretend to have a SRPM.
+        #if self.checklist.type == 'SRPM':
+        if True:
             from srpmqa import SRPMQA
             qamenu = SRPMQA(self)
         else:
@@ -295,10 +302,12 @@ class QAReviewer(gnomeglade.GnomeApp):
         iter = self.checklist.get_iter_from_string(row)
         path = self.checklist.get_path(iter)
         name = self.checklist.get_value(iter, checklist.RESOLUTION)
-        newValue = self.checklist.colorize_output(name, newValue)
+        ### FIXME:: May be changed into set_output_string(iter, res, output)
+        newValue = self.checklist.pangoize_output(name, newValue)
 
         outDict = self.checklist.get_value(iter, checklist.OUTPUTLIST)
         outDict[name] = newValue
+        ### FIXME: ... but is it worthwhile?
         self.checklist.set(iter, checklist.OUTPUT, newValue)
         self.checklist.row_changed(path, iter)
 

@@ -14,13 +14,13 @@ class Error(Exception):
     pass
     
 class DuplicateItem(Error):
-    '''An item duplicates a value already present.'''
+    '''An item duplicates a value already present in a checklist.'''
     pass
     
 class InvalidChecklist(Error):
     '''The given checklist is invalid for some reason.'''
     pass
     
-class InvalidSaveFile(Error):
-    '''The given savefile is invalid for some reason.'''
+class CannotAccessFile(Error):
+    '''We were unable to access the given filename.'''
     pass

@@ -1,36 +1,179 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!--
  Identifiers:
- PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.2//EN"
- SYSTEM "http://qa-assistant.sf.net/dtds/checklist/0.2/checklist.dtd"
+ PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.3//EN"
+ SYSTEM "http://qa-assistant.sf.net/checklist/0.3/checklist.dtd"
 -->
+
+<!-- Valid resolutions for a checklist item. -->
 <!ENTITY % Resolutions
   '(Needs-Reviewing|Pass|Fail|Non-Blocker|Not-Applicable)'
 >
-<!ENTITY % ChecklistType
-  '(SRPM|generic)'
->
+
+<!-- True or False -->
 <!ENTITY % Boolean
   '(true|false)'
 >
-<!ELEMENT checklist (category+)>
+
+<!-- Currently recognized languages to write tests in -->
+<!ENTITY % ExtensionLangs
+  '(python|sh)'
+>
+
+<!-- Types available for properties.  All properties need to be of one of
+     these types.
+  -->
+<!ENTITY % PropType
+  '(string|URL|number|md5sum|sha1sum)'
+>
+
+<!-- Top level element
+
+     Attributes:
+     version: Version of the checklist DTD
+     name: Name of this checklist
+     revision: Revision of this checklist
+     type: Type of this checklist
+  -->
+<!ELEMENT checklist (base?, properties?, functions, category+)>
   <!ATTLIST checklist
-    version CDATA #FIXED '0.2'
+    version CDATA #FIXED '0.3'
     name CDATA #REQUIRED
     revision CDATA #REQUIRED
-    type %ChecklistType; "generic"
   >
+  <!-- Information on the base checklist used to create this one
+  
+       Attributes:
+       name: Name of the base checklist
+       revision: Revision of the base checklist
+
+       Content: Filename of the base checklist (Generally does not include
+                  full path info at this time.)
+    -->
+  <!ELEMENT base (#PCDATA)>
+    <!ATTLIST base
+      name CDATA #REQUIRED
+      revision CDATA #REQUIRED
+    >
+  
+  <!-- Properties associated with the checklist such as filename,
+       Issue tracking number, etc. -->
+  <!ELEMENT properties (property+)>
+    <!-- An individual property set on the checklist.
+
+         Attributes:
+         name: The name of the property
+         type: The type of the property
+
+         Content: The property's value.  The application should validate
+                    the property's value against its type.
+      -->
+    <!ELEMENT property (#PCDATA)>
+      <!ATTLIST property
+        name CDATA #REQUIRED
+        type %PropType; #REQUIRED
+      >
+
+  <!-- List of functions this checklist requests from the checklist -->
+  <!ELEMENT functions (function+)>
+
+    <!-- Function requested by the program.
+         Content: The name of the function.  It's possible that we should
+                    create a list of values that this can be.  But I don't
+                    believe it's possible to effectively use such a list in
+                    a DTD.  XML Schemas might allow this, though.
+      -->
+    <!ELEMENT function (#PCDATA)>
+ 
+  <!-- Metainfo for a group of entries.
+    
+        Attributes:
+        name: Name for the category.
+    -->
   <!ELEMENT category (description, entry+)>
     <!ATTLIST category
       name CDATA #REQUIRED
     >
+    
+    <!-- Long description of the entry or category.  For categories, this
+         holds an overview of the category.  For entries, it has instructions
+         for evaluating an entry and filling it out.
+
+         Content: The description text.
+      -->
     <!ELEMENT description (#PCDATA)>
-    <!ELEMENT entry (states, description)>
+
+    <!-- A checklist item to fill out.
+    
+         Attributes:
+         name: The name of the entry.  Should be a *brief* description and
+                 unique.
+         display: Whether to display the entry or not.
+         state: state to set the entry to initially.
+      -->
+    <!ELEMENT entry (states, test?, description)>
       <!ATTLIST entry
         name CDATA #REQUIRED
-	display %Boolean; "false"
+        display %Boolean; "false"
+        state %Resolutions; "Needs-Reviewing"
       >
+      
+      <!-- An automated test that may be run to fill in the value for this
+           checklist item.
+        -->
+      <!ELEMENT test (argument*, code)>
+
+        <!-- An argument for the test.  The program is responsible for passing
+             the value of the argument to the test.  The arguments will be
+             passed in the order in which they are specified here.
+             
+             Contents: The name of one of the properties listed in the XML
+                         file.  The program can test that the named argument
+                         is a valid property but I don't believe it's possible
+                         even with Schemas to validate within the XML.
+          -->
+        <!ELEMENT argument (#PCDATA)>
+
+        <!-- The test itself.
+              
+             Attributes:
+             language: The extension language to use.
+             minlangver: Minimum version of the language which is required.
+             maxlangver: Maximum version of the language allowed.
+
+             Content: The test must follow the following conventions:
+             * Takes the arguments listed above on the commandline in the order
+               they are listed.
+             * Return value keys to the status to set the checklist item to:
+                 0 Pass
+                 1 Fail
+                 2 Non-Blocker
+                 3 Not-Applicable
+                 4 Needs-Reviewing
+               4 Should be used when the test results do not imply anything
+                 definite about the status of the code.
+             * Anything printed to stdout will be used as the output string
+               for the test.
+             * As this is the first iteration of the testing code, there are
+               sure to be future refinements to these requirements.
+          -->
+        <!ELEMENT code (#PCDATA)>
+          <!ATTLIST code
+            language %ExtensionLangs; "sh"
+            minlangver CDATA #IMPLIED
+            maxlangver CDATA #IMPLIED
+          >
+         
+      <!-- Allowable states for this checklist item. -->
       <!ELEMENT states (state+)>
+        <!-- A state tht the checklist item may be in.
+        
+             Attributes:
+             name: Name of the state.  Must be one of the valid resolutions.
+             
+             Content: The output string to print when the entry is in this
+                        state.
+          -->
         <!ELEMENT state (#PCDATA)>
           <!ATTLIST state
             name %Resolutions; #REQUIRED

@@ -7,101 +7,185 @@
 # structures.
 # Id: $Id$
 '''
-Class file to load a description of a checklist into internal structures.
+Class file to load a description of a checklist into python structures.
 '''
 
-import libxml2, string
-import gtk, gobject
+import string
+import re
+
+import libxml2
+import gtk
+import gobject
 
 import error
-
-_checklistFileVersion_='0.2'
 
 # TreeStore entries displayed on the screen
 ISITEM=0     # Entry is an item as opposed to category
 DISPLAY=1    # Write the output to the review
-MODIFIED=2   # Boolean holding whether the value has been modified
-SUMMARY=3    # Unique title for the entry
-DESC=4       # Long description of what to do to verify the entry
-RESOLUTION=5 # Current resolution
-OUTPUT=6     # Current resolution's output
-RESLIST=7    # Python list of possible resolutions
-OUTPUTLIST=8 # Python hash of outputs keyed to resolution
-
-class Error(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-    def __str__(self):
-        return repr(self.msg)
-
-class duplicateItemError(Error):
-    pass
+SUMMARY=2    # Unique title for the entry
+DESC=3       # Long description of what to do to verify the entry
+RESOLUTION=4 # Current resolution
+OUTPUT=5     # Current resolution's output
+RESLIST=6    # Python list of possible resolutions
+OUTPUTLIST=7 # Python hash of outputs keyed to resolution
+TEST=8       # Python class that holds any automated test information
 
 class CheckList (gtk.TreeStore):
     '''Holds the data associated with the checklist.
+
+    Attributes:
+    name -- Checklist's name
+    revision -- Revision of the checklist file
+    type -- Type of the checklist file
+    publicID -- Public identifier for the checklist's XML DTD
+    canonicalURL -- Canonical URL for the checklist's XML DT
+    entries -- Mapping of names to iters of checklist entries
+    customItemsIter -- gtk.TreeIter pointing to the category we are adding
+                       custom items to
+    addPaths -- Dictionay holding paths we're in the process of adding to the
+                tree until we have a key value so we can add it to the
+                `entries` lookup hash
+
+    Private Attributes:
+    __unspan -- Regex to remove <span> pango tags from a string.  Saved so the
+                code doesn't have to recompile the regex every time.
     
-    Data is held in a gtk TreeModel.  Saving the state of the checklist
-    should consist of saving the data in the TreeModel along with a reference
+    Special Purpose Attributes (These should translate into a properties map
+    or similar in the future):
+    SRPM -- SRPM object having information about the SRPM we are reviewing
+    ticketURL -- URL to get to the ticket for this checklist
+    
+    Obsolete Attributes (Certain functionality that is being phased out
+    depends on these.  As soon as the functionality goes, these can go.)
+    baseFilename -- File that the checklist was started from.  Goes away when
+                    we unify savefile and checklist if we don't find another
+                    use for it.  (Currently saved in the savefile.  Need to
+                    remove.)
+    
+    The CheckList class is a subclass of gtk.TreeModel and has all the methods
+    that the gtk.TreeModel class has for manipulating the data it save.  It
+    overrides the constructor to make a much more directed model that
+    implements one data set.  Saving the state of the checklist's data
+    saves the modified data in the TreeModel along with a reference
     to the checklist we're operating upon.
     '''
 
+    # checklist identifying strings
+    formatVersion='0.3'
+
+    publicID = '-//BaderWare//DTD QA Assistant Checklist File ' + formatVersion + '//EN'
+    canonicalURL = 'http://qa-assistant.sf.net/dtds/checklist/' + formatVersion + '/checklist.dtd'
+    
     class __Entry:
         '''Private class.  Holds entry information until ready to output.'''
+    class __Test:
+        '''Information related to automated tests embedded in the XML files.
+        
+        This class is meant to be invoked by the CheckList class.  It will be
+        wrapped in CheckList methods `run_test(SUMMARY)` and `run_all_tests()`
+
+        It won't be used directly by other programs because it is assumed that
+        getting properties from the CheckList into the Test would be harder.
+        If this is not the case, this class may become public and outside code
+        may use its interface directly.
+        '''
+        def run():
+            '''
+    
+            Returns: Tuple of Resolution string and Output for the string.  The
+                     output may be None.
+            '''
+            pass
 
     def __init__(self, path):
+        ''' Create a new CheckList
 
+        Attributes:
+        path -- full pathname of the checklist file we're implementing.
+
+        Creates a new CheckList.
+        '''
+        self.filename = path
+        self.functions = []
+        self.properties = {}
         self.customItemsIter = None
         self.addPaths = {}
+        self.__unspan = re.compile(r'([^<]*)(<span[^>]*>)?([^<]*)(</span>)?(.*)')
         libxml2.registerErrorHandler(self.__no_display_parse_error, None)
         ctxt = libxml2.newParserCtxt()
         checkFile = ctxt.ctxtReadFile(path, None, libxml2.XML_PARSE_DTDVALID)
 
         if ctxt.isValid() == False:
-            raise error.invalidChecklist('File does not validate against ' \
+            raise error.InvalidChecklist('File does not validate against ' \
                     'the checklist DTD')
 
         root = checkFile.getRootElement()
         if root.name != 'checklist':
-            raise error.invalidChecklist('File is not a valid checklist ' \
+            raise error.InvalidChecklist('File is not a valid checklist ' \
                     'policy file')
-        if root.prop('version') != _checklistFileVersion_:
-            raise error.invalidChecklist('Checklist file is not a known ' \
+        if root.prop('version') != self.formatVersion:
+            raise error.InvalidChecklist('Checklist file is not a known ' \
                     'version')
-        
-        # Extract the type from the checklist tag
+       
+        # Extract the name and revision of the CheckList
         self.name = root.prop('name')
         if not self.name:
-            raise error.invalidChecklist('Checklist file does not specify ' \
+            raise error.InvalidChecklist('Checklist file does not specify ' \
                     'a name for itself')
         self.revision = root.prop('revision') or '0'
-        self.type = root.prop('type') or 'generic'
 
-        # Store the checklist into a GtkTreeModel
+        # Create GtkTreeModel struct to store info in.
         gtk.TreeStore.__init__(self, gobject.TYPE_BOOLEAN,
-                gobject.TYPE_BOOLEAN,
                 gobject.TYPE_BOOLEAN,
                 gobject.TYPE_STRING,
                 gobject.TYPE_STRING,
                 gobject.TYPE_STRING,
                 gobject.TYPE_STRING,
                 gobject.TYPE_PYOBJECT,
+                gobject.TYPE_PYOBJECT,
                 gobject.TYPE_PYOBJECT)
+
+        base = root.xpathEval2('/checklist/base')
+        if base:
+            # We are loading a savefile.  Just load the base info.
+            self.baseName = base[0].prop('name')
+            self.baseRevision = base[0].prop('revision')
+            self.baseFilename = base[0].content
+        else:
+            # We are loading an original checklist definiton.  Set its values
+            # as the base and set the CheckList info to good values.
+            self.baseName = self.name
+            self.baseRevision = self.revision
+            self.baseFilename = path
+            self.filename = None
+            self.name += ' savefile'
+            self.revision = 0
+        
+        # Extract properties from the CheckList file
+        properties = root.xpathEval2('/checklist/properties')
+        for p in properties:
+            self.properties[p.prop('name')] = p.content
+
+        # Extract functions for the QA menu
+        functions = root.xpathEval2('/checklist/functions')
+        for function in functions:
+            self.functions.append(function.content)
 
         # Record each category as a toplevel in the tree
         categories = root.xpathEval2('/checklist/category')
         self.entries = {}
         for category in categories:
-            iter = self.append(None)
-            self.set(iter,
+            newCat = self.append(None)
+            self.set(newCat,
                     ISITEM, False,
-                    MODIFIED, False,
                     RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
                     RESOLUTION, 'Needs-Reviewing',
                     OUTPUT, None,
                     OUTPUTLIST, {'Needs-Reviewing':None,
                                  'Pass':None, 'Fail':None},
-                    SUMMARY, category.prop('name'))
-            self.entries[category.prop('name')] = iter
+                    SUMMARY, category.prop('name'),
+                    TEST, None)
+            self.entries[category.prop('name')] = newCat
 
             # Entries are subheadings
             node = category.children
@@ -109,15 +193,15 @@ class CheckList (gtk.TreeStore):
                 if node.name == 'description':
                     # Set DESCRIPTION of the heading
                     desc = string.join(string.split(node.content))
-                    self.set(iter, DESC, desc)
+                    self.set(newCat, DESC, desc)
                 elif node.name == 'entry':
                     entry = self.__xml_to_entry(node)
-                    entryIter=self.append(iter)
+                    entryIter=self.append(newCat)
                     self.set(entryIter,
                             ISITEM, True,
-                            MODIFIED, False,
                             DISPLAY, entry.display,
                             SUMMARY, entry.name,
+                            TEST, entry.test,
                             DESC, entry.desc)
                     self.entries[entry.name] = entryIter
                     
@@ -126,7 +210,7 @@ class CheckList (gtk.TreeStore):
                     resolutionList=['Needs-Reviewing']
                     for i in range(len(entry.states)):
                         name = entry.states[i]['name']
-                        output = self.colorize_output(name,
+                        output = self.pangoize_output(name,
                                 entry.states[i]['output'])
                         resolutions[name] = output
                         if name != 'Needs-Reviewing':
@@ -176,7 +260,7 @@ class CheckList (gtk.TreeStore):
 
         # Make sure this entry isn't already listed.
         if self.entries.has_key(summary):
-            raise duplicateItemError, ('%s is already present in the checklist.' % (self.entries[summary]))
+            raise error.DuplicateItemError, ('%s is already present in the checklist.' % (self.entries[summary]))
 
         # Set up all the default values.
         if item == None:
@@ -204,16 +288,15 @@ class CheckList (gtk.TreeStore):
                 # Create the 'Custom Checklist Items' category
                 self.set(self.customItemsIter,
                         SUMMARY, 'Custom Checklist Items',
-                        MODIFIED, True,
                         ISITEM, False,
                         RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
                         RESOLUTION, 'Needs-Reviewing',
                         OUTPUT, None,
                         OUTPUTLIST, {'Needs-Reviewing':None,
                                      'Pass':None, 'Fail':None},
-                                     DESC, "Review items that you have " \
-                                     "comments on even though they aren't " \
-                                     "on the standard checklist.")
+                        DESC, "Review items that you have comments on even " \
+                              "though they aren't on the standard checklist.",
+                        TEST, None)
                 newItem = self.append(self.customItemsIter)
         
         # Set up the new item
@@ -222,25 +305,112 @@ class CheckList (gtk.TreeStore):
                 DESC, desc,
                 ISITEM, item,
                 DISPLAY, display,
-                MODIFIED, True,
                 RESOLUTION, resolution,
                 OUTPUT, output,
                 RESLIST, resList,
-                OUTPUTLIST, outputList)
+                OUTPUTLIST, outputList,
+                TEST, None)
         return newItem
+
+    def publish(self, filename=None):
+        '''Saves the current state of the `CheckList` into a savefile.
         
-    def colorize_output(self, resolution, output):
-        """Colorize the output based on the resolution.
+        Attributes:
+        filename -- File to save the checklist in. (default self.filename)
+        
+        Saves the CheckList information into the filename.
+        '''
+        
+        self.filename = filename or self.filename
+        if not self.filename:
+            raise error.CannotAccessFile('No filename given to save to.')
+        # Create the xml DOM conforming to our save DTD
+        doc = libxml2.newDoc('1.0')
+        doc.createIntSubset('checklist', self.publicID,
+                self.canonicalURL)
+        
+        # Output root node
+        root = doc.newChild(None, 'checklist', None)
+        root.setProp('version', self.formatVersion)
+        root.setProp('name', self.name)
+        self.revision += 1
+        root.setProp('revision', self.revision)
+        
+        # Output base checklist information
+        node = root.newTextChild(None, 'base', self.baseFilename)
+        node.setProp('name', self.baseName)
+        node.setProp('revision', self.baseRevision)
+       
+        # Output properties we're concerned with
+        properties = root.newChild(None, 'properties', None)
+        for prop in self.properties.keys():
+            node = properties.newTextChild(None, 'property',
+                    self.properties[prop])
+            node.setProp('name', prop)
+
+        # Output functions
+        functions = root.newChild(None, 'functions', None)
+        for func in self.functions.keys():
+            node = functions.newChild(None, 'function', self.functions[func])
+        
+        # Output entries
+        self.foreach(self.__create_entry, root)
+
+        # Write the file
+        doc.saveFormatFileEnc(filename, 'UTF-8', True)
+
+        doc.freeDoc()
+
+    ### FIXME: Function not used anywhere.  Consider removing it.
+    def set_output_string(self, key, resolution, output):
+        '''Set the output string for the key and resolution.
+        
+        Arguments:
+        key -- summary that is used to key the entries
+        resolution -- resolution state this output applies to
+        output -- output string to set the entry:resolution to
+
+        `set_output_string` takes care of setting the output in the
+        `CheckList` including formatting it for proper pango display.
+        '''
+       
+        output = self.pangoize_output(resolution, output)
+        entryIter = self.entries[key]
+        outputList = self.get_value(entryIter, OUTPUTLIST)
+        outputList[key] = output
+    
+    def unpangoize_output(self, output):
+        '''Removes pango tags and unescapes pango special chars from output.
+
+        Arguments:
+        output -- output string to remove pango from.
+
+        This does the opposite of pangoize_output.  It removes pango span
+        tags which provide colorization to the output strings and replaces
+        escaped pango special chars with their ASCII character.
+
+        Returns: string with pango tags removed and special chars resotred.
+        '''
+        
+        # Remove the span tags
+        self.__unspan.match(output).expand(r'\g<1>\g<3>\g<5>')
+        # Unescape special chars
+        output = string.replace(output, '&amp;', '&')
+        output = string.replace(output, '&lt;', '<')
+        output = string.replace(output, '&gt;', '>')
+
+        return output
+
+    def pangoize_output(self, resolution, output):
+        '''Colorize the output based on the resolution.
         
         Arguments:
         resolution -- state of review that the output string applies to.
         output -- the output string to colorize.
-        """
-        ### FIXME:
-        # escaping really goes one level up but there are currently several
-        # external functions that call colorize output.  In the future we need
-        # to create a function one level up to change output strings and make
-        # colorize_output a private method.
+
+        Returns: the modified output string.
+        '''
+
         output = string.replace(output, '&', '&amp;')
         output = string.replace(output, '<', '&lt;')
         output = string.replace(output, '>', '&gt;')
@@ -262,37 +432,37 @@ class CheckList (gtk.TreeStore):
                     output + '</span>')
         return output
 
-    def __modified_row(self, tree, path, iter):
-        """Maintain internal values whenever a row is modified.
+    #
+    # Helpers to keep the checklist current.
+    #
 
-        The tree needs to set the modified flag on changed rows so that they
-        are saved properly.
-        """
+    def __modified_row(self, tree, path, entryIter):
+        '''Maintain internal values whenever a row is modified.
 
-        if not tree.get_value(iter, MODIFIED):
-            tree.set(iter, MODIFIED, True)
-        if self.addPaths.has_key(path) and tree.get_value(iter, SUMMARY):
-            name = tree.get_value(iter, SUMMARY)
-            self.entries[name] = iter
+        Add new pending checklist items.  Had to be deferred by `__added_row`
+        because the SUMMARY value might not be the first thing added.
+        '''
+
+        if self.addPaths.has_key(path) and tree.get_value(entryIter, SUMMARY):
+            name = tree.get_value(entryIter, SUMMARY)
+            self.entries[name] = entryIter
             del self.addPaths[path]
-            
 
-    def __added_row(self, tree, path, iter):
+    def __added_row(self, tree, path, entryIter):
         """Maintain some internal values whenever a row is added.
       
-        The tree needs to set the modified value on new entries so they get
-        saved properly.  We also need to list the path to the item as needing
-        to be entered into  self.entries when the summary value becomes
-        available.  self.entries allows fast checking for the existence of
-        an entry.
+        List the path to the item as needing to be entered into `self.entries`
+        when the summary value becomes available.  `self.entries` allows fast
+        checking for the existence of an entry.
         """
 
-        # Set the MODIFIED flag
-        tree.set(iter, MODIFIED, True)
-
         # List the path as needing to be entered into our lookup hash.
-        self.addPaths[tree.get_path(iter)] = True
+        self.addPaths[tree.get_path(entryIter)] = True
 
+    #
+    # Helpers to read a checklist
+    #
+    
     def __no_display_parse_error(self, ctx, str):
         """Disable Displaying parser errors."""
         pass
@@ -306,6 +476,7 @@ class CheckList (gtk.TreeStore):
         Returns: an entry data structure.
         """
         entry=self.__Entry()
+        entry.test = None
 
         entry.name = node.prop('name')
         if node.prop('display') == 'true':
@@ -326,7 +497,7 @@ class CheckList (gtk.TreeStore):
                         entry.states[n]['output'] = output
                         if entry.states[n]['output'].strip() == '':
                             entry.states[n]['output'] = entry.name + ': ' + state.prop('name')
-                        n+=1
+                        n += 1
                     else:
                         # DTD validation should catch things that aren't
                         # supposed to end up here.
@@ -335,10 +506,102 @@ class CheckList (gtk.TreeStore):
             elif fields.name == 'description':
                 desc = string.join(string.split(fields.content))
                 entry.desc = desc
+            elif fields.name == 'test':
+                testFields = fields.children
+                entry.test = self.__Test()
+                entry.test.arguments = []
+                while testFields:
+                    if testFields.name == 'argument':
+                        argument = testFields.content
+                        if not self.properties.has_key(argument):
+                            # Argument was invalid substitute this test for
+                            # the real one so the user can be alerted to the
+                            # fact that the test did not run correctly.
+                            entry.test.code = '''import sys
+print 'Automated test error: "%s" is an invalid argument because it is not a property name'
+sys.exit(4)
+''' % (argument)
+                            entry.test.language = 'python' 
+                            break
+
+                        entry.test.arguments.append(arguments)
+                    elif testFields.name == 'code':
+                        entry.test.language = testFields.prop('language') \
+                                or None
+                        entry.test.minlangver = testFields.prop('minlangver') \
+                                or None
+                        entry.test.maxlangver = testFields.prop('maxlangver') \
+                                or None
+                        entry.test.code = testFields.content
+                    else:
+                        # DTD validation should catch things that aren't
+                        # supposed to end up here.
+                        pass
+                    testFields = testFields.next
             else:
-                # DTD validation should prevent anything uwated from
+                # DTD validation should prevent anything uwanted from
                 # ending up here.
                 pass
             fields=fields.next
 
         return entry
+    
+    #
+    # Helpers to create a checklist
+    #
+    
+    def __create_entry(self, tree, path, entryIter, root):
+        '''Create an entry node and add it to the document.
+        
+        Attributes:
+        tree -- treemodel (synonymous to self)
+        path -- current path in the tree
+        entryIter -- current iter in the tree
+        root -- root of the xml entries node we're adding values to
+        
+        Meant to be used by a gtk.TreeModel.foreach().  This function
+        transforms the rows of data in the TreeModel into entries output
+        to the XML savefile.
+        '''
+
+        # Check if we're adding an entry or a category.
+        if tree.get_value(entryIter, ISITEM):
+            # Entry node
+            entry = root.lastChild().newChild(None, 'entry', None)
+            if tree.get_value(entryIter, DISPLAY):
+                entry.setProp('display', 'false')
+            else:
+                entry.setProp('display', 'true')
+            entry.setProp('state', tree.get_value(entryIter, RESOLUTION))
+
+            # state nodes
+            resolutions = tree.get_value(entryIter, RESLIST)
+            outputs = tree.get_value(entryIter, OUTPUTLIST)
+            states = entry.newChild(None, 'states', None)
+            for res in resolutions:
+                content = outputs[res]
+                if content:
+                    content = self.unpangoize_output(content)
+                state = states.newTextChild(None, 'state', content)
+                state.setProp('name', res)
+                
+            # test node
+            test = tree.get_value(entryIter, TEST)
+            if test:
+                testNode = entry.newChild(None, 'test', None)
+                for arg in test.arguments:
+                    testNode.newTextChild(None, 'argument', arg)
+                codeNode = testNode.newTextChild(None, 'code', test.code)
+                if test.language:
+                    codeNode.setProp('language', test.language)
+                if test.minlangver:
+                    codeNode.setProp('minlangver', test.minlangver)
+                if test.maxlangver:
+                    codeNode.setProp('maxlangver', test.maxlangver)
+        else:
+            entry = root.newChild(None, 'category', None)
+
+        # Common to both categories and entries:
+        entry.setProp('name', tree.get_value(entryIter, SUMMARY))
+        descNode = entry.newTextChild(None, 'description',
+                tree.get_value(entryIter, DESC))

@@ -53,6 +53,7 @@ class Review(gtk.VBox):
 
     def __init__(self, treeStore, properties):
         gobject.GObject.__init__(self)
+        self.checklist = treeStore
         self.properties = properties
         self.addPaths = {}
         self.textwrap = textwrap.TextWrapper(initial_indent='* ',
@@ -159,18 +160,12 @@ class Review(gtk.VBox):
         workList = []
         minorList = []
         notesList = []
-        unspan = re.compile(r'([^<]*)(<span[^>]*>)?([^<]*)(</span>)?(.*)')
         while iter:
             if self.list.get_value(iter, self.__DISPLAY):
                 res = self.list.get_value(iter, self.__RESOLUTION)
                 value = self.list.get_value(iter, self.__OUTPUT)
                 if value != None:
-                    # Remove the span tags
-                    value = unspan.match(value).expand(r'\g<1>\g<3>\g<5>')
-                    # Unescape special chars
-                    value = string.replace(value, '&amp;', '&')
-                    value = string.replace(value, '&lt;', '<')
-                    value = string.replace(value, '&gt;', '>')
+                    value = self.checklist.unpangoize_output(value)
                     value = self.textwrap.fill(value) + '\n'
                     if res == 'Pass':
                         goodList.append(value)
