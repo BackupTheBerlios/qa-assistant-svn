@@ -12,7 +12,7 @@
 import libxml2, string
 import gtk, gobject
 
-_checklistFileVersion_='0.1'
+_checklistFileVersion_='0.2'
 
 # TreeStore entries displayed on the screen
 ISITEM=0
@@ -57,12 +57,15 @@ class CheckList:
             raise Error("Checklist file is not a known version")
         
         # Extract the type from the checklist tag
-        self.type = root.prop('name')
-        if not self.type:
-            raise Error("Checklist file does not specify a type in the name attribute")
+        self.name = root.prop('name')
+        if not self.name:
+            raise Error("Checklist file does not specify a name for itself")
         self.revision = root.prop('revision')
         if not self.revision:
             self.revision='0'
+        self.type = root.prop('type')
+        if not self.type:
+            self.type = 'generic'
 
         # Store the checklist into a GtkTreeModel
         self.tree = gtk.TreeStore(gobject.TYPE_BOOLEAN,

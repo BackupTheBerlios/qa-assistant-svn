@@ -15,7 +15,6 @@
   <property name="default_height">400</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
-  <property name="icon">qa-icon.png</property>
   <property name="enable_layout_config">True</property>
   <signal name="delete_event" handler="on_delete_event" last_modification_time="Mon, 01 Mar 2004 19:07:47 GMT"/>
 
@@ -487,8 +486,6 @@ or 'New =&gt; From Bugzilla' to get started</property>
   <property name="border_width">5</property>
   <property name="visible">True</property>
   <property name="destroy_with_parent">False</property>
-  <property name="icon">qa-icon.png</property>
-  <property name="logo">qa-icon.png</property>
   <property name="copyright" translatable="yes">© 2004 Toshio Kuratomi</property>
   <property name="comments" translatable="yes">A tool to help write QA reviews of RPM Packaged Contributed Software</property>
   <property name="authors">Toshio Kuratomi &lt;toshio@tiki-lounge.com&gt;</property>

@@ -1,6 +1,6 @@
 <?xml version='1.0' ?>
 <!DOCTYPE checklist SYSTEM "checklist.dtd">
-<checklist version='0.1' name="fedoraus" revision="0.1">
+<checklist version='0.2' name="fedoraus" revision="0.2" type="SRPM">
   <category name='Security of the build system'>
     <description>Although many of the checklist items relate to security, the
       ones listed in this section are important to check before you proceed

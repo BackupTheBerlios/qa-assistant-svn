@@ -26,8 +26,8 @@ class Properties:
         # working right now.
         self.checklistName = checklist
         self.SRPM = None
-        # self.bugzillaURL
-        # self.bugzillaNumber
+        self.bugzillaURL = None
+        self.bugzillaNumber = None
         # Directories last searched (for FileSelect Dialogs)
         self.lastSRPMDir = './'
         self.lastSaveFileDir = './'

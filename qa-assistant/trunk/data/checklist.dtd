@@ -1,9 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!ELEMENT checklist (category+)>
   <!ATTLIST checklist
-    version CDATA #FIXED '0.1'
+    version CDATA #FIXED '0.2'
     name CDATA #REQUIRED
     revision CDATA #REQUIRED
+    type (SRPM|generic) "generic"
   >
   <!ELEMENT category (description, entry+)>
     <!ATTLIST category

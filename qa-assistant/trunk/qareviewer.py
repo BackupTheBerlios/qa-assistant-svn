@@ -1,4 +1,4 @@
-# File: qareviewer
+# File: qareviewer.py
 # Author: Toshio Kuratomi <toshio@tiki-lounge.com>
 # Date: 4 Mar 2004
 # Copyright: Toshio Kuratomi
@@ -10,12 +10,13 @@
 The main program object.  From here we set up the user interface, receive
 events, and send things off for future processing.
 """
-__programName__ = "QA Assistant"
-__version__ = "0.2"
+__programName__ = "qa-assistant"
+__programHumanName__ = "QA Assistant"
+__version__ = "0.3"
 __revision__ = "$Rev$"
 
 import libxml2
-import gtk
+import gtk, gnome
 import sys, os
 
 import checklist
@@ -42,12 +43,24 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         # Load the interface
         gladefile = 'glade/qa-assistant.glade'
-        gnomeglade.GnomeApp.__init__(self, __name__, __version__, gladefile,
-                'ReviewerWindow')
-
+        gnomeglade.GnomeApp.__init__(self, __programName__, __version__,
+                gladefile, 'ReviewerWindow')
+        self.program.set_property(gnome.PARAM_HUMAN_READABLE_NAME, __programHumanName__)
+        
         #
         # Create additional interface components
         #
+
+        iconFile = self._GnomeApp__uninstalled_file('pixmaps/qa-icon.png')
+        if iconFile == None:
+            iconFile = self.locate_file(gnome.FILE_DOMAIN_APP_PIXMAP,
+                                        'qa-icon.png')
+            if iconFile == []:
+                iconFile = None
+            else:
+                iconFile = iconFile[0]
+        if iconFile:
+            self.ReviewerWindow.set_property('icon', gnomeglade.load_pixbuf(iconFile))
 
         # Create a treeview for our listPane
         self.checkView = gtk.TreeView()
@@ -123,9 +136,25 @@ class QAReviewer(gnomeglade.GnomeApp):
     #
     # Helper Functions
     # 
+
     def __load_checklist(self):
+        filename = os.path.join('data', self.properties.checklistName)
+        checkFile = self._GnomeApp__uninstalled_file(filename)
+        if checkFile == None:
+            filename = os.path.join(__programName__, filename)
+            checkFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    filename)
+            if checkFile == []:
+                checkFile = None
+            else:
+                checkFile = checkFile[0]
+        if checkFile == None:
+            ### FIXME: When we can select checklists via property, we need to
+            # print error and recover.
+            sys.stderr.write("Unable to find checklist: %s\n" % (filename))
+            sys.exit(1)
         try:
-            self.checklist = checklist.CheckList('data/'+self.properties.checklistName)
+            self.checklist = checklist.CheckList(checkFile)
         except (libxml2.parserError, libxml2.treeError, checklist.Error), msg:
             ### FIXME: When we can select checklists via property, we need to
             # print error and recover.
@@ -362,9 +391,32 @@ class QAReviewer(gnomeglade.GnomeApp):
     def on_menu_about_activate(self, *extra):
         """Show the about window."""
 
-        about = gtk.glade.XML('glade/qa-assistant.glade', 'AboutWindow').get_widget('AboutWindow')
-        about.set_property('name', __programName__)
+        gladeFile = self._GnomeApp__uninstalled_file('glade/qa-assistant.glade')
+        if gladeFile == None:
+            filename = os.path.join(__programName__, 'glade/qa-assistant.glade')
+            gladeFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    filename)
+            if gladeFile == []:
+                raise Exception("Unable to locate glade file %s" % (filename))
+            else:
+                gladeFile = gladeFile[0]
+
+        about = gtk.glade.XML(gladeFile, 'AboutWindow').get_widget('AboutWindow')
+        about.set_property('name', __programHumanName__)
         about.set_property('version', __version__)
+        iconFile = self._GnomeApp__uninstalled_file('pixmaps/qa-icon.png')
+        if iconFile == None:
+            iconFile = self.locate_file(gnome.FILE_DOMAIN_APP_PIXMAP,
+                                        'qa-icon.png')
+            if iconFile == []:
+                iconFile = None
+            else:
+                iconFile = iconFile[0]
+        if iconFile:
+            icon = gnomeglade.load_pixbuf(iconFile)
+            about.set_property('icon', icon)
+            about.set_property('logo', icon)
+
         about.show()
        
     def on_toolbar_new_activate(self, button, *extra):

@@ -1,6 +1,16 @@
 QA Assistant -- A checklist reviewer to aid Quality Assurance
 ============
 
+0.3
+===
+
+* Website and downloads moved to sourceforge.
+  http://sourceforge.net/projects/qa-assistant
+* Anonymous Subversion repository 0.32 open at
+  http://springer.homelinux.com:8080/svn/fedora/qa-assistant/trunk
+* Now has an automake/autoconf build.  This means the package is now
+  installable with standard ./configure ; make; make install steps
+
 0.2
 ===
 This version concentrates on tidying up usability problems in the first
