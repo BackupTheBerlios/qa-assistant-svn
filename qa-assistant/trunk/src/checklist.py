@@ -199,7 +199,6 @@ class CheckList (gtk.TreeStore):
             self.baseRevision = self.revision
             self.baseFilename = path
             self.filename = None
-            self.name += ' savefile'
             self.revision = 0
         
         # Extract properties from the CheckList file
@@ -435,6 +434,8 @@ class CheckList (gtk.TreeStore):
         # Output root node
         root = doc.newChild(None, 'checklist', None)
         root.setProp('version', self.formatVersion)
+        if not self.name.endswith(' Savefile'):
+            self.name += ' Savefile'
         root.setProp('name', self.name)
         self.revision += 1
         root.setProp('revision', str(self.revision))
