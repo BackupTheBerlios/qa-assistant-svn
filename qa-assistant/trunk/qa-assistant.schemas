@@ -1,8 +1,8 @@
 <gconfschemafile>
   <schemalist>
     <schema>
-      <key>/schemas/apps/qa-assistant/use-gpg</key>
-      <applyto>/apps/qa-assistant/use-gpg</applyto>
+      <key>/schemas/apps/qa-assistant/user/use-gpg</key>
+      <applyto>/apps/qa-assistant/user/use-gpg</applyto>
       <owner>qa-assistant</owner>
       <type>bool</type>
       <default>false</default>
@@ -15,8 +15,8 @@
       </locale>
     </schema>
     <schema>
-      <key>/schemas/apps/qa-assistant/gpg-identity</key>
-      <applyto>/apps/qa-assistant/gpg-identity</applyto>
+      <key>/schemas/apps/qa-assistant/user/gpg-identity</key>
+      <applyto>/apps/qa-assistant/user/gpg-identity</applyto>
       <owner>qa-assistant</owner>
       <type>string</type>
       <locale name="C">
@@ -28,8 +28,8 @@
       </locale>
     </schema>
     <schema>
-      <key>/schemas/apps/qa-assistant/no-auto-display</key>
-      <applyto>/apps/qa-assistant/no-auto-display</applyto>
+      <key>/schemas/apps/qa-assistant/display/no-auto-display</key>
+      <applyto>/apps/qa-assistant/display/no-auto-display</applyto>
       <owner>qa-assistant</owner>
       <type>bool</type>
       <default>false</default>
@@ -44,8 +44,8 @@
       </locale>
     </schema>
     <schema>
-      <key>/schemas/apps/qa-assistant/fail-color</key>
-      <applyto>/apps/qa-assistant/fail-color</applyto>
+      <key>/schemas/apps/qa-assistant/display/fail-color</key>
+      <applyto>/apps/qa-assistant/display/fail-color</applyto>
       <owner>qa-assistant</owner>
       <type>string</type>
       <default>#FF0000</default>
@@ -57,8 +57,8 @@
       </locale>
     </schema>
     <schema>
-      <key>/schemas/apps/qa-assistant/pass-color</key>
-      <applyto>/apps/qa-assistant/pass-color</applyto>
+      <key>/schemas/apps/qa-assistant/display/pass-color</key>
+      <applyto>/apps/qa-assistant/display/pass-color</applyto>
       <owner>qa-assistant</owner>
       <type>string</type>
       <default>#006400</default>
@@ -70,8 +70,8 @@
       </locale>
     </schema>
     <schema>
-      <key>/schemas/apps/qa-assistant/minor-color</key>
-      <applyto>/apps/qa-assistant/minor-color</applyto>
+      <key>/schemas/apps/qa-assistant/display/minor-color</key>
+      <applyto>/apps/qa-assistant/display/minor-color</applyto>
       <owner>qa-assistant</owner>
       <type>string</type>
       <default>#A020F0</default>
@@ -84,8 +84,8 @@
       </locale>
     </schema>
     <schema>
-      <key>/schemas/apps/qa-assistant/notes-color</key>
-      <applyto>/apps/qa-assistant/notes-color</applyto>
+      <key>/schemas/apps/qa-assistant/display/notes-color</key>
+      <applyto>/apps/qa-assistant/display/notes-color</applyto>
       <owner>qa-assistant</owner>
       <type>string</type>
       <locale name="C">
@@ -98,8 +98,8 @@
       </locale>
     </schema>
     <schema>
-      <key>/schemas/apps/qa-assistant/disable-checklist-descriptions</key>
-      <applyto>/apps/qa-assistant/disable-checklist-descriptions</applyto>
+      <key>/schemas/apps/qa-assistant/display/disable-checklist-descriptions</key>
+      <applyto>/apps/qa-assistant/display/disable-checklist-descriptions</applyto>
       <owner>qa-assistant</owner>
       <type>bool</type>
       <default>false</default>
@@ -114,8 +114,8 @@
       </locale>
     </schema>
     <schema>
-      <key>/schemas/apps/qa-assistant/checklist-description-wait</key>
-      <applyto>/apps/qa-assistant/checklist-description-wait</applyto>
+      <key>/schemas/apps/qa-assistant/display/checklist-description-wait</key>
+      <applyto>/apps/qa-assistant/display/checklist-description-wait</applyto>
       <owner>qa-assistant</owner>
       <type>int</type>
       <default>500</default>
@@ -129,8 +129,8 @@
       </locale>
     </schema>
     <schema>
-      <key>/schemas/apps/qa-assistant/user-state-dir</key>
-      <applyto>/apps/qa-assistant/user-state-dir</applyto>
+      <key>/schemas/apps/qa-assistant/files/user-state-dir</key>
+      <applyto>/apps/qa-assistant/files/user-state-dir</applyto>
       <owner>qa-assistant</owner>
       <type>string</type>
       <default>~/qa-assistant</default>

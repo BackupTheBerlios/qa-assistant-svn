@@ -19,8 +19,6 @@ Packaging Errors
 
 Programming Errors
 ------------------
-* Using the save function (rather than save_as) doesn't seem to be saving the
-  file.
 * Use gtk.TreeStore.set instead of self.set in checklist.  Significant
   performance boost.
 * Need to hook the properties into the checklist.  Right now things are just
@@ -56,6 +54,8 @@ Programming Errors
 
 Working: Need to test
 ---------------------
+* Using the save function (rather than save_as) doesn't seem to be saving the
+  file.
 * Creation of Custom checklist items is not being displayed in the CheckView
   even though it is being created in the checklist.
 * Change of state in the Checklist is not being reflected in the Review.

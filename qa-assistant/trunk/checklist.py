@@ -141,11 +141,11 @@ class CheckList (gtk.TreeStore):
         self.gconfClient = gconf.client_get_default()
 
         self.gconfClient.add_dir(GCONFPREFIX, gconf.CLIENT_PRELOAD_NONE)
-        self.__init_colors('/pass-color')
-        self.__init_colors('/fail-color')
-        self.__init_colors('/minor-color')
-        self.__init_colors('/notes-color')
-        key = GCONFPREFIX + '/no-auto-display'
+        self.__init_colors('/display/pass-color')
+        self.__init_colors('/display/fail-color')
+        self.__init_colors('/display/minor-color')
+        self.__init_colors('/display/notes-color')
+        key = GCONFPREFIX + '/display/no-auto-display'
         self.noAutoDisplay = self.gconfClient.get_bool(key)
         self.gconfClient.notify_add(key, self.__change_auto_display)
         
@@ -513,13 +513,13 @@ class CheckList (gtk.TreeStore):
         output = string.replace(output, '>', '&gt;')
 
         if resolution == 'Fail':
-            color = self.colors['/fail-color']
+            color = self.colors['/display/fail-color']
         elif resolution == 'Non-Blocker':
-            color = self.colors['/minor-color']
+            color = self.colors['/display/minor-color']
         elif resolution == 'Pass':
-            color = self.colors['/pass-color']
+            color = self.colors['/display/pass-color']
         else:
-            color = self.colors['/notes-color']
+            color = self.colors['/display/notes-color']
         if color:
             output = ('<span foreground="' + color + '">' +
                     output + '</span>')
@@ -604,11 +604,11 @@ class CheckList (gtk.TreeStore):
             color = entry.value.get_string()
             if self.colorRE.match(color):
                 self.colors[colorKey] = color
-        if colorKey == '/fail-color':
+        if colorKey == '/display/fail-color':
             resChanged = 'Fail'
-        elif colorKey == '/pass-color':
+        elif colorKey == '/display/pass-color':
             resChanged = 'Pass'
-        elif colorKey == '/minor-color':
+        elif colorKey == '/display/minor-color':
             resChanged = 'Non-Blocker'
         else:
             resChanged = 'Needs-Reviewing'

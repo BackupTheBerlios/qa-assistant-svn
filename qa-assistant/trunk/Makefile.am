@@ -17,6 +17,7 @@ qa_assistantdir = $(datadir)/qa-assistant
 qa_assistant_PYTHON = \
 		SRPM.py \
 		checklist.py \
+		checkload.py \
 		checkview.py \
 		error.py \
 		genericqa.py \
@@ -49,7 +50,8 @@ checklistdtd_DATA = data/checklist.dtd
 qasavedtd_DATA = data/qasave.dtd
 
 datafilesdir = $(qa_assistantdir)/data
-datafiles_DATA = data/fedoraus.xml
+datafiles_DATA = data/fedoraus.xml \
+		 data/softwarerelease.xml
 
 uifilesdir = $(qa_assistantdir)/glade
 uifiles_DATA = glade/qa-assistant.glade \
@@ -73,6 +75,7 @@ GCONF_SCHEMA_FILES = \
 EXTRA_DIST = \
 	PREFERENCES \
 	TODO \
+	BUGS \
 	qa-assistant.pyin \
 	qa-convert.pyin \
 	paths.py.pyin \

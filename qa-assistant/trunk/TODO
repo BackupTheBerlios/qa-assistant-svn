@@ -45,7 +45,6 @@ glade/GUI:
 
 * Accelerators for QA Action items
 * Disable pieces of the QA Action menu when there is no SRPM being reviewed
-* Consider widgets that do textwrap for treeview and/or Review widget.
 
 Extra GNOME Functionality:
 ==========================
