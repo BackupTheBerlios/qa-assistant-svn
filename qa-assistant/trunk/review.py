@@ -8,6 +8,8 @@
 """
 __revision__ = "$Rev$"
 
+import re
+
 import gtk, gobject
 import checklist
 
@@ -144,11 +146,14 @@ class Review(gtk.VBox):
         workList = []
         minorList = []
         notesList = []
+        unspan = re.compile(r'([^<]*)(<span[^>]*>)?([^<]*)(</span>)?(.*)')
         while iter:
             if self.list.get_value(iter, self.__DISPLAY) == True:
                 res = self.list.get_value(iter, self.__RESOLUTION)
                 value = self.list.get_value(iter, self.__OUTPUT)
                 if value != None:
+                    # Remove the span tags
+                    value = unspan.match(value).expand(r'\g<1>\g<3>\g<5>')
                     if res == 'Pass':
                         goodList.append('* ' + value + "\n")
                     elif res == 'Fail':

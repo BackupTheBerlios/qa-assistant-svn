@@ -58,9 +58,6 @@ Programming:
 
 - Update to the fedora QAFormat output style
 
-- Prompt before outputting a review when the review is in state
-  'Needs Reviewing'
-
 Build Infrastructure:
 =====================
 - Write a spec file

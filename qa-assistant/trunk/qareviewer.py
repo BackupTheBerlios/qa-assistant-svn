@@ -368,19 +368,32 @@ class QAReviewer(gnomeglade.GnomeApp):
     def on_menu_publish_activate(self, *extra):
         """Publish a review to a file."""
         
+        # Check that the review is in a completed state
+        if self.reviewView.resolution.get_text() == 'Incomplete Review':
+            msgDialog = gtk.MessageDialog(self.ReviewerWindow,
+                    gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
+                    'You have not checked all items in the checklist so the review is incomplete.  Are you sure you want to submit a review based on the current work?')
+            msgDialog.set_title('Incomplete review: submit anyway?')
+            response = msgDialog.run()
+            msgDialog.destroy()
+            if response == gtk.RESPONSE_NO:
+                return
+        
         # File select dialog for use in file selecting callbacks.
         fileSelect = gtk.FileSelection(title='Select a file to publish the review into')
         if (os.path.isdir(self.properties.lastSRPMDir) and
                 os.access(self.properties.lastSRPMDir, os.R_OK|os.X_OK)):
             fileSelect.set_filename(self.properties.lastReviewDir)
         response = fileSelect.run()
-        if response == gtk.RESPONSE_OK:
-            filename = fileSelect.get_filename()
-            print filename
-            self.properties.lastReviewDir = os.path.dirname(filename)+'/'
-            self.reviewView.publish(fileSelect.get_filename())
-        fileSelect.destroy()
-        del fileSelect
+        try:
+            if response == gtk.RESPONSE_OK:
+                filename = fileSelect.get_filename()
+                self.properties.lastReviewDir = os.path.dirname(filename)+'/'
+                self.reviewView.publish(fileSelect.get_filename())
+        finally:
+            fileSelect.destroy()
+            del fileSelect
 
     def on_menu_quit_activate(self, *extra):
         """End the program.
@@ -445,7 +458,20 @@ class QAReviewer(gnomeglade.GnomeApp):
        
     def on_toolbar_new_activate(self, button, *extra):
         """Popup the menu to select a new review from bugzilla or SRPM"""
-        self.new1_menu.popup(None, None, None, 0, gtk.get_current_event_time())
+
+        ### FIXME: pygtk bug
+        # In pygtk 2.0 get_current_event_time returns a Python Long but
+        # menu.popup expects a Python Int.  The problem arises because the
+        # time is a guint32 which causes problems because Python does not have
+        # an unsigned int type
+        # This hack munges current_event_time to match what event.time
+        # provides but it's less than ideal.
+        time = gtk.get_current_event_time()
+        offset = time - int(0x7FFFFFFF)
+        if offset > 0:
+            time = int(-2147483648 + offset)
+
+        self.new1_menu.popup(None, None, None, 0, time)
         
     def on_menu_new_srpm_activate(self, *extra):
         """Open a new review based on the user selected SRPM"""

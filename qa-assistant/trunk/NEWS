@@ -11,6 +11,8 @@ string in the checklist Pane.
 * Colorized output for checklist items.
 * Now has an automake/autoconf build.  This means the package is now
   installable with standard ./configure ; make; make install steps
+* When publishing a review, QA Assistant now checks to see if it's in an
+  Incomplete state.
 * Fixed a bug that prevented editing of the output string in the checklist
 * Website and downloads moved to sourceforge.
   http://sourceforge.net/projects/qa-assistant

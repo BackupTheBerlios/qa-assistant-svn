@@ -106,8 +106,7 @@ class CheckList:
                                   SUMMARY, entry.name,
                                   DESC, entry.desc)
                     # Construct the resolution from multiple states
-                    resolutions={'Needs-Reviewing': ('<span foreground="' +
-                                 props.minorColor + '"> </span>')}
+                    resolutions={'Needs-Reviewing': None}
                     resolutionList=['Needs-Reviewing']
                     for i in range(len(entry.states)):
                         name = entry.states[i]['name']
