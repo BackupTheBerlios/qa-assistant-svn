@@ -21,6 +21,7 @@ qa_assistant_PYTHON = \
 		error.py \
 		genericqa.py \
 		gnomeglade.py \
+		gpg.py \
 		optionrenderer.py \
 		properties.py \
 		qareviewer.py \
