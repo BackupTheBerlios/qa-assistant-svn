@@ -8,7 +8,7 @@
 # Description: Program to automate some of the common, best practices of
 # the Fedora QA Proceedure.
 # Id: $Id$
-"""Generates a Fedora Style QA  template for a package.
+"""Generates a Fedora Style QA template for a package.
 Usage: fedora-qatemplate [OPTIONS] <SRC.RPM>
     -h
     --help              This usage message
@@ -17,6 +17,7 @@ Usage: fedora-qatemplate [OPTIONS] <SRC.RPM>
     --md5               Use the MD5 hash to capture file signature
     --output=FILE       Sends output to file instead of stdout
     --discard           Discard the files extracted from the SRC.RPM
+    --checkhdr          Checks the RPM header to make sure it has valid MD5s
 
     Not yet implemented:
     --nochecksig        Do not attempt to check the package's signature
@@ -33,13 +34,14 @@ current working directory.
 """
 
 __programName__ = "fedora-qatemplate"
-__version__ = "0.1"
+__version__ = "0.2"
 __revision__ = "$Rev$"
 
 # 8K block size for now.
 BLOCKSIZE=8192
 
 import sys, os, tempfile, stat
+import string, re
 import sha, md5
 import getopt
 # Requires python-optik w/ python2.2 or python2.3.
@@ -79,9 +81,8 @@ def parse_command_line(args):
     try:
         options, xtraArgs = getopt.getopt(args[1:],
         'h', ['help', 'version', 'output=', 'sha1', 'md5',
-                'discard', 'checksig', 'checklist'])
+                'discard', 'checkhdr', 'checksig', 'checklist'])
     except getopt.GetoptError, (msg, opt):
-        print opt
         raise InvalidCommandError(opt)
 
     argumentMap = {'-h':'help', '--help':'help',
@@ -90,61 +91,142 @@ def parse_command_line(args):
                     '--sha1':'sha1',
                     '--md5':'md5',
                     '--discard':'keep',
+                    '--checkhdr':'checkhdr',
                     '--nochecksig':'checksig',
                     '--checklist':'checklist'}
     flags={}
     # Set the input file
     if len(xtraArgs) == 1:
         flags["input"]=xtraArgs[0]
+    elif len(xtraArgs) > 1:
+        sys.stderr.write("Warning: %s only takes one SRPM as an argument.  Discarding the rest." % (__programName__))
 
     for arg in options:
-        flags[argumentMap[arg[0]]] = arg[1]
+        if arg == '--output':
+            flags[argumentMap[arg[0]]] = arg[1]
+        else:
+            flags[argumentMap[arg[0]]] = arg[0]
 
     # Set defaults
     if not flags.has_key('keep'):
         flags['keep']=True
+    else:
+        flags['keep']=False
+        
     if not flags.has_key('checksig'):
         flags['checksig']=True
+    else:
+        flags['checksig']=False
+    
+    if flags.has_key('checklist'):
+        flags['checklist']=True
+    else:
+        flags['checklist']=False
+
+    if flags.has_key('checkhdr'):
+        flags['checkhdr']=True
+    else:
+        flags['checkhdr']=False
+
     if not (flags.has_key('sha1') or flags.has_key('md5')):
         flags['md5']=True
     return flags
 
-def hash_file(input, infname, output, hasher):
+def hash_file(input, infname, hasher):
     """Cryptographically hash a file and output the info to another file.
     
     Keyword -- arguments:
         input -- An input filehandle
         infname -- The basename of the input file
-        output -- The output filehandle to write the hash to
         hasher -- Hash object to use to hash the file
+
+    Return: a one element dict with key set to filename and value to hash.
     """
 
     chunk=input.read(BLOCKSIZE)
     while (chunk):
         hasher.update(chunk)
         chunk=input.read(BLOCKSIZE)
-    output.write(hasher.hexdigest()+'  '+os.path.basename(infname)+"\n")
+    return {os.path.basename(infname) : hasher.hexdigest()}
 
-def hash_directory(dir, output, hasher):
+def hash_directory(dir, hasher):
     """Cryptographically hash all the files inside a directory.
     
     Keyword -- arguments:
         dir -- Name of the directory to extract files from
-        output -- Output filehandle to write the hash to
         hasher -- Hash object to use to hash the file
+
+    Returns: a dict of filenames and their hash values
     """
+
+    fileHashes={}
     for filename in os.listdir(dir):
         hash=hasher.copy()
         srcFile=file(dir+"/"+filename, 'r')
-        hash_file(srcFile, filename, output, hash)
+        fileHashes.update(hash_file(srcFile, filename, hash))
         del(hash)
+    return fileHashes
         
+def get_hashes_from_rpm(inFileName):
+    """Retrieve the hashes from the rpm headers"""
+    ### FIXME: when we start using the rpm library, remove this sytem call
+    ### and access the rpm headers directly
+    rpmQuery=os.popen("rpm -qp --nosignature --qf '[%{filenames} %{filemd5s}\n]' "+inFileName)
+    rpmHashPairs=rpmQuery.readlines()
+    rpmQuery.close()
+
+    fileHashes={}
+    for hashPair in rpmHashPairs:
+        (key, value) = string.split(hashPair, ' ')
+        value=string.strip(value)
+        fileHashes[key] = value
+
+    return fileHashes
+
+def perform_header_check(inFileName, fileHashes):
+    """Check for malicious SRPMs by comparing the rpm md5s to the actual md5s.
+
+    Keyword -- arguments:
+        inFileName: The SRPM path/filename information
+        fileHashes: MD5 hashes we computed within the SRPM
+
+    Grabs the MD5 hashes for the files from the RPM and checks that they
+    match with the checksums we computed.
+    """
+   
+    rpmHashes=get_hashes_from_rpm(inFileName)
+        
+    for filename in fileHashes.keys():
+        # Python 2.3 [untested]  2 lines to rm, search for <<<pop 1>>>
+        #rHash=rpmHashes.pop(filename, None)
+        rHash=rpmHashes.get(filename, None) # Python 2.2 <<<pop 1>>>
+        
+        # Hmm... Not sure if having unlisted items within the archive would
+        # be totally invalid but better to check for it until I know for sure.
+        if (rHash == None):
+            if (filename == os.path.basename(inFileName)):
+                # No reason to panic, it's just the SRPM file
+                continue
+            sys.stderr.write("SECURITY: %s is in the package but not listed in the rpm headers.\n" % (filename))
+            sys.exit(101)
+        if rHash != fileHashes[filename]:
+            sys.stderr.write("SECURITY: %s has an incorrect MD5 hash in the rpm headers.\n" % (filename))
+            sys.exit(102)
+        del rpmHashes[filename] # Python 2.2 <<<pop 1>>>
+        
+    # Check if there are other files listed in the rpm that don't really exist
+    if len(rpmHashes) > 0:
+        sys.stderr.write("SECURITY: There are files listed in the rpm header that aren't really there.\n")
+        for noFile in rpmHashes:
+            sys.stderr.write(" %s\n" % (noFile))
+        sys.exit(103)
+
 if __name__ == "__main__":
     try:
         actions=parse_command_line(sys.argv)
     except InvalidCommandError, (opt):
         sys.stderr.write("-"+str(opt)+" is an unrecognized option.  Please run '"+__programName__+" --help'\n")
-        sys.stderr.write("to learn what options I can use.")
+        sys.stderr.write("to learn what options are available.\n")
         sys.exit(2)
 
     # Print help or version information and exit
@@ -164,7 +246,7 @@ if __name__ == "__main__":
             sys.stderr.write("Unable to read from file "+actions["input"]+"\n")
             sys.exit(3)
     else:
-        sys.stderr.write("You must specify a src.rpm to read data from.\n")
+        sys.stderr.write("You must specify an SRPM to read data from.\n")
         sys.exit(3)
 
     # set up file handle for output
@@ -204,6 +286,13 @@ if __name__ == "__main__":
                     +actions["input"], 'r')
     unpackdir=rpmCmd.readline()
     rpmCmd.close()
+    # Check that we got a valid file
+    # Note: Must allow output to have more than 3 '-'s in it.
+    if not re.match('^.+-.+-.+$', unpackdir):
+        sys.stderr.write("Received error when trying to access SRPM.  The error was:\n")
+        sys.stderr.write("  %s" % (unpackdir))
+        sys.exit(5)
+        
     if actions["keep"] == True:
         # Output the directory here
         os.system("fedora-unrpm "+actions["input"]+"&>/dev/null")
@@ -226,37 +315,40 @@ if __name__ == "__main__":
         os.system("fedora-unrpm "+inFileName+"&>/dev/null")
         unpackdir=tempDirectory+"/"+unpackdir
 
-    if actions.has_key("sha1"):
-        outputFile.writelines("\nSHA1SUMs:\n")
-        hasher=sha.new()
-        hash_file(inputFile, actions['input'], outputFile, hasher)
+    if actions.has_key("md5") or actions["checkhdr"]:
+        hasher=md5.new()
+        fileHashes=hash_file(inputFile, actions['input'], hasher)
         del(hasher)
-        hasher=sha.new()
-        hash_directory(unpackdir, outputFile, hasher)
+        hasher=md5.new()
+        fileHashes.update(hash_directory(unpackdir, hasher))
         del(hasher)
+        if actions["checkhdr"]:
+            # Check the rpm header against the fileHashes.
+            perform_header_check(actions['input'], fileHashes)
+        if actions.has_key("md5"):
+            outputFile.writelines("\nMD5SUMs:\n")
+            for filename in fileHashes:
+                outputFile.writelines("%s  %s\n" % (fileHashes[filename], filename))
 
-    if actions.has_key("md5"):
+    if actions.has_key("sha1"):
         inputFile.seek(0)
-        outputFile.writelines("\nMD5SUMs:\n")
-        hasher=md5.new()
-        hash_file(inputFile, actions['input'], outputFile, hasher)
+        hasher=sha.new()
+        fileHashes = hash_file(inputFile, actions['input'], hasher)
         del(hasher)
-        ### Thought:  the rpm stores the md5s.  Can we trust that?
-        ### No.  With a hacked version of rpm, we could store invalid md5s
-        ### in the rpm.  Will rpm2cpio catch this and complain?
-        ### My use case: fedora-rpmchecksig foo.src.rpm
-        ###
-        hasher=md5.new()
-        hash_directory(unpackdir, outputFile, hasher)
+        hasher=sha.new()
+        fileHashes.update(hash_directory(unpackdir, hasher))
         del(hasher)
+        outputFile.writelines("\nSHA1SUMs:\n")
+        for filename in fileHashes:
+            outputFile.writelines("%s  %s\n" % (fileHashes[filename], filename))
 
     outputFile.close()
     inputFile.close()
 
     # Clean up the temporary directory
     if tempDirectory:
-        for file in os.listdir(unpackdir):
-            os.unlink(unpackdir+'/'+file)
+        for filename in os.listdir(unpackdir):
+            os.unlink(unpackdir+'/'+filename)
         os.rmdir(unpackdir)
         os.rmdir(tempDirectory)
 
