@@ -288,7 +288,7 @@ class NewDruid(gtk.Window):
 
         '''
         propForm.set_model(self.newList.properties)
-        propForm.show_all()
+        propForm.show()
 
     def finish(self, page, druid):
         '''

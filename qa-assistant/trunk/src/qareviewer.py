@@ -27,6 +27,7 @@ from review import Review
 from checklist import CheckList
 from checkview import CheckView
 from preferences import Preferences
+from propview import PropertiesDialog
 
 __version__ = VERSION
 
@@ -296,6 +297,14 @@ class QAReviewer(gnomeglade.GnomeApp):
         if isinstance(entry, gtk.Editable):
             entry.paste_clipboard()
 
+    def on_menu_properties_activate(self, *extra):
+        """Pops up a dialog that allows us to set the CheckList properties."""
+        propDialog = PropertiesDialog(self.checklist.properties)
+        if self.logo:
+            propDialog.set_icon(self.logo)
+
+        propDialog.show()
+
     def on_menu_preferences_activate(self, *extra):
         """Sets program properties."""
         gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
@@ -403,16 +412,6 @@ Relative Priority: Publish will be the primary submission for now.  This is an e
         msg = """Associates this review with a bugzilla report.  The program needs to be able to use this to pick out information from a bugzilla report in order to autodownload packages and otherwise set up an environment for reviewing.  Although definitely cool, there's a good deal of work necessary for this to work.
         
 Relative priority: Enhancement sometime after new review from SRPM. (Rather low)"""
-        self.not_yet_implemented(msg)
-        pass
-
-    def on_menu_properties_activate(self, *extra):
-        """Set properties on the review."""
-        msg = """Difference between preference and properties?  Preferences can be program preferences and properties can be review properties.  Good for things like bugzilla report number and such like.
-
-Okay. So maybe it will hold all things that are created on a review once and then largely forgotten about (but someone might want to edit them later.)
-        
-Relative priority: Comes after New from SRPM but before feature enhancements like new_from_bugzilla & Submit to bugzilla."""
         self.not_yet_implemented(msg)
         pass
 
