@@ -9,58 +9,41 @@ Preferences to Add Via GConf
 Preferences
 -----------
 All currently needed preferences have been implemented.
-Infrastructure exists and seems workable.
+Infrastructure exists and seems workable.  This seems to be all done.
 
 Druid
 -----
-In the new scheme of things we need to know what checklist to load before we
-can do useful things.  Once we know what checklist to load, we should be able
-to invoke functions to take onLoad information from users.
+The druid itself has been created.  Some work still needs to be done -- mostly
+to the supporting widgets:
 
-The Druid will have the following pathways:
-
-1) Info screen.
-2) (A) Load savefile (B) New checklist
-3) A) Open a file chooser with the CWD for the user to pick from
-   B) Open a selector of the system installed checklists
-4) Load checklist.  Display a properties dialog to get the properties that
-   the checklist requires (onLoad) if any.
-5) Start the program.
-
-When loading a new checklist after the program is started, we should skip
-1 & 2 and go directly to 3A.
-
-When loading a saved checklist we want to popup a file selector (could be
-the Druid page or the Druid file selector could be the load checklist file
-selector.)  Then proceed to 4pre.
+* Check that all required properties are entered.
+* When loading a savefile from the menus, use the Druid as we have to force
+  users to confront the Properties as well.
+* Use the file selector widget instead of the Browse button type file selector
+  we have currently.
+* File chooser needs to use the directory we last used to save/load from.
+* On startup Druid should be started before a QA-Assistant main window is
+  shown.  (ie: No more Druid with empty window.)
 
 Properties
 ----------
-    # Output:
-    # Three consumers:
-    #   - CheckList needs to convert into XML
-    #   - PropertiesWidget needs to convert into list of labels/entry boxes.
-    #   - Functions need to get values from individual properties and set them
-    #     for others.
-    # How best to handle this?
-    # CheckList:
-    # for propKey in props.keys():
-    #       info = props[propKey]
-Properties are set on the checklist.  The checklist type should provide a
-set of properties that are legal.  Perhaps implement as GObject values on
-the checklist object (Can't do this as it isn't extensible.  The checklist
-may have arbitrary properties.  Specifying in GObject makes them a
-"compiletime" rather than run-time setting.)
+There are three consumers of Properties:
+1) CheckList: Which loads what Properties are valid and saves the Properties
+   back into a file.
+2) PropertiesWidget which converts the data into a display of labels and entry
+   boxes for setting and displaying the values.
+3) Functions which use values from indiiual properties to set other properties,
+   run tests, or output headers for the Review.
 
+(These are properties we want to set on the fedora.us checklist)
 * MD5Sums
 * Bugzilla URL
 * SRPM to check
-* QA checklist loaded
 
-We have a properties dict in the CheckList right now.
-What are we going to do with that?
+Properties as Function Arguments
+++++++++++++++++++++++++++++++++
 
-We need the following attributes on functions:
+We need the following types of attributes on functions:
 
 * automatic/userinput/useroverride
 * onLoad(Mandatory before we start)/onPublish(mandatory before we end)/optional
@@ -73,27 +56,8 @@ RequireTypes:
 * automatic (when its dependencies resolve, automatic)
 * optional (optional, user)
 
-overrides are implemented as user invocable functions.
-
-Properties widget that allows setting the properties (properties.py)
-
-Properties data structure that is set from checklist and used by the widget
-and the functions.  The functions are a set of methods 
-
-::
-  class Checklist():
-    Has a Properties.
-
-  class Properties(dict):
-    __init__()
-    clear()
-    set(name, value)
-    add(name, value=None)
-    output() sorted list of Properties.
-    
-  class PropertiesWidget():
-    __init__(self, model=None):
-    set_model(model)
+overrides are implemented as an onLoad or onPublish that also has a function
+to set the value from other properties.
 
 Functions
 ---------

@@ -11,63 +11,58 @@ QA Assistant TODO
 
 glade/GUI:
 ==========
-* Publish Button should be added to toolbar
-* Submit Button should be added to toolbar
-  - Pressing Submit will build the review and submit upstream and down.
-* Add a New dialog to take input about bugzilla
-  - If new then make sure we have both a bugzilla # and an SRPM
 * Create a logo to go along with the icon.  Think up some other small pixmaps
   for the menu/toolbar: toggle Preview, new from bugzilla, new from SRPM,
   Publish Report, Submit Report
 * When the reviewer really should add additional information, how should we
   make it happen?  A field in the XML file under state?  And that causes
   qa-assistant to pop up a textEntry dialog when the item enters that state?
-* Currently the QA functions are encapsulated into a gtk.Menu.  I think this
-  is wrong in the long run.  Instead of the main program creating a QA
-  object and operating on it, it should create a QA object and have the
-  object operate on it.
-  
-  (QAReviewer is really a parent class of the QA objects.  But I don't see a
-  way to model this efficiently as we need to create the GUI and base items
-  every time the program starts.  Then, when the user chooses a specific
-  checklist we would have to destroy the old object and instantiate a new one
-  for the new QA object.)
 
-  - QAReviewer needs to implement a set of hooks that the QA object attaches
-    to.  For instance, QAReviewer provides the QAActions menu at
-    self.QAMenuItem.  QA object should create the menu and set:
-    self.app.QAMenuItem.set_submenu(menu)
-  - Things that may be overridden in this manner:
-  
-    + QAMenu
-    + Allowable Properties
-    + Review object output format
-  
-  How about this?  checklist is the model that the QA Object is created from.
-  The QAReviewer object can add the QA Object into its menu, properties, and
-  other places?  Properties will be taken care of in a druid screen.  qamenu
-  will have to be provided.  The Review output is still not taken care of...
+Functions:
+==========
+Everything in this list requires rethinking because of the new Functions and
+Properties structure.
 
-* Disable pieces of the QA Action menu when there is no SRPM being reviewed
- 
-  - Will be taken care of in the merge with checklist.  Now have functions
-    listed in the checklist that should make this happen.
+* These require integration with the Functions features
 
-* Accelerators for QA Action items
+  - Publish Button should be added to toolbar
+  - Submit Button should be added to toolbar
+
+    + Pressing Submit will build the review and submit upstream and down.
+
+  - Add a New dialog to take input about bugzilla
+
+    + If new then make sure we have both a bugzilla # and an SRPM
+
+  - Disable pieces of the QA Action menu when there is no SRPM being reviewed
+
+    + Will be taken care of in the merge with checklist.  Now have functions
+      listed in the checklist that should make this happen.
+
+  - Accelerators for QA Action items
 
 Extra GNOME Functionality:
 ==========================
 * Update to pygtk-2.4.
+  
   - Embed the 2.4 file selector widget in the druid..
   - Change gobjects to use the new chained calls.
   - Switch to the 2.6 ComboBox Renderer instead of optionrenderer.
+
+* Update to gnome-python-2.10.
+
+  - Utilize new properties setting on gnome.program_init() so we don't get
+    warnings trying to set them after initialization.
+  - Use gnome.program.locate_file() instead of our locate_file() function.
 
 Programming:
 ============
 * GenericQA needs to provide a menu item to toggle treetip display
 * Command line argument parsing
+
   - If a savefile is given, open that
   - Use optparse/optik
+
 * Enhance tracking entries into the editor.  We want
   people to be able to shift text around from Needswork and Non-blocker, and
   to add to them but we want to keep track of what entry is associated with
@@ -118,22 +113,15 @@ Programming:
     Currently paths.py is built from paths.pyin at build time.  We'd need to
     create one paths.py at build time and a separate one at install time to
     make this work.
+
     + This looks like the way to go.  The new objective is to set all
       information in the paths.py and have minimal setup processing and no
       special processing in the main body of the program.
 
-* paths.py.pyin should maybe be merged into qa-assistant.pyin.  Afterall,
-  paths.py is located in the DATADIR/qa-assistant directory -- by including
-  that information into the program file, we can play with path information
-  in just that one file to make uninstalled testing work.
-
 * Finish writing unittests for the program.  We've barely scratched the
   surface of this.  When completed it should allow one to quickly figure
   out what's working and what's broken in the package.
+
   - Basically need a set of unittests for each object defined in the program.
     Don't yet know how to unittest the widgets.  The model objects and the
     program object should work much better, though.
-
-Done -- Needs testing
-=====================
-* Create preferences infrastructure : check PREFERENCES for ideas. [Nearly done]

@@ -35,8 +35,9 @@ class PropertiesView(gtk.HBox):
         '''
         props = self.model
         if not props:
-            self.add(gtk.Label(
-                'This Checklist does not contain any properties.'))
+            label = gtk.Label('This CheckList does not contain any properties.')
+            self.add(label)
+            label.show()
             return
         
         self.labels = gtk.VBox()

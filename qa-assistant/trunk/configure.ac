@@ -4,7 +4,7 @@ dnl Date: 27 April, 2004
 dnl Description: Controls the configure process for qa-assistant
 dnl $Id$
 
-AC_INIT([QA Assistant], [0.4.90.3], [abadger1999@sourceforge.net], qa-assistant)
+AC_INIT([QA Assistant], [0.4.90.3], [abadger1999@sourceforge.net], [qa-assistant])
 AC_CONFIG_SRCDIR([src/qareviewer.py])
 AM_INIT_AUTOMAKE([gnu check-news dist-bzip2 -Wall])
 
@@ -49,10 +49,11 @@ PKG_CHECK_MODULES(LIBXML, libxml-2.0 >= 2.5.0)
 AC_SUBST(LIBXML_CFLAGS)
 AC_SUBST(LIBXML_LIBS)
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
 Makefile
 tests/Makefile
 src/Makefile
 qa-assistant.spec
 src/qaconst.py
 ])
+AC_OUTPUT

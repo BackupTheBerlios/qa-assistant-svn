@@ -19,29 +19,11 @@ import test
 import error
 import checklist
 import checkview
-import treetips
 import review
 
 class TestCreation(unittest.TestCase):
     def setUp(self):
         self.dataDir = os.path.join(test.srcdir, '..', 'data')
-
-    #
-    # Treetip creation function
-    #
-    def test_TreetipCreateSuccess(self):
-        self.assert_(isinstance(treetips.TreeTips(), treetips.TreeTips))
-
-    def test50_TreetipCreateSuccessCheckView(self):
-        view = checkview.CheckView()
-        self.assert_(isinstance(treetips.TreeTips(view, 1), treetips.TreeTips))
-
-    def test_TreetipCreateSuccessTreeView(self):
-        view = gtk.TreeView()
-        self.assert_(isinstance(treetips.TreeTips(view, 1), treetips.TreeTips))
-
-    def test_TreetipCreateNotATreeView(self):
-        self.assertRaises(TypeError, treetips.TreeTips, 3, 1)
 
     #
     # CheckView creation tests
