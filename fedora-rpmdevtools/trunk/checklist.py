@@ -19,11 +19,10 @@ ISITEM=0
 DISPLAY=1
 SUMMARY=2
 DESC=3
-INPUT=4
-RESOLUTION=5
-OUTPUT=6
-RESLIST=7
-OUTPUTLIST=8
+RESOLUTION=4
+OUTPUT=5
+RESLIST=6
+OUTPUTLIST=7
 
 class Error(Exception):
     def __init__(self, msg):
@@ -44,18 +43,23 @@ class CheckList:
 
     def __init__(self, path):
         
-        checkFile = libxml2.parseFile(path)
-        ### FIXME: validate
-        root = checkFile.children
+        libxml2.registerErrorHandler(self.__noDisplayParseError, None)
+        ctxt = libxml2.newParserCtxt()
+        checkFile = ctxt.ctxtReadFile(path, None, libxml2.XML_PARSE_DTDVALID)
+
+        if ctxt.isValid() == False:
+            raise Error("File does not validate against the checklist DTD")
+
+        root = checkFile.getRootElement()
         if root.name != 'checklist':
-            raise CheckListError("File is not a valid checklist policy file")
+            raise Error("File is not a valid checklist policy file")
         if root.prop('version') != _checklistFileVersion_:
-            raise CheckListError("Checklist file is not a known version")
+            raise Error("Checklist file is not a known version")
         
         # Extract the type from the checklist tag
         self.type = root.prop('name')
         if not self.type:
-            raise CheckListError("Checklist file does not specify a type in the name attribute")
+            raise Error("Checklist file does not specify a type in the name attribute")
         self.revision = root.prop('revision')
         if not self.revision:
             self.revision='0'
@@ -63,7 +67,6 @@ class CheckList:
         # Store the checklist into a GtkTreeModel
         self.tree = gtk.TreeStore(gobject.TYPE_BOOLEAN,
                                   gobject.TYPE_BOOLEAN,
-                                  gobject.TYPE_STRING,
                                   gobject.TYPE_STRING,
                                   gobject.TYPE_STRING,
                                   gobject.TYPE_STRING,
@@ -97,8 +100,7 @@ class CheckList:
                                   ISITEM, True,
                                   DISPLAY, entry.display,
                                   SUMMARY, entry.name,
-                                  DESC, entry.desc,
-                                  INPUT, entry.input)
+                                  DESC, entry.desc)
                     # Construct the resolution from multiple states
                     resolutions={'Needs-Reviewing': None}
                     resolutionList=['Needs-Reviewing']
@@ -121,6 +123,10 @@ class CheckList:
 
         checkFile.freeDoc()
 
+    def __noDisplayParseError(self, ctx, str):
+        """Disable Displaying parser errors."""
+        pass
+
     def __xmlToEntry(self, node):
         """Converts an entry node from an XML DOM into a python data structure.
 
@@ -132,7 +138,6 @@ class CheckList:
         entry=self.__Entry()
         # Set defaults
         entry.display = False
-        entry.input = None
 
         entry.name = node.prop('name')
         fields = node.children
@@ -144,18 +149,25 @@ class CheckList:
                     entry.display = False
             if fields.name == 'states':
                 state = fields.children
-                n=0
+                n = 0
                 entry.states=[]
                 while state:
                     if state.name == 'state':
                         entry.states.append({'name' : state.prop('name')})
-                        output = state.children
-                        while output:
-                            if output.name == 'output':
-                                entry.states[n]['output']=output.content
-                            output=output.next
-                        if not entry.states[n].has_key('output'):
+                        entry.states[n]['output'] = state.content
+                        if entry.states[n]['output'].strip() == '':
                             entry.states[n]['output'] = entry.name + ': ' + state.prop('name')
+                        ### FIXME: After we decide the output tag is gone for
+                        # good, remove these lines.  We need to decide how to
+                        # take input for output lines that it would make sense
+                        # for first.
+                        #output = state.children
+                        #while output:
+                        #    if output.name == 'output':
+                        #        entry.states[n]['output']=output.content
+                        #    output=output.next
+                        #if not entry.states[n].has_key('output'):
+                        #    entry.states[n]['output'] = entry.name + ': ' + state.prop('name')
                         n+=1
                     else:
                         # DTD validation should catch things that aren't
@@ -164,8 +176,6 @@ class CheckList:
                     state=state.next
             elif fields.name == 'description':
                 entry.desc = fields.content
-            elif fields.name == 'input':
-                entry.input = fields.content
             else:
                 # DTD validation should prevent anything uwated from
                 # ending up here.

@@ -20,6 +20,14 @@ glade/GUI:
 
 - Identify what SRPM/ bugzilla/ package we're working on in the status bar
 
+- Create a logo to go along with the icon.  Think up some other small pixmaps
+  for the menu/toolbar: toggle Preview, new from bugzilla, new from SRPM,
+  Publish Report, Submit Report
+
+- When the reviewer really should add additional information, how should we
+  make it happen?  A field in the XML file under state?  And that causes
+  qa-assistant to pop up a textEntry dialog when the item enters that state?
+
 Extra GNOME Functionality:
 ==========================
 - Create preferences infrastructure : check PREFERENCES for ideas.
@@ -52,6 +60,3 @@ Programming:
 
 - Prompt before outputting a review when the review is in state
   'Needs Reviewing'
-XML:
-====
-- Create at least one complete checklist.

@@ -270,15 +270,19 @@ class Review(gtk.VBox):
         bugs, be sure to check there as well.
         """
         iter = self.tree.get_iter_first()
+        moreWork = False
         while iter:
             value = self.tree.get_value(iter, checklist.RESOLUTION)
             if value == 'Fail':
                 self.resolution.set_text('NEEDSWORK')
                 return
             elif value == 'Needs-Reviewing':
-                self.resolution.set_text('Incomplete Review')
-                return
+                moreWork = True
             iter = self.tree.iter_next(iter)
-        self.resolution.set_text('PUBLISH +1')
+
+        if moreWork:
+            self.resolution.set_text('Incomplete Review')
+        else:
+            self.resolution.set_text('PUBLISH +1')
 
 gobject.type_register(Review)

@@ -50,7 +50,9 @@ class QAReviewer(gnomeglade.GnomeApp):
         # load the checklist data
         try:
             self.checklist = checklist.CheckList('data/'+self.properties.checklistName)
-        except (libxml2.parserError, checklist.Error), msg:
+        except (libxml2.parserError, libxml2.treeError, checklist.Error), msg:
+            ### FIXME: When we can select checklists via property, we need to
+            # print error and recover.
             sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
             sys.exit(1)
 

