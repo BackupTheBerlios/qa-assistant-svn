@@ -81,7 +81,7 @@ class SaveFile:
 
         # Output entries
         entries = root.newChild(None, 'entries', None)
-        self.checklist.tree.foreach(self.__create_entry, entries)
+        self.checklist.foreach(self.__create_entry, entries)
 
         # Write the file
         doc.saveFormatFileEnc(self.filename, 'UTF-8', True)
@@ -119,7 +119,7 @@ class SaveFile:
         if not checkFile:
             ### FIXME: Throw an exception to get out gracefully
             sys.exit(1)
-        newList = checklist.CheckList(checkFile, self.properties)
+        newList = checklist.CheckList(checkFile)
 
         # Check that the checklist is the appropriate version
         if (newList.name != saveCheck[0].prop('name')):
@@ -174,7 +174,7 @@ class SaveFile:
                         resList=entry.reslist,
                         outputList=entry.outlist)
             else:
-                newList.tree.set(iter, checklist.ISITEM, entry.item,
+                newList.set(iter, checklist.ISITEM, entry.item,
                     checklist.DISPLAY, entry.display,
                     checklist.MODIFIED, True,
                     checklist.SUMMARY, entry.name,

@@ -14,11 +14,15 @@ Checklist Reviewer to Aid Quality Assurance
 Version 0.5
 ===========
 This release has a rewritten checklist display that should be both prettier
-to look at and more easily programmed against.
+to look at and more easily programmed against.  Most changes are developer
+visible but not end-user visible:
+
+* Changed checklist into a subclass of gtk.TreeStore.
 
 Version 0.4.1
 =============
 This is a bugfix release.
+
 * Fix a bug in loading saved checklists that caused the custom category to
   be displayed as an item.
 

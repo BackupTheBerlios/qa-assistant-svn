@@ -146,7 +146,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         # was causing editing of cells to no longer work.  I think we have
         # to reload our checklistPane everytime we load a new checklist....
         # -- Some restructuring of code to do there.
-        # -- May only need to make sure self.checklist.tree is set correctly?
+        # -- May only need to make sure self.checklist is set correctly?
         filename = os.path.join('data', self.properties.checklist)
         checkFile = gnomeglade.uninstalled_file(filename)
         if checkFile == None:
@@ -163,14 +163,14 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.stderr.write("Unable to find checklist: %s\n" % (filename))
             sys.exit(1)
         try:
-            self.checklist = checklist.CheckList(checkFile, self.properties)
+            self.checklist = checklist.CheckList(checkFile)
         except (libxml2.parserError, libxml2.treeError, checklist.Error), msg:
             ### FIXME: When we can select checklists via property, we need to
             # print error and recover.
             sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
             sys.exit(1)
 
-        self.checkView.set_model(self.checklist.tree)
+        self.checkView.set_model(self.checklist)
 
         if self.checklist.type == 'SRPM':
             from srpmqa import SRPMQA
@@ -185,7 +185,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         except AttributeError:
             # No problems as long as reviewView doesn't exist
             pass
-        self.reviewView = Review(self.checklist.tree, self.properties)
+        self.reviewView = Review(self.checklist, self.properties)
         self.reviewView.update_hash()
         self.reviewView.show()
         self.reviewPane.add(self.reviewView)
@@ -292,15 +292,15 @@ class QAReviewer(gnomeglade.GnomeApp):
     # 
     def output_edited(self, cell, row, newValue):
         """Change the text of the output string"""
-        iter = self.checklist.tree.get_iter_from_string(row)
-        path = self.checklist.tree.get_path(iter)
-        name = self.checklist.tree.get_value(iter, checklist.RESOLUTION)
+        iter = self.checklist.get_iter_from_string(row)
+        path = self.checklist.get_path(iter)
+        name = self.checklist.get_value(iter, checklist.RESOLUTION)
         newValue = self.checklist.colorize_output(name, newValue)
 
-        outDict = self.checklist.tree.get_value(iter, checklist.OUTPUTLIST)
+        outDict = self.checklist.get_value(iter, checklist.OUTPUTLIST)
         outDict[name] = newValue
-        self.checklist.tree.set(iter, checklist.OUTPUT, newValue)
-        self.checklist.tree.row_changed(path, iter)
+        self.checklist.set(iter, checklist.OUTPUT, newValue)
+        self.checklist.row_changed(path, iter)
 
     ### FIXME: I believe this should go into checklist.  Possibly this whole
     # section belongs in checklist.
@@ -317,19 +317,19 @@ class QAReviewer(gnomeglade.GnomeApp):
         affected by this change as well.
         """
 
-        self.checklist.tree.set(iter, checklist.RESOLUTION, newValue)
-        outputlist = self.checklist.tree.get_value(iter, checklist.OUTPUTLIST)
+        self.checklist.set(iter, checklist.RESOLUTION, newValue)
+        outputlist = self.checklist.get_value(iter, checklist.OUTPUTLIST)
         out = outputlist[newValue]
-        self.checklist.tree.set(iter, checklist.OUTPUT, out)
-        path = self.checklist.tree.get_path(iter)
-        self.checklist.tree.row_changed(path, iter)
-        category = self.checklist.tree.iter_parent(iter)
-        catRes = self.checklist.tree.get_value(category, checklist.RESOLUTION)
+        self.checklist.set(iter, checklist.OUTPUT, out)
+        path = self.checklist.get_path(iter)
+        self.checklist.row_changed(path, iter)
+        category = self.checklist.iter_parent(iter)
+        catRes = self.checklist.get_value(category, checklist.RESOLUTION)
 
         if newValue == 'Fail' or newValue == 'Non-Blocker':
             ### FIXME: Check preferences for auto-display on fail
             # Auto display to review if it's a fail
-            self.checklist.tree.set(iter, checklist.DISPLAY, True)
+            self.checklist.set(iter, checklist.DISPLAY, True)
 
         # Check if the change makes the overall review into a pass or fail
         if newValue == 'Fail':
@@ -340,27 +340,27 @@ class QAReviewer(gnomeglade.GnomeApp):
             if catRes == 'Needs-Reviewing':
                 return
             if catRes != 'Pass':
-                iter = self.checklist.tree.iter_children(category)
+                iter = self.checklist.iter_children(category)
                 while iter:
-                    nodeRes = self.checklist.tree.get_value(iter, checklist.RESOLUTION)
+                    nodeRes = self.checklist.get_value(iter, checklist.RESOLUTION)
                     if nodeRes == 'Fail':
                         return
-                    iter = self.checklist.tree.iter_next(iter)
+                    iter = self.checklist.iter_next(iter)
         elif (newValue == 'Pass' or newValue == 'Not-Applicable' or 
                 newValue == 'Non-Blocker'):
             newValue = 'Pass'
-            iter = self.checklist.tree.iter_children(category)
+            iter = self.checklist.iter_children(category)
             while iter:
-                nodeRes = self.checklist.tree.get_value(iter, checklist.RESOLUTION)
+                nodeRes = self.checklist.get_value(iter, checklist.RESOLUTION)
                 if nodeRes == 'Needs-Reviewing':
                     newValue = 'Needs-Reviewing'
                 elif nodeRes == 'Fail':
                     return
-                iter = self.checklist.tree.iter_next(iter)
+                iter = self.checklist.iter_next(iter)
 
-        self.checklist.tree.set(category, checklist.RESOLUTION, newValue)
-        path = self.checklist.tree.get_path(category)
-        self.checklist.tree.row_changed(path, category)
+        self.checklist.set(category, checklist.RESOLUTION, newValue)
+        path = self.checklist.get_path(category)
+        self.checklist.row_changed(path, category)
 
     def display_toggle(self, cell, path, *data):
         """Toggles outputting a message for the review.
@@ -375,13 +375,13 @@ class QAReviewer(gnomeglade.GnomeApp):
         callback takes care of setting the state in the TreeStore.
         """ 
         
-        iter = self.checklist.tree.get_iter(path)
-        value = self.checklist.tree.get_value(iter, checklist.DISPLAY)
+        iter = self.checklist.get_iter(path)
+        value = self.checklist.get_value(iter, checklist.DISPLAY)
 
         if value:
-            self.checklist.tree.set(iter, checklist.DISPLAY, False)
+            self.checklist.set(iter, checklist.DISPLAY, False)
         else:
-            self.checklist.tree.set(iter, checklist.DISPLAY, True)
+            self.checklist.set(iter, checklist.DISPLAY, True)
 
     #
     # Menu/Toolbar callbacks
@@ -429,7 +429,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             # sync_checklist which will perform this sync of checklistView to
             # data.  And a load_checklist which is a special case of this
             # function (and thus should be merged with it.)
-            self.checkView.set_model(self.checklist.tree)
+            self.checkView.set_model(self.checklist)
             
             if self.checklist.type == 'SRPM':
                 from srpmqa import SRPMQA
@@ -444,7 +444,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             except AttributeError:
                 # No problems as long as reviewView no longer exists.
                 pass
-            self.reviewView = Review(self.checklist.tree, self.properties)
+            self.reviewView = Review(self.checklist, self.properties)
             self.reviewView.update_hash()
             self.reviewView.show()
             self.reviewPane.add(self.reviewView)

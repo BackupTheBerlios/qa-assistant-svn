@@ -51,7 +51,7 @@ class Review(gtk.VBox):
     __RESOLUTION=2
     __OUTPUT=3
 
-    def __init__(self, tree, properties):
+    def __init__(self, treeStore, properties):
         gobject.GObject.__init__(self)
         self.properties = properties
         self.addPaths = {}
@@ -62,7 +62,7 @@ class Review(gtk.VBox):
         self.resolution = gtk.Label()
         self.resolution.set_property('justify', gtk.JUSTIFY_LEFT)
         self.resolution.set_property('xalign', 0.0)
-        self.__resolution_check(tree)
+        self.__resolution_check(treeStore)
         ### FIXME: Do something about packing
         self.add(self.resolution)
 
@@ -79,7 +79,7 @@ class Review(gtk.VBox):
         ### FIXME: Allow editing the OUTPUT from this Widget.  Need to emit
         # row-changed signals that are picked up by the TreeStore (or else
         # change both listStore and treeStore)
-        self.__generate_data(tree)
+        self.__generate_data(treeStore)
        
         self.goodLabel=gtk.Label('Good:')
         self.goodLabel.set_property('justify', gtk.JUSTIFY_LEFT)
@@ -141,8 +141,8 @@ class Review(gtk.VBox):
         self.noteComments.append_column(column)
         self.add(self.noteComments)
 
-        tree.connect('row-changed', self.__update_data)
-        tree.connect('row-inserted', self.__add_data)
+        treeStore.connect('row-changed', self.__update_data)
+        treeStore.connect('row-inserted', self.__add_data)
         ### FIXME: Need to connect to a signal when the SRPM changes.
         # self.properties.connect('hash-change', self.__update_hash)
 
@@ -260,8 +260,8 @@ class Review(gtk.VBox):
         if len(path) > 1:
             self.addPaths[path] = True
 
-    def __generate_data(self, tree):
-        """Create the internal list from the present state of tree.
+    def __generate_data(self, treeStore):
+        """Create the internal list from the present state of treeStore.
         
         Take data from the TreeModel and put it into a ListStore.  We only
         need DISPLAY and RESOLUTION to decide how the data is too be displayed
@@ -276,16 +276,16 @@ class Review(gtk.VBox):
                                   gobject.TYPE_BOOLEAN,
                                   gobject.TYPE_STRING,
                                   gobject.TYPE_STRING)
-        category = tree.get_iter_first()
+        category = treeStore.get_iter_first()
         while category:
-            iter = tree.iter_children(category)
+            iter = treeStore.iter_children(category)
             while iter:
-                self.list.append((tree.get_value(iter, checklist.SUMMARY),
-                              tree.get_value(iter, checklist.DISPLAY),
-                              tree.get_value(iter, checklist.RESOLUTION),
-                              tree.get_value(iter, checklist.OUTPUT)))
-                iter = tree.iter_next(iter)
-            category = tree.iter_next(category)
+                self.list.append((treeStore.get_value(iter, checklist.SUMMARY),
+                              treeStore.get_value(iter, checklist.DISPLAY),
+                              treeStore.get_value(iter, checklist.RESOLUTION),
+                              treeStore.get_value(iter, checklist.OUTPUT)))
+                iter = treeStore.iter_next(iter)
+            category = treeStore.iter_next(category)
 
     def __filter_good(self, column, cell, model, iter):
         """Only display comments which have DISPLAY and RESOLUTION=pass."""
@@ -327,22 +327,22 @@ class Review(gtk.VBox):
         else:
             cell.set_property('visible', False)
             
-    def __resolution_check(self, tree):
+    def __resolution_check(self, treeStore):
         """Checks the treeStore to decide the recommendation for this review
 
         This depends on the category status being correct so if there are
         bugs, be sure to check there as well.
         """
-        iter = tree.get_iter_first()
+        iter = treeStore.get_iter_first()
         moreWork = False
         while iter:
-            value = tree.get_value(iter, checklist.RESOLUTION)
+            value = treeStore.get_value(iter, checklist.RESOLUTION)
             if value == 'Fail':
                 self.resolution.set_text('NEEDSWORK')
                 return
             elif value == 'Needs-Reviewing':
                 moreWork = True
-            iter = tree.iter_next(iter)
+            iter = treeStore.iter_next(iter)
 
         if moreWork:
             self.resolution.set_text('Incomplete Review')

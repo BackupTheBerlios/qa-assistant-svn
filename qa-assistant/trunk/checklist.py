@@ -6,11 +6,14 @@
 # Description: Class file to load a description of a checklist into internal
 # structures.
 # Id: $Id$
-"""Class file to load a description of a checklist into internal structures.
-"""
+'''
+Class file to load a description of a checklist into internal structures.
+'''
 
 import libxml2, string
 import gtk, gobject
+
+import error
 
 _checklistFileVersion_='0.2'
 
@@ -34,71 +37,70 @@ class Error(Exception):
 class duplicateItemError(Error):
     pass
 
-class CheckList:
-    """Holds the data associated with the checklist.
+class CheckList (gtk.TreeStore):
+    '''Holds the data associated with the checklist.
     
     Data is held in a gtk TreeModel.  Saving the state of the checklist
     should consist of saving the data in the TreeModel along with a reference
     to the checklist we're operating upon.
-    """
+    '''
 
     class __Entry:
-        """Private class.  Holds entry information until ready to output."""
+        '''Private class.  Holds entry information until ready to output.'''
 
-    def __init__(self, path, props):
+    def __init__(self, path):
 
         self.customItemsIter = None
-        self.props = props
         self.addPaths = {}
         libxml2.registerErrorHandler(self.__no_display_parse_error, None)
         ctxt = libxml2.newParserCtxt()
         checkFile = ctxt.ctxtReadFile(path, None, libxml2.XML_PARSE_DTDVALID)
 
         if ctxt.isValid() == False:
-            raise Error("File does not validate against the checklist DTD")
+            raise error.invalidChecklist('File does not validate against ' \
+                    'the checklist DTD')
 
         root = checkFile.getRootElement()
         if root.name != 'checklist':
-            raise Error("File is not a valid checklist policy file")
+            raise error.invalidChecklist('File is not a valid checklist ' \
+                    'policy file')
         if root.prop('version') != _checklistFileVersion_:
-            raise Error("Checklist file is not a known version")
+            raise error.invalidChecklist('Checklist file is not a known ' \
+                    'version')
         
         # Extract the type from the checklist tag
         self.name = root.prop('name')
         if not self.name:
-            raise Error("Checklist file does not specify a name for itself")
-        self.revision = root.prop('revision')
-        if not self.revision:
-            self.revision='0'
-        self.type = root.prop('type')
-        if not self.type:
-            self.type = 'generic'
+            raise error.invalidChecklist('Checklist file does not specify ' \
+                    'a name for itself')
+        self.revision = root.prop('revision') or '0'
+        self.type = root.prop('type') or 'generic'
 
         # Store the checklist into a GtkTreeModel
-        self.tree = gtk.TreeStore(gobject.TYPE_BOOLEAN,
-                                  gobject.TYPE_BOOLEAN,
-                                  gobject.TYPE_BOOLEAN,
-                                  gobject.TYPE_STRING,
-                                  gobject.TYPE_STRING,
-                                  gobject.TYPE_STRING,
-                                  gobject.TYPE_STRING,
-                                  gobject.TYPE_PYOBJECT,
-                                  gobject.TYPE_PYOBJECT)
+        gtk.TreeStore.__init__(self, gobject.TYPE_BOOLEAN,
+                gobject.TYPE_BOOLEAN,
+                gobject.TYPE_BOOLEAN,
+                gobject.TYPE_STRING,
+                gobject.TYPE_STRING,
+                gobject.TYPE_STRING,
+                gobject.TYPE_STRING,
+                gobject.TYPE_PYOBJECT,
+                gobject.TYPE_PYOBJECT)
 
         # Record each category as a toplevel in the tree
         categories = root.xpathEval2('/checklist/category')
         self.entries = {}
         for category in categories:
-            iter = self.tree.append(None)
-            self.tree.set(iter,
-                          ISITEM, False,
-                          MODIFIED, False,
-                          RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
-                          RESOLUTION, 'Needs-Reviewing',
-                          OUTPUT, None,
-                          OUTPUTLIST, {'Needs-Reviewing':None,
-                                       'Pass':None, 'Fail':None},
-                          SUMMARY, category.prop('name'))
+            iter = self.append(None)
+            self.set(iter,
+                    ISITEM, False,
+                    MODIFIED, False,
+                    RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
+                    RESOLUTION, 'Needs-Reviewing',
+                    OUTPUT, None,
+                    OUTPUTLIST, {'Needs-Reviewing':None,
+                                 'Pass':None, 'Fail':None},
+                    SUMMARY, category.prop('name'))
             self.entries[category.prop('name')] = iter
 
             # Entries are subheadings
@@ -107,16 +109,16 @@ class CheckList:
                 if node.name == 'description':
                     # Set DESCRIPTION of the heading
                     desc = string.join(string.split(node.content))
-                    self.tree.set(iter, DESC, desc)
+                    self.set(iter, DESC, desc)
                 elif node.name == 'entry':
                     entry = self.__xml_to_entry(node)
-                    entryIter=self.tree.append(iter)
-                    self.tree.set(entryIter,
-                                  ISITEM, True,
-                                  MODIFIED, False,
-                                  DISPLAY, entry.display,
-                                  SUMMARY, entry.name,
-                                  DESC, entry.desc)
+                    entryIter=self.append(iter)
+                    self.set(entryIter,
+                            ISITEM, True,
+                            MODIFIED, False,
+                            DISPLAY, entry.display,
+                            SUMMARY, entry.name,
+                            DESC, entry.desc)
                     self.entries[entry.name] = entryIter
                     
                     # Construct the resolution from multiple states
@@ -130,11 +132,11 @@ class CheckList:
                         if name != 'Needs-Reviewing':
                             resolutionList.append(entry.states[i]['name'])
                         
-                    self.tree.set(entryIter,
-                                  RESLIST, resolutionList,
-                                  OUTPUTLIST, resolutions,
-                                  RESOLUTION, 'Needs-Reviewing',
-                                  OUTPUT, resolutions['Needs-Reviewing'])
+                    self.set(entryIter,
+                            RESLIST, resolutionList,
+                            OUTPUTLIST, resolutions,
+                            RESOLUTION, 'Needs-Reviewing',
+                            OUTPUT, resolutions['Needs-Reviewing'])
                 else:
                     # DTD validation should make this ignorable.
                     pass
@@ -144,8 +146,8 @@ class CheckList:
         checkFile.freeDoc()
         # More efficient to do the stuff in the signal handlers manually
         # during setup and only register them afterwards.
-        self.tree.connect('row-inserted', self.__added_row)
-        self.tree.connect('row-changed', self.__modified_row)
+        self.connect('row-inserted', self.__added_row)
+        self.connect('row-changed', self.__modified_row)
 
     def add_entry(self, summary, item=None, display=None,
             desc=None, resolution=None, output=None,
@@ -193,27 +195,29 @@ class CheckList:
             outputList[resolution] = output
        
         if self.customItemsIter:
-            newItem = self.tree.append(self.customItemsIter)
+            newItem = self.append(self.customItemsIter)
         else:
-            self.customItemsIter = self.tree.append(None)
+            self.customItemsIter = self.append(None)
             if summary == 'Custom Checklist Items':
                 newItem = self.customItemsIter
             else:
                 # Create the 'Custom Checklist Items' category
-                self.tree.set(self.customItemsIter,
-                    SUMMARY, 'Custom Checklist Items',
-                    MODIFIED, True,
-                    ISITEM, False,
-                    RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
-                    RESOLUTION, 'Needs-Reviewing',
-                    OUTPUT, None,
-                    OUTPUTLIST, {'Needs-Reviewing':None,
-                                           'Pass':None, 'Fail':None},
-                    DESC, '''Review items that you have comments on even though they aren't on the standard checklist.''')
-                newItem = self.tree.append(self.customItemsIter)
+                self.set(self.customItemsIter,
+                        SUMMARY, 'Custom Checklist Items',
+                        MODIFIED, True,
+                        ISITEM, False,
+                        RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
+                        RESOLUTION, 'Needs-Reviewing',
+                        OUTPUT, None,
+                        OUTPUTLIST, {'Needs-Reviewing':None,
+                                     'Pass':None, 'Fail':None},
+                                     DESC, "Review items that you have " \
+                                     "comments on even though they aren't " \
+                                     "on the standard checklist.")
+                newItem = self.append(self.customItemsIter)
         
         # Set up the new item
-        self.tree.set(newItem,
+        self.set(newItem,
                 SUMMARY, summary,
                 DESC, desc,
                 ISITEM, item,
@@ -240,12 +244,17 @@ class CheckList:
         output = string.replace(output, '&', '&amp;')
         output = string.replace(output, '<', '&lt;')
         output = string.replace(output, '>', '&gt;')
+
+        ### FIXME: Get the *Colors from gconf
+        failColor = 'red'
+        minorColor = 'purple'
+        passColor = 'dark green'
         if resolution == 'Fail':
-            color = self.props.failColor
+            color = failColor
         elif resolution == 'Non-Blocker' or resolution == 'Needs-Reviewing':
-            color = self.props.minorColor
+            color = minorColor
         elif resolution == 'Pass':
-            color = self.props.passColor
+            color = passColor
         else:
             color = None
         if color:
