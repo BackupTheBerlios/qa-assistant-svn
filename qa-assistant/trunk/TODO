@@ -64,3 +64,9 @@ Programming:
 
 - Prompt before outputting a review when the review is in state
   'Needs Reviewing'
+
+Build Architecture
+==================
+- Python Distutils or autoconf configure
+  + Install files
+  + Create distribution tarballs
