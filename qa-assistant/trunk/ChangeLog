@@ -1,3 +1,54 @@
+2005-01-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r149    
+    * qa-assistant.spec.in: Update ChangeLog to latest version.
+    * data/softwarerelease.xml:
+      - Fix a typo in make distcheck
+      - Remove duplicate make distcheck entry.
+      - Add a descriptive entry to the runs fine entry.
+    
+2005-01-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r148    
+    * src/Makefile.am: Add preferences.py
+    
+2005-01-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r147    
+    * src/Makefile.am: Add gpg.py to the list of files.
+    
+2004-12-30 Toshio Kuratomi <toshio@tiki-lounge.com> - r146    
+    * src/error.py: Add exceptions returned by our gpg module.
+    * src/review.py:
+      - Import gconf, our gpg and error modules.
+      - Retrieve gpg information from gconf.
+      - publish():
+        + Change outBuf from a list of lines to a string.
+        + Sign the review
+    * src/gpg.py:
+      - get_passphrase(): function to popup a dialog that takes a passphrase
+        from the user.
+      - sign_buffer(): Fix the gpg invokation to process the output correctly.
+    * README:
+      - Update requirements to python 2.3 and pygtk 2.4.
+    * PREFERENCES: Update preferences to done once tested.
+    * configure.ac:
+      - Update python requirement to 2.3
+      - Update version to 0.4.90.2
+      - Update pygtk requirement to 2.4
+    * TODO: Move Preferences to need testing.
+    * NEWS:
+      - Up version to 4.90.2
+      - Added preferences and druid to new features.
+    
+2004-11-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r145    
+    * src/preferences.py:
+      - If help button is pressed, print a message that there is no help.
+      - When Ok button is pressed, close and destroy the dialog.
+    * src/qareviewer.py:
+      - Set icons for Preferences Dialog and Druid.
+      - Delete the about dialog when we're done with it.
+    * BUGS: Remove note to set icons.
+    * glade/qa-assistant.glade: Rename preferences window help button and ok
+      button so we can access them from code.
+    
+2004-11-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r144    
+    * ChangeLog: Update to (r143)
+    
 2004-11-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r143    
     * src/error.py: Note that we need to add exceptions for gpg errors.
     * src/preferences.py:
