@@ -5,7 +5,7 @@
 # Date: 8 Feb, 2004
 # Copyright: Toshio Kuratomi
 # License: GPL
-# Description: Program to generate MD5sums of a src.rpm
+# Description: Program to generate MD5sums for an SRPM
 # Id: $Id$
 """Generates MD5sums of an SRPM and the files within it.
 Usage: fedora-md5 [OPTIONS] <SRPM>
@@ -39,8 +39,6 @@ import sys, os, tempfile, stat
 import string, re
 import sha, md5
 import getopt
-# Requires python-optik w/ python2.2 or python2.3.
-#from optparse import OptionParser
 
 class InvalidCommandError(Exception):
     """Specifies an unknown option or command.
@@ -100,6 +98,9 @@ def parse_command_line(args):
     if flags.setdefault('keep', False):
         flags['keep'] = True
     flags.setdefault('hash', '--md5')
+
+    # Currently no command line flag to disable this but the code to disable
+    # it is there.  [untested]
     flags.setdefault('headercheck', True)
 
     return flags
@@ -221,14 +222,7 @@ if __name__ == "__main__":
         sys.stderr.write("You must specify an SRPM to read data from.\n")
         sys.exit(3)
 
-    ### FIXME: Remove the system calls as much as possible
-    ### Possibilities:
-    ###  * reimplement fedora-unrpm here with an option to --unrpm only
-    ###  * looks as though rpm2cpio uses some private interfaces to rpmlib
-    ###    so implementing it within the script may not be practical
-    ###    (or desirable)
-    ###  * Should be able to extract the package name-ver-rel with rpmlib
-    ###    operating on the package headers.
+    ### FIXME: os.system => rpmlib conversion
     rpmCmd=os.popen('rpm -qp --qf "%{NAME}-%{VERSION}-%{RELEASE}" '
                     +actions["input"], 'r')
     unpackdir=rpmCmd.readline()
