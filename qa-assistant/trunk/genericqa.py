@@ -89,7 +89,7 @@ class GenericQA(gtk.Menu):
         resList = ('Pass', 'Fail', 'Non-Blocker')
         outputList = {}
         for res in resList:
-            outputList[res] = None
+            outputList[res] = ''
             resMenu.append(gtk.MenuItem(res))
         resEntry = gtk.OptionMenu()
         resEntry.set_menu(resMenu)

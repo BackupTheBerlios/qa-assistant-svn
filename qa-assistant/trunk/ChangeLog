@@ -1,3 +1,55 @@
+2004-10-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r114    
+    * Warning: This commit should display the checklist on the screen fine but
+      will not publish a review to file.  It also will not display any header
+      information associated with SRPM reviews.  Anything that was broken
+      before is likely to still be broken now.  On the plus side, this is
+      probably the most broken the package will get for a while.  The major
+      architectural changes are done for the next version.  There is a great
+      deal to do, but should be mostly rewriting older features to work within
+      the new design.
+    * ChangeLog: Update to r113
+    * review.py: Major rewrite of the Review widget.  Display is mostly
+      finished but publish does not work and some more reworking of the
+      interaction with the CheckList/checklist file is needed.
+      - Removed re and string as functions using them are now in CheckList.
+      - Remove MyRendererText.  The new Review widget does not use a ListView
+        so it doesn't need a custom Cell Renderer.
+      - Remove listview positional constants.
+      - __init__ no longer creates self.properties or takes a properties
+        argument.  All operations on the SRPM (which we got from properties)
+        will now be done in a header creation function in the checklist.
+      - Remove self.addPaths and __add_data as the functionality has been
+        merged into __update_data.
+      - resolution and hashLabel are replaced with a header label which will
+        be set from a property on the CheckList.
+      - The four gtk.ListViews have been replaced with a reviewBoxes dict
+        that holds four gtk.VBoxes.
+      - Remove update_hash and __update_hash as hashes become the
+        responsibility of the CheckList.
+      - set_model() method to set a data model for the Review to view.
+      - __sync_checklist() method to sync the Review to a new CheckList.
+        This replaces and extends __generate_data.
+      - Significant rewrite of __update_data() using the new
+          self.entries[SUMMARY] = (RESOLUTION, unique number) and
+          self.displayList[(RESOLUTION, unique number)] = label and
+          self.reviewBoxes[RESOLUTION] = label
+        datastructures.  This has the side effect of incorporating the logic
+        for new CheckList entries entirely into this function.
+      - Remove __filter_good, __filter_work, __filter_minor, __filter_note as
+        we aren't using Cell Renderers anymore so we don't have to create
+        arcane callbacks to transform our data before passing to them for
+        display.
+      - Note that most of __resolution_check's functionality is going to be
+        merged into the checklist.
+    * checklist.py:
+      - Set values for outputList to the empty string rather than None.  This
+        works with the new Review widget better.
+      - Note that check_category_resolution is going to undergo a major
+        overhaul.
+    * qareviewer.py: Remove calls to Review.update_hash.
+    * tests: ignore Makefile, Makefile.in and *.pyc files.
+    * tests/Makefile.am: Add *.pyc and *.pyo files to the CLEANFILES.
+    
 2004-09-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r113    
     * tests/testchecklist.py, tests/testcreation.py:
       - Make this a runnable script so we can run the checklist tests as a
