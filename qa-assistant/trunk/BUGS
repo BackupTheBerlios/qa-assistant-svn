@@ -53,10 +53,6 @@ Programming Errors
     svn repository.  The repository or a tarball needs to be accessbile to run
     make dist-check, et al.
 
-* Preferences -- set gpg path, gpg id, etc.  These are gtk.ComboBoxEntry's
-  but the way I have them set up, they don't seem to want to take information
-  from the keyboard.  Read the pygtk tutorial and we'll find the problems.
-
 Working: Need to test
 ---------------------
 * Using the save function (rather than save_as) doesn't seem to be saving the

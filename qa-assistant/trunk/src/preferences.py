@@ -9,7 +9,6 @@
 __revision__ = "$Rev$"
 
 import os
-import re
 
 import gtk
 import gconf
@@ -140,6 +139,8 @@ class Preferences(gnomeglade.Component):
 
         # GPG identity
         self.create_gpg_ids_list(gpgPath)
+        self.SignIdCombo.child.connect('focus-out-event',
+                self.set_gpg_identity)
         self.SignIdCombo.connect('changed', self.set_gpg_identity)
         
         # Temporary directory for files
@@ -172,6 +173,7 @@ class Preferences(gnomeglade.Component):
         '''
         key = GCONFPREFIX + '/user/gpg-identity'
         model = self.SignIdCombo.get_model()
+        model.clear()
         try:
             gpgId = self.gconfClient.get_string(key)
         except gobject.GError:
@@ -180,13 +182,8 @@ class Preferences(gnomeglade.Component):
         if gpgId:
             model.append((gpgId,))
             self.SignIdCombo.set_active(0)
-            idRE = re.compile(gpgId)
-            for identity in gpgIdentities:
-                if idRE.match(identity):
-                    continue
-                model.append((identity,))
-        else:
-            for identity in gpgIdentities:
+        for identity in gpgIdentities:
+            if gpgId != identity:
                 model.append((identity,))
 
     #
@@ -197,7 +194,7 @@ class Preferences(gnomeglade.Component):
         '''Update the gpgID list when the gpg program is updated.
         '''
         if entry.value and entry.value.type == gconf.VALUE_STRING:
-            create_gpg_ids_list(entry.value.get_string())
+            self.create_gpg_ids_list(entry.value.get_string())
         
     def toggle_desc_options(self, client, connectId, entry, extra):
         '''Enable or disable settign the description options.
@@ -279,23 +276,24 @@ class Preferences(gnomeglade.Component):
         self.gconfClient.set_int(GCONFPREFIX + '/display/checklist-description-wait',
         spinButton.get_value_as_int())
 
-    def set_gpg_path(self, comboBox):
+    def set_gpg_path(self, fileEntry):
         '''
         '''
-        model = comboBox.get_model()
         self.gconfClient.set_string(GCONFPREFIX + '/files/gpg-path',
-                model.get_value(comboBox.get_active_iter(),0))
+                fileEntry.gtk_entry().get_text())
 
-    def set_gpg_identity(self, comboBox):
+    def set_gpg_identity(self, entry, event=None):
         '''
         '''
-        model = comboBox.get_model()
-        self.gconfClient.set_string(GCONFPREFIX + '/user/gpg-identity',
-                model.get_value(comboBox.get_active_iter(),0))
+        if event:
+            self.gconfClient.set_string(GCONFPREFIX + '/user/gpg-identity',
+                    entry.get_text())
+        else:
+            self.gconfClient.set_string(GCONFPREFIX + '/user/gpg-identity',
+                    entry.child.get_text())
 
-    def set_state_dir(self, comboBox):
+    def set_state_dir(self, fileEntry):
         '''
         '''
-        model = comboBox.get_model()
         self.gconfClient.set_string(GCONFPREFIX + '/files/user-state-dir',
-                model.get_value(comboBox.get_active_iter(),0))
+                fileEntry.gtk_entry().get_text())
