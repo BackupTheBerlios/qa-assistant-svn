@@ -1,4 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
+<!--
+ Identifiers:
+ PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.2//EN"
+ SYSTEM "http://qa-assistant.sf.net/checklist/0.2/checklist.dtd"
+-->
 <!ENTITY % Resolutions
   '(Needs-Reviewing|Pass|Fail|Non-Blocker|Not-Applicable)'
 >

@@ -20,12 +20,12 @@ qa_assistant_PYTHON = \
 		qareviewer.py \
 		review.py \
 		srpmqa.py \
+		savefile.py \
 		treetips.py
 
 # Generated program files
 nodist_qa_assistantdir = $(datadir)/qa-assistant
-nodist_qa_assistant_PYTHON = \
-			paths.py
+nodist_qa_assistant_PYTHON = paths.py
 
 iconsdir = $(datadir)/pixmaps
 icons_DATA = pixmaps/qa-icon.png
@@ -79,7 +79,7 @@ CLEANFILES= \
 	    -e "s,@#pkgdatadir#@,$(pkgdatadir)," < $<  > $@
 
 # automake's py_compile script compiles DESTDIR into the module's paths
-# which is not what we want.  (DESTDIR is a stagign area so it
+# which is not what we want.  (DESTDIR is a staging area so it
 # shouldn't be included in the built files.)  This takes care of it.
 install-data-hook:
 	python -c "import compileall ; compileall.compile_dir('$(DESTDIR)$(qa_assistantdir)', None, '$(qa_assistantdir)', True)"

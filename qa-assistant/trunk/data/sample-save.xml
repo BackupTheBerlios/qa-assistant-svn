@@ -7,15 +7,17 @@
     <property name='BugzillaURL'>http://bugzilla.somebugzillaurl.com/cgi-bin/bugquery</property>
     <property name='SRPM'>Pyrex-0.9-1.fdr.0.src.rpm</property>
   </properties>
-  <entry name='Epoch' display='true' state='Fail'>
-    <states>
-      <state name='Fail'>Epoch is incorrect</state>
-      <state name='Pass'>Epoch is correct</state>
-    </states>
-  </entry>
-  <entry name='SRPM Signature' display='true' state='Pass'>
-    <states>
-      <state name='Fail'>This is a failur</state>
-    </states>
-  </entry>
+  <entries>
+    <entry name='Epoch' display='true' state='Fail'>
+      <states>
+        <state name='Fail'>Epoch is incorrect</state>
+        <state name='Pass'>Epoch is correct</state>
+      </states>
+    </entry>
+    <entry name='SRPM Signature' display='true' state='Pass'>
+      <states>
+        <state name='Fail'>This is a failur</state>
+      </states>
+    </entry>
+  </entries>
 </qasave>
