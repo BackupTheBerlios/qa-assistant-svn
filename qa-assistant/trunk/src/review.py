@@ -170,6 +170,22 @@ class Review(gtk.VBox):
                     response = errorDialog.run()
                     errorDialog.destroy()
                     return
+                except error.NotGPGCompatible:
+                    errorDialog = gtk.MessageDialog(None,
+                            gtk.DIALOG_DESTROY_WITH_PARENT,
+                            gtk.MESSAGE_WARNING,
+                            gtk.BUTTONS_CLOSE,
+                            'The program specified in the Preferences'
+                            ' dialog does not appear to take the same'
+                            ' commandline arguments as gpg.  Please specify'
+                            ' a new program in the Preferences that is either'
+                            ' gpg or something that is a dropin replacement'
+                            ' for it.')
+                    errorDialog.set_title('Invalid GPG program specified')
+                    errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
+                    response = errorDialog.run()
+                    errorDialog.destroy()
+                    return
                 else:
                     # Success!
                     break

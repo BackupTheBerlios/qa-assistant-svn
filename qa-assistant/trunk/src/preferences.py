@@ -16,6 +16,7 @@ import gobject
 
 import gnomeglade
 from qaconst import *
+import error
 
 import gpg
 
@@ -172,16 +173,26 @@ class Preferences(gnomeglade.Component):
         '''
         '''
         key = GCONFPREFIX + '/user/gpg-identity'
-        model = self.SignIdCombo.get_model()
-        model.clear()
         try:
             gpgId = self.gconfClient.get_string(key)
         except gobject.GError:
             gpgId = None
-        gpgIdentities = gpg.list_secret_keys(gpgPath)
+
+        model = self.SignIdCombo.get_model()
+        model.clear()
         if gpgId:
             model.append((gpgId,))
             self.SignIdCombo.set_active(0)
+
+        try:
+            gpgIdentities = gpg.list_secret_keys(gpgPath)
+        except error.GPGError:
+            # We are going to allow this to continue and check for validity
+            # when we sign the review.  This is because the config might be
+            # shared between different machines where the gpg program may or
+            # may not work.
+            return
+
         for identity in gpgIdentities:
             if gpgId != identity:
                 model.append((identity,))

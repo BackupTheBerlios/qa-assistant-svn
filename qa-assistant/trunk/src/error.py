@@ -40,6 +40,10 @@ class NoSecretKey(GPGError):
     '''There was no secret key for the specified user id.'''
     pass
 
+class NotGPGCompatible(GPGError):
+    '''The program selected in the preferences isn't compatible with gpg.'''
+    pass
+    
 class NoOut(GPGError):
     '''The signing did not generate any output.'''
     pass
