@@ -24,7 +24,6 @@ gchar *s = N_("translator_credits");
 gchar *s = N_("Not Yet Implemented");
 gchar *s = N_("<span weight='bold' size='larger'>Feature Not Yet Implemented</span>");
 gchar *s = N_("This feature is planned for the future but has not yet been implemented.  If you are interested in implementing this feature, please email the developers.");
-gchar *s = N_("Select File");
 gchar *s = N_("Open a Submited Package");
 gchar *s = N_("Bugzilla Server");
 gchar *s = N_("Enter the Bugzilla Server URL or select from the list");

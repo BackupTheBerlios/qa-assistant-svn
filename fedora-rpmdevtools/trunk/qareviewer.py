@@ -228,6 +228,17 @@ class QAReviewer(gnomeglade.GnomeApp):
     # Menu/Toolbar callbacks
     #
     
+    def on_menu_publish_activate(self, *extra):
+        """Publish a review to a file."""
+        
+        # File select dialog for use in file selecting callbacks.
+        fileSelect = gtk.FileSelection(title='Select a file to save the review into')
+        response = fileSelect.run()
+        if response == gtk.RESPONSE_OK:
+            self.reviewView.publish(fileSelect.get_filename())
+        fileSelect.destroy()
+        del fileSelect
+
     def on_menu_quit_activate(self, *extra):
         """End the program.
 
@@ -237,14 +248,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         ### FIXME: Check for unsaved files.
         self.quit()
        
-    def on_menu_about_activate(self, *extra):
-        """Show the about window."""
-
-        about = gtk.glade.XML('glade/qa-assistant.glade', 'AboutWindow').get_widget('AboutWindow')
-        about.set_property('name', __programName__)
-        about.set_property('version', __version__)
-        about.show()
-        
     def on_menu_view_toggle_preview_activate(self, *extra):
         """Toggles between checklist view and output view.
 
@@ -266,18 +269,15 @@ class QAReviewer(gnomeglade.GnomeApp):
             self.checkView.append_column(self.outputColumn)
             self.reviewScroll.hide()
             
+    def on_menu_about_activate(self, *extra):
+        """Show the about window."""
+
+        about = gtk.glade.XML('glade/qa-assistant.glade', 'AboutWindow').get_widget('AboutWindow')
+        about.set_property('name', __programName__)
+        about.set_property('version', __version__)
+        about.show()
+        
     ### FIXME: Features we want to implement but haven't had the time yet:
-    def on_menu_publish_activate(self, *extra):
-        """Publish a review to a file."""
-        msg = """Currently this is only partially implemented.  It needs two more things:
-1] Connect to the file dialog so the user can select the file to use.  Currently it just outputs to /var/tmp/qa-review.txt
-
-2] Ask whether to publish when the review is not in a finished state (PUBLISH +1 or NEEDSWORK)
-        """
-        ### FIXME: Get Filename from the user.
-        filename = '/var/tmp/qa-review.txt'
-        self.reviewView.publish(filename)
-
     def on_menu_new_srpm_activate(self, *extra):
         """Open a new review based on the user selected SRPM"""
         msg = """Create a new review based on an SRPM downloaded to the system.

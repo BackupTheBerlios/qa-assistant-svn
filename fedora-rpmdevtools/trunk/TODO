@@ -1,62 +1,57 @@
-Pressing New should prompt for a bugzilla # or URL
-Pressing save should dump the present state to an xml file
-Pressing open should load a dumped xml file
-
 glade/GUI:
 ==========
-Publish Button should be added to toolbar and menu
-Pressing Publish should build a review and prompt user for file to save as
+- Publish Button should be added to toolbar
 
-Submit Button should be added to toolbar and menu
-Pressing Submit will build the review and submit upstream and down.
+- Submit Button should be added to toolbar and menu
+  + Pressing Submit will build the review and submit upstream and down.
 
-Add a New dialog to take input about bugzilla
+- Add a New dialog to take input about bugzilla
 
-Add a New Dialog to take input about SRPM
+- Add a New Dialog to take input about SRPM
 
-Colorize output depending on the resolution state (green for pass,
-red for blocker, pink for let it slide.)
+- Pressing save should dump the present state to an xml file
 
-tooltip like popup for DESCRIPTIONS of each checklist item
+- Pressing open should load a dumped xml file
 
-Identify what SRPM/ bugzilla/ package we're working on in the status bar
+- Colorize output depending on the resolution state (green for pass,
+  red for blocker, pink for let it slide.)
+
+- tooltip like popup for DESCRIPTIONS of each checklist item
+
+- Identify what SRPM/ bugzilla/ package we're working on in the status bar
 
 Extra GNOME Functionality:
 ==========================
-Create preferences infrastructure : check PREFERENCES for ideas.
+- Create preferences infrastructure : check PREFERENCES for ideas.
 
-Figure out the best way to add default paths to our data files.
-(Look at gnome-blog)
+- Figure out the best way to add default paths to our data files.
+  (Look at gnome-blog)
 
 Programming:
 ============
-Process command line argument parsing
+- Process command line argument parsing
 
-Figure out how we are going to track entries into the editor.  We want
-people to be able to shift text around from Needswork and Non-blocker, and
-to add to them but we want to keep track of what entry is associated with what
-entry id.
+- Enhance tracking entries into the editor.  We want
+  people to be able to shift text around from Needswork and Non-blocker, and
+  to add to them but we want to keep track of what entry is associated with
+  what entry id.
 
-Possibility of creating a list view of the output sorted on the RESOLUTION
-rather than reviewPane textareas.
+- Ability to add non-checklist item review items: ie "Fails to call my dog
+  into dinner which is what I expect gdogcaller to do."
 
-Save file functionality
+- Automate some review tasks
+  + checkheader
+  + checksig
+  + verify source against spec file/canonical URL
 
-Automate some review tasks
-MD5Sum
-checkheader
-checksig
-verify source against spec file/canonical URL
+- SRPM.py needs a lot of work.  It currently barely works.
+  + Exceptions
 
-SRPM.py needs a lot of work.  It currently barely works.
+- review.publish needs to do wordwrapping of lines.  Look into whether a
+  textBuffer object has the necessary wordwrapping even without a textView.
 
+- Prompt before outputting a review when the review is in state
+  'Needs Reviewing'
 XML:
 ====
-In our xml file, we must give each entry a unique id.
-
-DTD for our xml files
-
-Create at least one complete checklist.
-
-Resolution states: Pass, Needswork, Non-Blocker, N/A, Needs Reviewing
-Needs Reviewing is provided by the program right now as a default state....
+- Create at least one complete checklist.
