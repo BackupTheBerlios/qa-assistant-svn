@@ -42,6 +42,23 @@ class QAReviewer(gnomeglade.GnomeApp):
         ### FIXME: Properties is hard-coded right now.  Needs some love.
         self.properties = Properties('fedoraus.xml')
 
+        ### FIXME: Merge with checklist.
+
+        # Create a structure providing savefiles
+        dtdFile = os.path.join('data', 'qasave.dtd')
+        saveDTD = gnomeglade.uninstalled_file(dtdFile)
+        if not saveDTD:
+            dtdFile = os.path.join(__programName__, dtdFile)
+            saveDTD = gnomeglade.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    dtdFile)
+            if saveDTD == []:
+                saveDTD = None
+        if saveDTD:
+            self.saveFile = SaveFile(None, self.properties, saveDTD)
+        else:
+            ### FIXME: Error out gracefully.
+            sys.stderr.write('Unable to locate the qasave dtd.  Is qa-assistant installed properly?')
+
         # Load the interface
         gladefile = 'glade/qa-assistant.glade'
         gnomeglade.GnomeApp.__init__(self, __programName__, __version__,
@@ -93,7 +110,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.checkView.append_column(column)
         
         renderer = gtk.CellRendererText()
-        renderer.connect('edited', self.output_edited, self.checklist.tree)
+        renderer.connect('edited', self.output_edited)
         column = gtk.TreeViewColumn('Output', renderer,
                                     markup=checklist.OUTPUT,
                                     visible=checklist.DISPLAY,
@@ -114,20 +131,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.grabArrow.show()
 
         self.reviewScroll.hide()
-
-        dtdFile = os.path.join('data', 'qasave.dtd')
-        saveDTD = gnomeglade.uninstalled_file(dtdFile)
-        if not saveDTD:
-            dtdFile = os.path.join(__programName__, dtdFile)
-            saveDTD = gnomeglade.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
-                    dtdFile)
-            if saveDTD == []:
-                saveDTD = None
-        if saveDTD:
-            self.saveFile = SaveFile(self.checklist, self.properties, saveDTD)
-        else:
-            ### FIXME: Error out gracefully.
-            sys.stderr.write('Unable to locate the qasave dtd.  Is qa-assistant installed properly?')
 
         #
         # Command line initialization
@@ -198,6 +201,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.reviewView.update_hash()
         self.reviewView.show()
         self.reviewPane.add(self.reviewView)
+        self.saveFile.set_checklist(self.checklist)
 
     def SRPM_into_properties(self, filename):
         '''Add an SRPM file into our properties structure.
@@ -297,9 +301,9 @@ class QAReviewer(gnomeglade.GnomeApp):
     #
     # Treeview Callbacks
     # 
-    def output_edited(self, cell, row, newValue, model):
+    def output_edited(self, cell, row, newValue):
         """Change the text of the output string"""
-        iter = model.get_iter_from_string(row)
+        iter = self.checklist.tree.get_iter_from_string(row)
         path = self.checklist.tree.get_path(iter)
         name = self.checklist.tree.get_value(iter, checklist.RESOLUTION)
         newValue = self.checklist.colorize_output(name, newValue)
@@ -418,6 +422,11 @@ class QAReviewer(gnomeglade.GnomeApp):
                 ### FIXME: MSG Dialog that we were unable to load the file
                 pass
 
+            try:
+                self.checklist.destroy()
+            except AttributeError:
+                # No problems as long as checklist no longer exists.
+                pass
             self.checklist = newList
             ### FIXME: The following is copied from SRPM_into_properties
             # It needs to be refactored to just have one copy somewhere.
@@ -439,11 +448,16 @@ class QAReviewer(gnomeglade.GnomeApp):
                 qamenu = GenericQA(self)
             self.QAMenuItem.set_submenu(qamenu)
             qamenu.show_all()
-            self.reviewView.destroy()
+            try:
+                self.reviewView.destroy()
+            except AttributeError:
+                # No problems as long as reviewView no longer exists.
+                pass
             self.reviewView = Review(self.checklist.tree, self.properties)
             self.reviewView.update_hash()
             self.reviewView.show()
             self.reviewPane.add(self.reviewView)
+            self.saveFile.set_checklist(self.checklist)
             ### End of __load_checklist copy.
 
     def on_menu_save_activate(self, *extra):

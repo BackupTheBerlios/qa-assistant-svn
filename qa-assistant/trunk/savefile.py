@@ -79,7 +79,7 @@ class SaveFile:
         if self.properties.SRPM:
             properties.addChild(self.__create_property('SRPM',
                 self.properties.SRPM.filename))
-     
+
         # Output entries
         entries = root.newChild(None, 'entries', None)
         self.checklist.tree.foreach(self.__create_entry, entries)
@@ -189,6 +189,13 @@ class SaveFile:
         
         self.filename = filename
 
+    def set_checklist(self, checklist):
+        '''Dirty hack to get the proper checklist when we create a new one.
+        When we combine this with checklist, we can just reference `self`
+        instead of trying to remain in sync.
+        '''
+        self.checklist = checklist
+
     #
     # Helper methods
     #
@@ -213,14 +220,15 @@ class SaveFile:
 
         entry.res = node.prop('state')
         entry.reslist = []
-        entry.outlist = []
+        entry.outlist = {}
         while state:
             if state.name == 'state':
-                entry.reslist.append(state.prop('name'))
-                entry.outlist.append(newList.colorize_output(
-                    state.prop('name'), state.content))
-                if state.prop('name') == entry.res:
-                    entry.out = entry.outlist[-1]
+                resName = state.prop('name')
+                entry.reslist.append(resName)
+                entry.outlist[resName] = newList.colorize_output(resName,
+                            state.content)
+                if resName == entry.res:
+                    entry.out = entry.outlist[resName]
             state = state.next
 
         return entry
