@@ -1,3 +1,35 @@
+2005-01-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r152    
+    * src/preferences.py:
+      - __init__(), set_gpg_identity(): Fix signing combo to properly set
+        whether it's changed by typing or selecting from the dropdown menu.
+      - creat_gpg_ids_list():
+        + clear the dropdown menu before creating a new list of ids.
+        + Now do a full match of the gpgIds rather than a substring.  This
+          is because several keys could have similar IDs yet be different.
+      - change_gpg_path(): Prepend "self." to call to create_gpg_ids_list.
+      - set_gpg_path(), set_state_dir(): properly set the program and state
+        directory whether the entry is typed in or selcted from the
+        FileChooser.
+    * BUGS: Preferences BUGS fixed.
+    
+2005-01-05 Toshio Kuratomi <toshio@tiki-lounge.com> - r151    
+    * src/genericqa.py: Add note to convert OptionMenu to ComboBox.  Deferring
+      because genericqa.py is being phased out and it's not yet clear
+      whether the code will be reused or go away.
+    * src/review.py: __update_date(): 
+      - Create the review key from Summary after checking whether summary is
+        valid yet.
+      - If the output string in the checklist is not yet set, set it to the
+        empty string so the review label is set correctly.
+    * src/checklist.py: set(): When changing the resolution, automatically
+      change the output only if an outputlist has been set in the checklist.
+      This fixes a bug when the user adds custom entries.
+    * BUGS: Note that there's a bug somewhere in the preferences dialog
+      with handling gpg_path/gpg_id and other ComboBoxEntry widgets.
+    
+2005-01-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r150    
+    * ChangeLog: Update to (r149)
+    
 2005-01-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r149    
     * qa-assistant.spec.in: Update ChangeLog to latest version.
     * data/softwarerelease.xml:
