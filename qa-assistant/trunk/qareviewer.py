@@ -144,8 +144,9 @@ class QAReviewer(gnomeglade.GnomeApp):
         except AttributeError:
             # No problems as long as reviewView doesn't exist
             pass
-        self.reviewView = Review(self.checklist, self.properties)
-        self.reviewView.update_hash()
+        self.reviewView = Review(self.checklist)
+        ### FIXME: This must be replaced with a header method in the checklist.
+        #self.reviewView.update_hash()
         self.reviewView.show()
         self.reviewPane.add(self.reviewView)
         # Create the primary view on our checklist for the listPane
@@ -203,7 +204,8 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         ### FIXME: Eventually properties should be a gobject and this
         # should be caught by a signal.connect in the Review Widget.
-        self.reviewView.update_hash()
+        # Moving it into the checklist
+        #self.reviewView.update_hash()
 
 
     def __check_readiness(self):
@@ -298,7 +300,8 @@ class QAReviewer(gnomeglade.GnomeApp):
                 # No problems as long as reviewView no longer exists.
                 pass
             self.reviewView = Review(self.checklist, self.properties)
-            self.reviewView.update_hash()
+            ### FIXME: This must be replaced with a header method in the checklist
+            #self.reviewView.update_hash()
             self.reviewView.show()
             self.reviewPane.add(self.reviewView)
             ### End of __load_checklist copy.

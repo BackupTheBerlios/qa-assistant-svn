@@ -237,7 +237,7 @@ class CheckList (gtk.TreeStore):
                     self.entries[entry.name.lower()] = entryIter
                     
                     # Construct the resolution from multiple states
-                    outputList={'Needs-Reviewing': None}
+                    outputList={'Needs-Reviewing': ''}
                     resolutionList=['Needs-Reviewing']
                     for i in range(len(entry.states)):
                         name = entry.states[i]['name']
@@ -296,14 +296,14 @@ class CheckList (gtk.TreeStore):
         if display == None:
             display = True
         resolution = resolution or 'Needs-Reviewing'
-        output = output or None
+        output = output or ''
         desc = desc or None
         resList = resList or ['Needs-Reviewing', 'Pass', 'Fail', 'Non-Blocker', 'Not-Applicable']
         if outputList:
             outputList = outputList
         else:
             for res in resList:
-                outputList[res] = None
+                outputList[res] = ''
             outputList[resolution] = output
        
         if self.customItemsIter:
@@ -460,13 +460,13 @@ class CheckList (gtk.TreeStore):
             output = ('<span foreground="' + color + '">' +
                     output + '</span>')
         return output
-    
+   
     def check_category_resolution(self, changedRow, newValue):
         '''Checks a rows category to see if its status should change.
         
         Arguments:
-        changedRow -- The entry row that has changed.
-        newValue -- The new value of the row.
+        :changedRow: The entry row that has changed.
+        :newValue: The new value of the row.
 
         This function is a small hack.  It really should be a signal handler
         that gets called when a resolution is changed on the CheckList.
@@ -474,6 +474,37 @@ class CheckList (gtk.TreeStore):
         column-changed signal.  So we are instead calling this function when
         the changed signal occurs on the checkView column looking at
         RESOLUTION.
+
+        ### FIXME: Ways to change this function:
+        A) What if I change CheckList to emit a signal when the Resolution
+           changes.  The signal would emit resolution-changed with row
+           and old value.  Then, when CheckView changes the resolution,
+           the checkview can call emit.resolution_changed()
+
+        1) Make it process changes to either entry or category.
+        
+           * Pass in the changedRow and newValue.
+           * It should then start at the first iter at that level of the
+             checklist.
+           * Scan through the resolutions.  Spit back the resolution to change
+             the top level to or None to not change.
+
+             - Changing the category/toplevel resolution will be handled by
+               the calling code? Maybe better to handle that internally as
+               well?
+             - Yes.  so instead of spitting the change back, this code can
+               either figure out which is which and modify or we can write
+               a new public function that calls this one.
+        2) Make it able to resync to the current state of the checklist, not
+           just on individual entry changes.
+
+           * When given no value on newValue, we need to walk the values of
+             each set, tallying what values we are going to set without a
+             newValue to compare to.  This is a simpler operation, but the
+             code has no shortcuts whereas the current implementation has
+             several.  Don't know if there's a performance gain from the
+             simplicity or a loss from the lack of shortcuts.  Need to try it
+             out and see.
         '''
         outputlist = self.get_value(changedRow, self.OUTPUTLIST)
         out = outputlist[newValue]
@@ -523,9 +554,20 @@ class CheckList (gtk.TreeStore):
                     return
                 entryIter = self.iter_next(entryIter)
 
-        self.set(category, self.RESOLUTION, newValue)
-        path = self.get_path(category)
-        self.row_changed(path, category) ### FIXME: Is this necessary?
+        oldRes = self.get_value(category, self.RESOLUTION)
+        if oldRes == newValue:
+            return
+        else:
+            self.set(category, self.RESOLUTION, newValue)
+            ### FIXME: Check whether the overall checklist value has changed
+            # or not.
+            # catIter = treeStore.get_iter_first()
+            #
+            # self.checkRes = 
+
+            ### FIXME: Is this really necessary?
+            path = self.get_path(category)
+            self.row_changed(path, category)
 
     #
     # Helpers to read a checklist

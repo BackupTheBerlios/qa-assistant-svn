@@ -8,4 +8,6 @@ TESTS = testcreation.py \
 EXTRA_DIST = test.py \
 	     testchecklist.py \
 	     testcreation.py
-	     
+CLEANFILES = \
+	     *.pyc \
+	     *.pyo

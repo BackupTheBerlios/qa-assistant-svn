@@ -1,3 +1,39 @@
+2004-09-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r113    
+    * tests/testchecklist.py, tests/testcreation.py:
+      - Make this a runnable script so we can run the checklist tests as a
+        subset of the complete suite.
+      - Now import the local test module to get path information and other
+        things global to all tests.
+      - Change naming format from test* to test[0-9]*_*.  This allows us to
+        define priorities for our tests.
+      - Make suite a toplevel function instead of a method so it's easily
+        callable by external programs.
+      - Call our own suite function to create the test suite.  Also check the
+        results to give a proper return code on exit.
+      - Add Rev, Id, and Date substitution.
+    * tests/testcreation.py:
+      - Add tests for TreeTips and CheckView.
+      - Change detection of classes from a string test on the type to calls
+        to isinstance().
+    * tests/test.py:
+      - Check for the existence of srcdir environment variable before running
+        the test.  If it's available we use it to enable VPATH builds.
+        Otherwise default to using modules relative to the current directories.
+      - Use the suite functions of the test* modules to create the test suites.
+      - Add Rev, Id, and Date substitution.
+    * tests/Makefile.am: Change from running test.py to invoke all tests to
+      the two test modules individually.  Not sure if this is more desirable or
+      not.  Will try for a while and see.
+      - Add Rev, Id, and Date substitution.
+    * autogen.sh: Change from using the auto* tools individually to using
+      autoreconf as suggestied in the autoconf info pages.
+    * treetips.py: Check that the treeview argument to the TreeTips is a
+      gtk.TreeView.
+    * ChangeLog:
+      - Update to r112.
+      - Fix some spelling and formatting errors.
+    * TODO: Add a note to finish the unittests.
+    
 2004-09-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r112    
     * tests, tests/testchecklist.py, test.py, tests/Makefile.am,
       tests/testcreation.py, configure.ac, Makefile.am: The tests directory

@@ -8,8 +8,6 @@
 """
 __revision__ = "$Rev$"
 
-import re, string
-
 import gtk, gobject
 import checklist
 
@@ -21,129 +19,58 @@ except ImportError:
     except ImportError:
         from optparse import textwrap
 
-class MyRendererText(gtk.CellRendererText):
-    __gproperties__ = {
-        'resolution' : (gobject.TYPE_STRING, 'Resolution state',
-        'how the reviewer resolves this checklist item',
-        '', gobject.PARAM_READWRITE),
-        'display' : (gobject.TYPE_BOOLEAN, 'Display state',
-        'is this item selected for display in the review?',
-        False, gobject.PARAM_READWRITE),
-    }
-    def __init__(self):
-        self.__gobject_init__()
-        setattr(self, 'display', False)
-        setattr(self, 'resolution', '')
-
-    def do_set_property(self, id, value):
-        if not hasattr(self, id.name):
-            raise AttributeError, 'unknown property %s' % (id.name)
-        setattr(self, id.name, value)
-
-    def do_get_property(self, id):
-        return getattr(self, id.name)
-
-gobject.type_register(MyRendererText)
-
 class Review(gtk.VBox):
-    __SUMMARY=0
-    __DISPLAY=1
-    __RESOLUTION=2
-    __OUTPUT=3
 
-    def __init__(self, treeStore, properties):
+    def __init__(self, treeStore):
+        ''' Create a new Review object. 
+        
+        Attributes:
+        :treeStore: A gtk.TreeModel to operate on.
+        '''
+        ### FIXME: Can we use gtk.VBox.__init__() instead?
         gobject.GObject.__init__(self)
-        self.checklist = treeStore
-        self.properties = properties
-        self.addPaths = {}
+
+        # Create the textwrap object for use by the publish method
         self.textwrap = textwrap.TextWrapper(initial_indent='* ',
                 subsequent_indent='  ')
 
+        # Create the widgets:
+
+        self.reviewBoxes = {}
+
+        self.header = gtk.Label()
+        self.passTitle = gtk.Label('Good:')
+        self.failTitle = gtk.Label('Needswork:')
+        self.minorTitle = gtk.Label('Minor:')
+        self.notesTitle = gtk.Label('Notes:')
+        self.footer = gtk.Label()
+
+        self.add(self.header)
+        self.add(self.passTitle)
+        self.add(self.failTitle)
+        self.add(self.minorTitle)
+        self.add(self.notesTitle)
+        self.add(self.footer)
+
+        # Set display properties on the widgets
         self.set_property('homogeneous', False)
-        self.resolution = gtk.Label()
-        self.resolution.set_property('justify', gtk.JUSTIFY_LEFT)
-        self.resolution.set_property('xalign', 0.0)
-        self.__resolution_check(treeStore)
-        ### FIXME: Do something about packing
-        self.add(self.resolution)
+        self.header.set_property('xalign', 0.0)
+        self.passTitle.set_property('xalign', 0.0)
+        self.failTitle.set_property('xalign', 0.0)
+        self.minorTitle.set_property('xalign', 0.0)
+        self.notesTitle.set_property('xalign', 0.0)
+        self.footer.set_property('xalign', 0.0)
 
-        self.hashLabel = gtk.Label('MD5Sums:\n')
-        self.hashLabel.set_property('justify', gtk.JUSTIFY_LEFT)
-        self.hashLabel.set_property('xalign', 0.0)
-        self.add(self.hashLabel)
-        self.hashes = gtk.Label()
-        self.hashes.set_property('justify', gtk.JUSTIFY_LEFT)
-        self.hashes.set_property('xalign', 0.0)
-        self.__update_hash(self.properties)
-        self.add(self.hashes)
-
-        ### FIXME: Allow editing the OUTPUT from this Widget.  Need to emit
-        # row-changed signals that are picked up by the TreeStore (or else
-        # change both listStore and treeStore)
-        self.__generate_data(treeStore)
-       
-        self.goodLabel=gtk.Label('Good:')
-        self.goodLabel.set_property('justify', gtk.JUSTIFY_LEFT)
-        self.goodLabel.set_property('xalign', 0.0)
-        self.add(self.goodLabel)
-        self.goodComments = gtk.TreeView(self.list)
-        self.goodComments.set_headers_visible(False)
-        renderer = MyRendererText()
-        column = gtk.TreeViewColumn('Output', renderer,
-                                    markup=self.__OUTPUT,
-                                    resolution=self.__RESOLUTION,
-                                    display=self.__DISPLAY)
-        column.set_cell_data_func(renderer, self.__filter_good)
-        self.goodComments.append_column(column)
-        self.add(self.goodComments)
-
-        self.workLabel=gtk.Label('Needswork:')
-        self.workLabel.set_property('justify', gtk.JUSTIFY_LEFT)
-        self.workLabel.set_property('xalign', 0.0)
-        self.add(self.workLabel)
-        self.workComments = gtk.TreeView(self.list)
-        self.workComments.set_headers_visible(False)
-        renderer = MyRendererText()
-        column = gtk.TreeViewColumn('Output', renderer,
-                                    markup=self.__OUTPUT,
-                                    resolution=self.__RESOLUTION,
-                                    display=self.__DISPLAY)
-        column.set_cell_data_func(renderer, self.__filter_work)
-        self.workComments.append_column(column)
-        self.add(self.workComments)
+        # Copy data from the checklist into internal structures and add to
+        # our display.
+        self.set_model(treeStore)
         
-        self.minorLabel=gtk.Label('Minor:')
-        self.minorLabel.set_property('xalign', 0.0)
-        self.minorLabel.set_property('justify', gtk.JUSTIFY_LEFT)
-        self.add(self.minorLabel)
-        self.minorComments = gtk.TreeView(self.list)
-        self.minorComments.set_headers_visible(False)
-        renderer = MyRendererText()
-        column = gtk.TreeViewColumn('Output', renderer,
-                                    markup=self.__OUTPUT,
-                                    resolution=self.__RESOLUTION,
-                                    display=self.__DISPLAY)
-        column.set_cell_data_func(renderer, self.__filter_minor)
-        self.minorComments.append_column(column)
-        self.add(self.minorComments)
-        
-        self.noteLabel=gtk.Label('Notes:')
-        self.noteLabel.set_property('xalign', 0.0)
-        self.noteLabel.set_property('justify', gtk.JUSTIFY_LEFT)
-        self.add(self.noteLabel)
-        self.noteComments = gtk.TreeView(self.list)
-        self.noteComments.set_headers_visible(False)
-        renderer = MyRendererText()
-        column = gtk.TreeViewColumn('Output', renderer,
-                                    markup=self.__OUTPUT,
-                                    resolution=self.__RESOLUTION,
-                                    display=self.__DISPLAY)
-        column.set_cell_data_func(renderer, self.__filter_note)
-        self.noteComments.append_column(column)
-        self.add(self.noteComments)
+        ### FIXME: Need to work on CheckList to make these work.
+        # Resolution should now be a part of checklist.
+        # Displaying it has to somehow be propogated through the CheckList
+        # function header entry.
+        # Hash also needs to be propogates through the CheckList header entry.
 
-        treeStore.connect('row-changed', self.__update_data)
-        treeStore.connect('row-inserted', self.__add_data)
         ### FIXME: Need to connect to a signal when the SRPM changes.
         # self.properties.connect('hash-change', self.__update_hash)
 
@@ -192,140 +119,147 @@ class Review(gtk.VBox):
         outfile.close()
 
     def submit(self):
+        '''Submit the output to a ticketting system.
+
+        This needs to be broken up into two parts.  Most of it will be done by
+        the QAreviewer program.  Only formatting the output will be done here.
+        I think I can see where we might be able to just do this with the
+        publish method.  But we'll need to change it to write to an internal
+        buffer or something.
+        '''
         pass
 
-    def update_hash(self):
-        """See __update_hash"""
-        ### FIXME: This is a stopgap until we make properties a gobject and can
-        # connect to a signal for SRPM changes there.
-        self.__update_hash(self.properties)
+    def set_model(self, treeStore):
+        '''Set a new model for the Review to get data from.
 
-    def __update_hash(self, properties):
-        """Updates the hashes label with the current hashes in the properties"""
-        if self.properties.SRPM:
-            srpmhash, sourcehashes = self.properties.SRPM.hashes()
-            (file, hash) = srpmhash.popitem()
-            hashBuf = hash + '  ' + file + "\n"
-            while sourcehashes:
-                (file, hash) = sourcehashes.popitem()
-                hashBuf += hash + '  ' + file + "\n"
-        else:
-            hashBuf = ""
-        self.hashes.set_text(hashBuf)
+        Attributes:
+        :treeStore: The model for which we are writing the Review.
+
+        This method sets a new treemodel for the Review.
+        '''
+        self.checklist = treeStore
+        treeStore.connect('row-changed', self.__update_data)
+        self.__sync_checklist()
+
+    def __sync_checklist(self):
+        ''' Sync the Review to a new checklist model.
+
+        This loads the checklist data into the internal data structures and
+        then adds them to the displayBoxes.
+        '''
+        treeStore = self.checklist
+        self.entries = {} # Keys to transform summary -> resolution/entry order
+        self.displayList = {} # res/entry order -> gtk.Label()
+        lastEntry = 0
+        summaries = treeStore.entries.keys()
+        for sum in summaries:
+            treeIter = treeStore.entries[sum]
+            if treeStore.get_value(treeIter, checklist.DISPLAY):
+                key  = (treeStore.get_value(treeIter, checklist.RESOLUTION),
+                        lastEntry)
+                value = gtk.Label(treeStore.get_value(treeIter, checklist.OUTPUT))
+                value.set_property('xalign', 0.0)
+                self.displayList[key] = value
+                self.entries[sum] = key
+                lastEntry += 1
+
+        self.lastEntry = lastEntry
+        # Clear out the Boxes that hold review items
+        try:
+            for box in self.reviewBoxes:
+                self.remove(box)
+        except AttributeError:
+            # As long as self.passBox does not exist, it's safe to continue.
+            pass
+        for box in ('Pass', 'Fail', 'Non-Blocker', 'Notes'):
+            self.reviewBoxes[box] = gtk.VBox()
+        
+        # Fill each display list
+        ### FIXME: Figure out whether we want to hide the display *Box's before
+        # doing this.
+        for entry in self.displayList.iteritems():
+            res = entry[0][0]
+            if res == 'Needs-Reviewing' or res == 'Not-Applicable':
+                self.reviewBoxes['Notes'].add(entry[1])
+            else:
+                self.reviewBoxes[res].add(entry[1])
+
+        pos = 2
+        for box in ('Pass', 'Fail', 'Non-Blocker', 'Notes'):
+            self.add_with_properties(self.reviewBoxes[box], 'position', pos)
+            pos += 2
 
     def __update_data(self, treeStore, path, updateIter):
-        """Update internal list from treeStore when treeStore is changed."""
+        '''Update internal list from treeStore when treeStore is changed.
+        
+        Attributes:
+        :treeStore: The CheckList we're working with.
+        :path: The path to the value that was changed.
+        :updateIter: Iter to the changed Row.
+        '''
 
         # row-changed gets called once for each item that is updated, even
         # when there's a group.  So we have to wait until we get a proper
-        # summary (our key value) to add the entry to the list
-        summary = treeStore.get_value(updateIter, self.checklist.SUMMARY)
-        if self.addPaths.has_key(path) and summary:
-            # New item
-            self.list.append((summary,
-                treeStore.get_value(updateIter, self.checklist.DISPLAY),
-                treeStore.get_value(updateIter, self.checklist.RESOLUTION),
-                treeStore.get_value(updateIter, self.checklist.OUTPUT)))
-            del self.addPaths[path]
-        elif len(path) > 1:
+        # summary (our key value) when we add the entry to the list
+        summary = treeStore.get_value(updateIter, checklist.SUMMARY).lower()
+        res = treeStore.get_value(updateIter, self.checklist.RESOLUTION)
+        if not (summary and res and len(path) > 1):
+            # 1) Don't care about Categories (toplevel items)
+            # 2) Items that don't have summary's and resolutions yet are in
+            #    the process of being added.
+            return
+
+        if self.entries.has_key(summary):
             # Update an old item
-            listIter = self.list.get_iter_first()
-            while listIter:
-                if self.list.get_value(listIter, self.__SUMMARY) == summary:
-                    self.list.set(listIter,
-                            self.__DISPLAY,
-                            treeStore.get_value(updateIter,
-                                self.checklist.DISPLAY),
-                            self.__RESOLUTION,
-                            treeStore.get_value(updateIter,
-                                self.checklist.RESOLUTION),
-                            self.__OUTPUT,
-                            treeStore.get_value(updateIter,
-                                self.checklist.OUTPUT))
-                    break
-                listIter = self.list.iter_next(listIter)
+            key = self.entries[summary]
+            if not treeStore.get_value(updateIter, self.checklist.DISPLAY):
+                # No longer need to display it
+                key = self.entries[summary]
+                if key[0] == 'Needs-Reviewing' or key[0] == 'Not-Applicable':
+                    self.reviewBoxes['Notes'].remove(self.displayList[key])
+                else:
+                    self.reviewBoxes[key[0]].remove(self.displayList[key])
+                del self.displayList[key]
+                del self.entries[summary]
+                return
+
+            # Save the old label
+            label = self.displayList[key]
+            if key[0] != res:
+                # Change the key
+                if key[0] == 'Needs-Reviewing' or key[0] == 'Not-Applicable':
+                    self.reviewBoxes['Notes'].remove(self.displayList[key])
+                else:
+                    self.reviewBoxes[key[0]].remove(self.displayList[key])
+                del self.displayList[key]
+                key = (res, key[1])
+                self.entries[summary] = key
+                self.displayList[key] = label
+                if key[0] == 'Needs-Reviewing' or key[0] == 'Not-Applicable':
+                    self.reviewBoxes['Notes'].add(label)
+                else:
+                    self.reviewBoxes[key[0]].add(label)
+            # Change output
+            label.set_markup(treeStore.get_value(updateIter, self.checklist.OUTPUT))
         else:
-            # Don't care about Categories (toplevel items)
-            pass
+            # New item
+            if treeStore.get_value(updateIter, self.checklist.DISPLAY):
+                key = (res, self.lastEntry)
+                self.entries[summary] = key
+                label = gtk.Label(treeStore.get_value(updateIter, self.checklist.OUTPUT))
+                label.set_use_markup(True)
+                label.set_property('xalign', 0.0)
+                self.displayList[key] = label
+                if key[0] == 'Needs-Reviewing' or key[0] == 'Not-Applicable':
+                    self.reviewBoxes['Notes'].add(label)
+                else:
+                    self.reviewBoxes[key[0]].add(label)
+                label.show()
+                self.lastEntry += 1
 
-        self.__resolution_check(treeStore)
-
-    def __add_data(self, treeStore, path, addIter):
-        """Let update know it will be handling an add soon."""
-
-        # If it's not a Category (toplevel) row then add it to our list of
-        # aditions.
-        if len(path) > 1:
-            self.addPaths[path] = True
-
-    def __generate_data(self, treeStore):
-        """Create the internal list from the present state of treeStore.
-        
-        Take data from the TreeModel and put it into a ListStore.  We only
-        need DISPLAY and RESOLUTION to decide how the data is too be displayed
-        and OUTPUT as the actual data we will show.  We do not display
-        categories, only entries.
-
-        __update_data is used to keep the ListStore synced with the TreeStore
-        whenever the TreeStore emits row-changed.
-        """
-        
-        self.list = gtk.ListStore(gobject.TYPE_STRING,
-                                  gobject.TYPE_BOOLEAN,
-                                  gobject.TYPE_STRING,
-                                  gobject.TYPE_STRING)
-        category = treeStore.get_iter_first()
-        while category:
-            entryIter = treeStore.iter_children(category)
-            while entryIter:
-                self.list.append((treeStore.get_value(entryIter,
-                    self.checklist.SUMMARY),
-                    treeStore.get_value(entryIter, self.checklist.DISPLAY),
-                    treeStore.get_value(entryIter, self.checklist.RESOLUTION),
-                    treeStore.get_value(entryIter, self.checklist.OUTPUT)))
-                entryIter = treeStore.iter_next(entryIter)
-            category = treeStore.iter_next(category)
-
-    def __filter_good(self, column, cell, model, entryIter):
-        """Only display comments which have DISPLAY and RESOLUTION=pass."""
-        
-        cell.set_property('mode', gtk.CELL_RENDERER_MODE_INERT)
-        if (cell.get_property('display') and 
-                cell.get_property('resolution') == 'Pass'):
-            cell.set_property('visible', True)
-        else:
-            cell.set_property('visible', False)
-
-    def __filter_work(self, column, cell, model, entryIter):
-        """Only display comments which have DISPLAY and RESOLUTION=Fail."""
-
-        cell.set_property('mode', gtk.CELL_RENDERER_MODE_INERT)
-        if (cell.get_property('display') and
-                cell.get_property('resolution') == 'Fail'):
-            cell.set_property('visible', True)
-        else:
-            cell.set_property('visible', False)
-            
-    def __filter_minor(self, column, cell, model, entryIter):
-        """Only display comments which have DISPLAY and RESOLUTION=Minor."""
-
-        cell.set_property('mode', gtk.CELL_RENDERER_MODE_INERT)
-        if (cell.get_property('display') and
-                cell.get_property('resolution') == 'Non-Blocker'):
-            cell.set_property('visible', True)
-        else:
-            cell.set_property('visible', False)
-            
-    def __filter_note(self, column, cell, model, entryIter):
-        """Only display comments which have DISPLAY and Not-Applicable."""
-
-        cell.set_property('mode', gtk.CELL_RENDERER_MODE_INERT)
-        if (cell.get_property('display') and
-                cell.get_property('resolution') == 'Not-Applicable'):
-            cell.set_property('visible', True)
-        else:
-            cell.set_property('visible', False)
-            
+    ### FIXME: this needs to become a simple cached value in the checklist.
+    # It's really checklist metadata.
+    # Will be part of the header manipulation
     def __resolution_check(self, treeStore):
         """Checks the treeStore to decide the recommendation for this review
 
