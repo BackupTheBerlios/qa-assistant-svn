@@ -12,7 +12,7 @@ Preferences are set on the app.  They could be implemented as GConf
 variables.
 
 Person
-(Probably happen in the main program.)
+(Probably happen in the review widget, publish function.)
 * Whether to sign [s]
 * Signing identity [s]
 
@@ -38,24 +38,23 @@ Status Key:
 Coding wise we need three things:
 
 1) We need to write the gconf schema file describing the keys.
+   [Done]
 
-  * Need to take a look at other schemas and decide how to structure the
-    keys.  Right now it's a flat structure.  We need to think about a hierarchy
-    that makes sense.
-  
 2) Write code to make use of the values.
   * Where should the GConfClient reside?  If each place that uses it has a
     copy, it's wasteful but modular.  OTOH, gconf.client_get_default() doesn't
     seem to create a new client, just get a reference to a main gconf client.
     The app keeps a copy of it, then it needs to pass the client to the other
     modules somehow. [Going with each module that uses it]
+  [Mostly done.  Still need to use the gpg keys to sign the review]
 
 3) We need to have a dialog box that has entries for all the properties.
    This can be a glade dialog as the box should be the same for all checklists.
    The dialog needs to take input about all the preferences listed here.
    When the submit button is pressed, put the information into the gconf
    database and change the effect of the values on the program.
-   [preferences.py]
+   [Dialog completed in glade still need to 1) utilize the dialog.
+    2) set values from the dialog in preferences.py]
 
 http://developer.gnome.org/doc/API/2.0/gconf/
 
@@ -93,7 +92,9 @@ Properties
 ----------
 Properties are set on the checklist.  The checklist type should provide a
 set of properties that are legal.  Perhaps implement as GObject values on
-the checklist object.
+the checklist object (Can't do this as it isn't extensible.  The checklist
+may have arbitrary properties.  Specifying in GObject makes them a
+"compiletime" rather than run-time setting.)
 
 * MD5Sums
 * Bugzilla URL

@@ -16,7 +16,8 @@ Packaging Errors
   files error.py and checkview.py.  Removed files SRPM.py, genericqa.py,
   srpmqa.py, and properties.py.  Need to make sure these are all taken care of
   as well as other problems that may not show up until later.
-
+* Need to clear my gconf cache of any keys created during testing that aren't
+  going to be distributed to guard against error.
 Programming Errors
 ------------------
 * Use gtk.TreeStore.set instead of self.set in checklist.  Significant
@@ -51,6 +52,8 @@ Programming Errors
   - In the softwarerelease checklist we need to have the network to check the
     svn repository.  The repository or a tarball needs to be accessbile to run
     make dist-check, et al.
+
+* the display tooltip after preference item syncs too often.
 
 Working: Need to test
 ---------------------

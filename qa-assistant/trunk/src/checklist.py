@@ -540,7 +540,7 @@ class CheckList (gtk.TreeStore):
                         RESOLUTION, res)
 
                 # Auto display to review if it's a fail
-                if not self.noAutoDisplay and (res == 'Fail' or
+                if (not self.noAutoDisplay) and (res == 'Fail' or
                         res == 'Non-Blocker'):
                     gtk.TreeStore.set(self, row, DISPLAY, True)
 
@@ -585,11 +585,15 @@ class CheckList (gtk.TreeStore):
         '''
         key = GCONFPREFIX + colorKey
         self.gconfClient.notify_add(key, self.__color_changed, colorKey)
-        color = self.gconfClient.get_string(key)
+        try:
+            color = self.gconfClient.get_string(key)
+        except gobject.GError:
+            color = self.gconfClient.get_default_from_schema(key).get_string()
         if color and self.colorRE.match(color):
             self.colors[colorKey] = color
         else:
-            self.colors[colorKey] = '#000000'
+            self.colors[colorKey] = (
+                    self.gconfClient.get_default_from_schema(key).get_string())
 
     def __color_changed(self, client, connectID, entry, colorKey):
         '''Changes a color when it is changed in GConf.

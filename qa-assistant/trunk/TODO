@@ -42,14 +42,22 @@ glade/GUI:
     + QAMenu
     + Allowable Properties
     + Review object output format
+  
+  How about this?  checklist is the model that the QA Object is created from.
+  The QAReviewer object can add the QA Object into its menu, properties, and
+  other places?  Properties will be taken care of in a druid screen.  qamenu
+  will have to be provided.  The Review output is still not taken care of...
+
+* Disable pieces of the QA Action menu when there is no SRPM being reviewed
+  - Will be taken care of in the merge with checklist.  Now have functions
+    listed in the checklist that should make this happen.
 
 * Accelerators for QA Action items
-* Disable pieces of the QA Action menu when there is no SRPM being reviewed
 
 Extra GNOME Functionality:
 ==========================
 * Create preferences infrastructure : check PREFERENCES for ideas.
-* Druid on New
+* Druid on New (In progress)
 * Update to pygtk-2.4.
   - Embed the 2.4 file selector widget in the druid..
   - Switch to the 2.4 ComboBox Renderer instead of optionrenderer.
@@ -95,7 +103,16 @@ Programming:
     recognize that.  Also, there is currently a small period where the
     program searches for uninstalled files when it is installed.  This needs
     to be changed so installation removes this penalty.
+  - DTDs and the Druid would both have to be special-cased now to make things
+    work uninstalled.  The DTDs could work if the user is connected to a
+    network or if I can get libxml2 to recognize a private xmlcatalog.  The
+    Druid and the rest of the current consumers of uninstalled_files might be
+    better served by creating an uninstalled version of paths.py that lists
+    the directories inside the source instead of directories in the system.
+    Currently paths.py is built from paths.pyin at build time.  We'd need to
+    create one paths.py at build time and a separate one at install time to
+    make this work.
 
-* Finish writing unittests for the program.  We've barely scratched the surface
-  of this.  When completed it should allow one to quickly figure out what's
-  working and what's broken in the package.
+ * Finish writing unittests for the program.  We've barely scratched the
+   surface of this.  When completed it should allow one to quickly figure
+   out what's working and what's broken in the package.

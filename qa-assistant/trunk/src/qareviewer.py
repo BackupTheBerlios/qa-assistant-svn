@@ -25,13 +25,14 @@ import checkload
 from review import Review
 from checklist import CheckList
 from checkview import CheckView
+from preferences import Preferences
 
 __version__ = VERSION
 
 class QAReviewer(gnomeglade.GnomeApp):
-    #
-    # Program Initialization
-    # 
+    '''Main Program Object.
+
+    '''
     def __init__(self, arguments):
         """Creates a new QA reviewer window.
            
@@ -44,7 +45,7 @@ class QAReviewer(gnomeglade.GnomeApp):
                 gladefile, 'ReviewerWindow')
         self.program.set_property(gnome.PARAM_HUMAN_READABLE_NAME,
                 HUMANPROGRAMNAME)
-        
+       
         #
         # Create additional interface components
         #
@@ -265,6 +266,51 @@ class QAReviewer(gnomeglade.GnomeApp):
         ### FIXME: Check for unsaved files.
         self.quit()
        
+    def on_menu_cut_activate(self, *extra):
+        '''Cut some text'''
+        owner = self.clipPrimary.get_owner()
+        if owner:
+            if isinstance(owner, gtk.Editable):
+                owner.cut_clipboard()
+            else:
+                ### FIXME: Is this behaviour consistent?
+                # Or are apps supposed to fail if editing of the selection is
+                # not allowed?
+                selectionText = self.clipPrimary.wait_for_text()
+                if selectionText:
+                    self.clipboard.set_text(selectionText, -1)
+
+    def on_menu_copy_activate(self, *extra):
+        '''Copy from the current selection into the clipboard.'''
+        if self.clipPrimary.get_owner():
+            selectionText = self.clipPrimary.wait_for_text()
+            if selectionText:
+                self.clipboard.set_text(selectionText, -1)
+
+    def on_menu_paste_activate(self, *extra):
+        '''Copy from the clipboard into the selection.'''
+        entry = self.ReviewerWindow.focus_widget
+        if isinstance(entry, gtk.Editable):
+            entry.paste_clipboard()
+
+    def on_menu_preferences_activate(self, *extra):
+        """Sets program properties."""
+        gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
+        if gladeFile == None:
+            filename = os.path.join(PROGRAMNAME, 'glade/qa-assistant.glade')
+            gladeFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    filename)
+            if gladeFile == []:
+                raise Exception("Unable to locate glade file %s" % (filename))
+            else:
+                gladeFile = gladeFile[0]
+
+        prefDialog = Preferences(gladeFile)
+        if self.logo:
+            prefDialog.PreferencesDialog.set_property('icon', self.logo)
+
+        propDialog.show()
+
     def on_menu_view_toggle_preview_activate(self, *extra):
         """Toggles between checklist view and output view.
 
@@ -302,25 +348,15 @@ class QAReviewer(gnomeglade.GnomeApp):
         about = gtk.glade.XML(gladeFile, 'AboutWindow').get_widget('AboutWindow')
         about.set_property('name', HUMANPROGRAMNAME)
         about.set_property('version', __version__)
-        iconFile = gnomeglade.uninstalled_file('pixmaps/qa-icon.png')
-        if iconFile == None:
-            iconFile = self.locate_file(gnome.FILE_DOMAIN_APP_PIXMAP,
-                                        'qa-icon.png')
-            if iconFile == []:
-                iconFile = None
-            else:
-                iconFile = iconFile[0]
-        if iconFile:
-            icon = gnomeglade.load_pixbuf(iconFile)
-            about.set_property('icon', icon)
-            about.set_property('logo', icon)
+        if self.logo:
+            about.set_property('icon', self.logo)
+            about.set_property('logo', self.logo)
 
         about.show()
        
     def on_toolbar_new_activate(self, button, *extra):
         """Popup the menu to select a new review from bugzilla or SRPM"""
         self.on_menu_new_activate()
-        #self.new1_menu.popup(None, None, None, 0, gtk.get_current_event_time())
         
     def on_menu_new_srpm_activate(self, *extra):
         """Open a new review based on the user selected SRPM"""
@@ -375,14 +411,6 @@ Relative priority: Comes after New from SRPM but before feature enhancements lik
         self.not_yet_implemented(msg)
         pass
 
-    def on_menu_preferences_activate(self, *extra):
-        """Sets program properties."""
-        msg = """Please see the PREFERENCES file for a list of preferences that are going to be added to preferences once we get GConf set up.
-
-Relative Priority: Not before the first release.  Sensible defaults is my hope for that release."""
-        self.not_yet_implemented(msg)
-        pass
-
     def on_menu_help_activate(self, *extra):
         """Display program help."""
         msg = """There's currently no help file written so this is pretty useless.  When we write some documentation this will display the standard gnome help browser.
@@ -391,33 +419,6 @@ Relative Priority: Low.  There's too much programming to do for me to spend too 
         self.not_yet_implemented(msg)
         pass
         
-    def on_menu_cut_activate(self, *extra):
-        '''Cut some text'''
-        owner = self.clipPrimary.get_owner()
-        if owner:
-            if isinstance(owner, gtk.Editable):
-                owner.cut_clipboard()
-            else:
-                ### FIXME: Is this behaviour consistent?
-                # Or are apps supposed to fail if editing of the selection is
-                # not allowed?
-                selectionText = self.clipPrimary.wait_for_text()
-                if selectionText:
-                    self.clipboard.set_text(selectionText, -1)
-
-    def on_menu_copy_activate(self, *extra):
-        '''Copy from the current selection into the clipboard.'''
-        if self.clipPrimary.get_owner():
-            selectionText = self.clipPrimary.wait_for_text()
-            if selectionText:
-                self.clipboard.set_text(selectionText, -1)
-
-    def on_menu_paste_activate(self, *extra):
-        '''Copy from the clipboard into the selection.'''
-        entry = self.ReviewerWindow.focus_widget
-        if isinstance(entry, gtk.Editable):
-            entry.paste_clipboard()
-
     # 
     # Other GUI callbacks
     # 

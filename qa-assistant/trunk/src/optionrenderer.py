@@ -33,17 +33,12 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
         self.__height = None
         self.__xOffset = None
         self.__yOffset = None
-        #self.connect('notify', self.on_changed_property)
         self.connect('clicked', self.on_clicked)
         if not hasattr(self, 'optionlist'):
-            pylist = ['This', 'is', 'a test']
-            self.optionlist = pylist
+            self.optionlist = []
         if not hasattr(self, 'selectedoption'):
-            self.selectedoption = pylist[0]
+            self.selectedoption = ''
 
-    #def on_changed_property(self, widget, value):
-        #setattr(self, 'selectedoption', getattr(self, 'optionlist')[0])
-        
     def do_get_property(self, id):
         return getattr(self, id.name)
 
@@ -82,13 +77,12 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
     def on_clicked(self, widget, data):
         self.display_options(widget, data)
        
-    def alert_changes(self, menuItem, x, y, treeView):
+    def alert_changes(self, menuItem, x, y, (treeView, oldValue)):
         cell = treeView.get_path_at_pos(x, y)
         path = cell[0]
         model = treeView.get_model()
         changedIter = model.get_iter(path)
 
-        oldValue = self.get_property('selectedoption')
         newValue = menuItem.get_children()[0].get_text()
         if oldValue != newValue:
             self.set_property('selectedoption', newValue)
@@ -117,7 +111,7 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
             itemList.append(item)
         for item in itemList:
             item.connect('toggled', self.alert_changes,
-                    int(event.x), int(event.y), data[0])
+                    int(event.x), int(event.y), (data[0], currentOption))
             menu.add(item)
             item.show()
         path, column = tree.get_path_at_pos(int(event.x), int(event.y))[:2]

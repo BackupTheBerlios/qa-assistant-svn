@@ -4,12 +4,7 @@
 # Copyright: Toshio Kuratomi
 # License: GPL
 # Id: $Id$
-'''Functions to use a druid for QA Assistant startup.
-
-
-I implemented this as a set of functions rather than an object because it
-is only needed for a small fraction of the time the program is running.  So it
-seemed extraneous to create and destroy an object for the Druid every time.
+'''A QA Assistant druid for starting new checklists.
 '''
 __revision__ = '$Rev$'
 
@@ -29,6 +24,7 @@ from checklist import CheckList
 START = 1   # Druid to display on startup
 NEW = 2     # Druid to help when creating a new review
 LOAD = 3    # Druid to use when loading a review
+PROPERTIES = 4 # Druid to use when changing properties
 
 class NewDruid(gtk.Window):
     '''Druid to walk through starting a new review
@@ -86,6 +82,10 @@ class NewDruid(gtk.Window):
             self.druidWidget.set_buttons_sensitive(False, True, True, True)
             self.propertiesPage.connect('back', self.disable_back,
                     self.selectorPage)
+        elif mode == PROPERTIES:
+            self.set_title('QA Assistant - Set Properties')
+            self.druidWidget.set_buttons_sensitive(False, True, True, True)
+            self.druidWidget.set_finish()
         else:
             self.set_title('QA Assistant - Starting a QA Review')
             # Coming back from propertiesPage has to determine whether it came
@@ -267,9 +267,21 @@ class NewDruid(gtk.Window):
         endPage.connect('finish', self.finish)
 
     def properties_create(self, page, druid):
+        '''
+
+        '''
+        # checklist.properties['name'].(type|value|require|function|functionType|args)
+        for i in self.newList.properties.keys():
+            ### FIXME:
+            # Create an entry for each property
+            pass
         ### FIXME:
-        # Use self.newList to create the entry page for properties we need
-        # to load.
+        # We really need to do some processing of the properties here.  Or
+        # perhaps, we need a widget that exports a properties widget.  The
+        # widget is simply imported here.  The properties widget can also be
+        # put into a properties dialog for the main program.  It can also be
+        # saved between instantiations so we don't have to recreate it each
+        # time we use it.
         pass
 
     def finish(self, page, druid):

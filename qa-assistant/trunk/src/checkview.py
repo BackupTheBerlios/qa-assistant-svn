@@ -18,7 +18,9 @@ import checklist
 
 class CheckView(gtk.TreeView):
     def __init__(self, checkList=None):
-        gtk.TreeView.__init__(self, checkList)
+        gtk.TreeView.__init__(self)
+        if checkList:
+            self.set_model(checkList)
         self.set_rules_hint(True)
 
         renderer = gtk.CellRendererToggle()
@@ -98,7 +100,6 @@ class CheckView(gtk.TreeView):
         would force the checklist to be defined before the checkView.  This
         is unnecessary.  Thus this callback.
         '''
-
         # Set the checklist to the new resolution and output values
         self.get_model().set(changedRow, checklist.RESOLUTION, newValue)
        
@@ -171,7 +172,7 @@ class CheckView(gtk.TreeView):
         # GConf helper functions
         #
         
-    def __change_treetip_show(self, client, connectID, entry, extra):
+    def __change_treetip_show(self, client, connectID, entry, extra=None):
         '''Enable and disable showing the help description.
 
         '''
