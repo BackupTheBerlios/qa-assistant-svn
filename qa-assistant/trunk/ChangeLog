@@ -1,3 +1,21 @@
+2005-03-14 Toshio Kuratomi <toshio@tiki-lounge.com> - r175    
+    * src/propview.py: Show the label that says we don't have any properties.
+    * README: Note we'll move to newer pygtk and gnome-python soon.
+    * PREFERENCES:
+      - Note what's left for the Druid.
+      - Note that Properties are essentially done.
+    * tests/treetipstest.py:
+      - Check creation of TreeTips.
+      - Add docstrings for all the TreeTip tests.
+      - Make checking for checkview functionality optional.
+    * tests/creationtest.py: Remove treetips creation from here.
+    * configure.ac: Migrate from AC_OUTPUT to AC_CONFIG_FILES.
+    * TODO: Create a new heading Functions and move all Action/QA Menu/
+      Function items in there.
+    
+2005-03-09 Toshio Kuratomi <toshio@tiki-lounge.com> - r174    
+    * ChangeLog: Update to (r173)
+    
 2005-03-09 Toshio Kuratomi <toshio@tiki-lounge.com> - r173    
     * src/qareviewer.py: Enable the properties menu entry.
     * src/propview.py:
