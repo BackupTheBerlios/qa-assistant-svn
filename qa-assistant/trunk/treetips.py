@@ -8,102 +8,188 @@
 """
 __revision__ = "$Rev$"
 
-import random
-import gtk, gobject
+import gtk
+import gobject
 
 class TreeTips(gtk.Widget):
-    """ A specialized tooltips widget.
+    ''' A tooltips widget specialized to work with gtk.TreeView's.
 
     TreeTips associates a column in a TreeStore with tooltips that will be
     displayed when the mouse is over the row the column is for.  Each row can
     have one treetip.
-    """ 
-    # The amount of hover time before a treetip pops up (milliseconds)
+    ''' 
+    __gproperties__ = {
+        'tip_window' : (gobject.TYPE_PYOBJECT,
+                'The window that the tooltip is displayed in.',
+                'The window that the tooltip is displayed in.',
+                gobject.PARAM_READABLE),
+        'tip_label' : (gobject.TYPE_PYOBJECT,
+                'The label that displays the tooltip text.',
+                'The label that displays the tooltip text.',
+                gobject.PARAM_READABLE),
+        'active_tips_data' : (gobject.TYPE_PYOBJECT,
+                'The data associated with the active tooltip.',
+                'The data associated with the active tooltip.',
+                gobject.PARAM_READABLE),
+        'delay' : (gobject.TYPE_INT,
+                'MSecs before displaying the tooltip.',
+                'The delay between the mouse pausing over the widget and the display of the tooltip in msec.',
+                0, 1200, 500,
+                gobject.PARAM_READWRITE),
+        'enabled' : (gobject.TYPE_BOOLEAN,
+                'If TRUE the tooltips are enabled',
+                'If TRUE the tooltips are enabled',
+                True,
+                gobject.PARAM_READABLE),
+        'view' : (gobject.TYPE_PYOBJECT,
+                'gtk.TreeView that we get our data from.',
+                'The tip data comes from a column in a gtk.TreeView.',
+                gobject.PARAM_READWRITE),
+        'column' : (gobject.TYPE_INT,
+                'Column from the gtk.TreeView that holds tip data.',
+                'The tip data for each row is held by a column in the row.  This specifies which column that data is in.',
+                0, 32000, 0,
+                gobject.PARAM_READWRITE)
+    }
 
-    ### FIXME: make this a settable gproperty
-    DELAY = 500
-
-    def __init__(self, treeview, column):
-        """Create a new TreeTips Group.
+    def __init__(self, treeview=None, column=None):
+        '''Create a new TreeTips Group.
 
         Keyword -- arguments:
         treeview -- the treeview the tips are associated with
         column -- the column id the tip text comes from
-        """
-       
-        assert isinstance(treeview, gtk.TreeView), \
-                "%s is not a gtk.TreeView" % (treeview)
-        self.tree = treeview
+        '''
+        if treeview:
+            try:
+                treeview.connect('leave-notify-event', self.__tree_leave_notify)
+                treeview.connect('motion-notify-event', self.__tree_motion_notify)
+            except AttributeError, TypeError:
+                raise TypeError, ('The value of view must be an object that'
+                        'implements leave-notify-event and motion-notify-event '
+                        'gsignals')
 
-        ### FIXME: make sure that the data we are getting is correct.
-        # 2) treeview has a column numbered column that is a string type.
-        # Get model from treeview.  attempt to get model[column].  if that
-        # is a string we're set, else assert.
-        
-        self.column = column
-        self.tipWindow = gtk.Window(gtk.WINDOW_POPUP)
-        self.tipWindow.set_app_paintable(True)
-        self.tipWindow.set_border_width(4)
-        self.tipWindow.connect('expose-event', self.__paint_window)
-        self.label = gtk.Label()
-        self.label.set_line_wrap(True)
-        self.label.set_alignment(0.5, 0.5)
-        self.tipWindow.add(self.label)
+        gobject.GObject.__init__(self)
+
+        self.view = treeview or None
+        self.delay = 500
+        self.enabled = True
+        self.column = column or 0
+        self.tip_window = gtk.Window(gtk.WINDOW_POPUP)
+        self.tip_window.set_app_paintable(True)
+        self.tip_window.set_border_width(4)
+        self.tip_window.connect('expose-event', self.__paint_window)
+        self.tip_label = gtk.Label('')
+        self.tip_label.set_line_wrap(True)
+        self.tip_label.set_alignment(0.5, 0.5)
+        self.active_tips_data = ''
+        self.tip_window.add(self.tip_label)
+        self.unique = 1 # Unique number used for timeouts
         self.timeoutID = 0
         self.path = None
         self.screenWidth = gtk.gdk.screen_width()
         self.screenHeight = gtk.gdk.screen_height()
-        self.tree.connect("leave-notify-event", self.__tree_leave_notify)
-        self.tree.connect("motion-notify-event", self.__tree_motion_notify)
+
+    def enable(self):
+        '''Enable showing of tooltips'''
+        self.enabled = True
+
+    def disable(self):
+        '''Disable showing tooltips'''
+        self.enabled = False
+       
+    def do_get_property(self, prop):
+        '''Return the gproperty's value.'''
+        if prop.name == 'delay':
+            return self.delay
+        elif prop.name == 'enabled':
+            return self.enabled
+        elif prop.name == 'view':
+            return self.view
+        elif prop.name == 'column':
+            return self.column
+        elif prop.name == 'active-tips-data':
+            return self.active_tips_data
+        elif prop.name == 'tip-label':
+            return self.tip_label
+        elif prop.name == 'tip-window':
+            return self.tip_window
+        else:
+            raise AttributeError, 'unknown property %s' % prop.name
+
+    def do_set_property(self, prop, value):
+        '''Set the property of writable properties.
+
+        At this moment, only delay is a writable property.
+        '''
+        if prop.name == 'delay':
+            self.delay = prop.value
+        if prop.name == 'view':
+            try:
+                value.connect('leave-notify-event', self.__tree_leave_notify)
+                value.connect('motion-notify-event', self.__tree_motion_notify)
+            except AttributeError, TypeError:
+                raise TypeError, ('The value of view must be an object that'
+                        'implements leave-notify-event and motion-notify-event '
+                        'gsignals')
+            self.view = value
+        if prop.name == 'column':
+            self.column = value
+        else:
+            raise AttributeError, 'unknown or read only property %s' % prop.name
 
     def __paint_window(self, window, event):
-        self.tipWindow.style.paint_flat_box(self.tipWindow.window,
-                gtk.STATE_NORMAL, gtk.SHADOW_OUT, None, self.tipWindow,
-                "tooltip", 0, 0, -1, -1)
+        self.tip_window.style.paint_flat_box(self.tip_window.window,
+                gtk.STATE_NORMAL, gtk.SHADOW_OUT, None, self.tip_window,
+                'tooltip', 0, 0, -1, -1)
         
     def __tree_leave_notify(self, tree, event):
-        """Hide tooltips when we leave the tree."""
+        '''Hide tooltips when we leave the tree.'''
 
         self.timeoutID = 0
         self.path = None
-        self.tipWindow.hide()
+        self.tip_window.hide()
 
     def __tree_motion_notify(self, tree, event):
-        """Decide which tooltip to display when we move within the tree."""
+        '''Decide which tooltip to display when we move within the tree.'''
 
-        self.tipWindow.hide()
+        if not self.enabled:
+            return
+        self.tip_window.hide()
         self.path = None
-        timeoutID = random.randint(1, 10000)
-        self.timeoutID = timeoutID
-        gobject.timeout_add(self.DELAY, self.__treetip_show, tree,
-                int(event.x), int(event.y), timeoutID)
+        self.unique += 1
+        self.timeoutID = self.unique
+        gobject.timeout_add(self.delay, self.__treetip_show, tree,
+                int(event.x), int(event.y), self.timeoutID)
 
     def __treetip_show(self, tree, xEvent, yEvent, ID):
+        '''Show the treetip window.'''
         if self.timeoutID != ID:
             return False
-        pathReturn = self.tree.get_path_at_pos(xEvent, yEvent)
-        model = self.tree.get_model()
+        pathReturn = tree.get_path_at_pos(xEvent, yEvent)
+        model = tree.get_model()
         if pathReturn == None:
             self.path = None
         elif self.path != pathReturn[0]:
             self.path = pathReturn[0]
             rowIter = model.get_iter(self.path)
             text = model.get_value(rowIter, self.column)
+            self.active_tips_data = text
             if not text:
+                self.tip_label.set_text('')
                 return False
-            self.label.set_text(text)
-            x, y = self.label.size_request()
-            self.tipWindow.resize(x, y)
-            windowWidth, windowHeight = self.tipWindow.get_size()
+            self.tip_label.set_text(text)
+            x, y = self.tip_label.size_request()
+            self.tip_window.resize(x, y)
+            windowWidth, windowHeight = self.tip_window.get_size()
             cellInfo = tree.get_cell_area(self.path, pathReturn[1])
             x, y = self.__compute_tooltip_position(cellInfo, windowWidth, windowHeight)
-            self.tipWindow.move(int(x), int(y))
-            self.tipWindow.show_all()
+            self.tip_window.move(int(x), int(y))
+            self.tip_window.show_all()
 
         return False
 
     def __compute_tooltip_position(self, cellInfo, popupWidth, popupHeight):
-        """Figures out where the tooltip should be placed on the page
+        '''Figures out where the tooltip should be placed on the page
 
         [p] = pointer
         x =      [p]
@@ -117,9 +203,9 @@ class TreeTips(gtk.Widget):
             +------------+
             |____________|
                  [p]
-        """
+        '''
 
-        xOrigin, yOrigin = self.tree.get_bin_window().get_origin()
+        xOrigin, yOrigin = self.view.get_bin_window().get_origin()
         x = xOrigin + cellInfo.x + cellInfo.width/2 - popupWidth/2
         if x < 0:
             x = 0
@@ -133,14 +219,4 @@ class TreeTips(gtk.Widget):
                 y = 0
 
         return x, y
-
-    def enable(self):
-        """Enable showing of tooltips"""
-        ### FIXME: Enable tooltip display
-        pass
-
-    def disable(self):
-        """Disable showing tooltips"""
-        ### FIXME: Disable tooltip display
-        pass
-        
+gobject.type_register(TreeTips)

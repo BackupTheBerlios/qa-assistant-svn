@@ -12,6 +12,7 @@ __revision__ = '$Rev$'
 import os
 import sys
 import unittest
+import gtk
 
 import test
 
@@ -19,6 +20,7 @@ import error
 import checklist
 import checkview
 import treetips
+import review
 
 class TestCreation(unittest.TestCase):
     def setUp(self):
@@ -41,9 +43,26 @@ class TestCreation(unittest.TestCase):
                 'gobbledygook.xml')
 
     #
+    # Treetip creation function
+    #
+    def test_TreetipCreateSuccess(self):
+        self.assert_(isinstance(treetips.TreeTips(), treetips.TreeTips))
+
+    def test50_TreetipCreateSuccessCheckView(self):
+        view = checkview.CheckView()
+        self.assert_(isinstance(treetips.TreeTips(view, 1), treetips.TreeTips))
+
+    def test_TreetipCreateSuccessTreeView(self):
+        view = gtk.TreeView()
+        self.assert_(isinstance(treetips.TreeTips(view, 1), treetips.TreeTips))
+
+    def test_TreetipCreateNotATreeView(self):
+        self.assertRaises(TypeError, treetips.TreeTips, 3, 1)
+
+    #
     # CheckView creation tests
     #
-    def test50_CheckViewCreateWithoutChecklist(self):
+    def test_CheckViewCreateWithoutChecklist(self):
         self.assert_(isinstance(checkview.CheckView(), checkview.CheckView))
     
     def test_CheckViewCreateWithChecklist(self):
@@ -53,17 +72,19 @@ class TestCreation(unittest.TestCase):
        
     def test_CheckViewCreateNotACheckList(self):
         self.assertRaises(TypeError, checkview.CheckView, 1)
-    #
-    # Treetip creation function
-    #
-    def test_TreetipCreateSuccess(self):
-        view = checkview.CheckView()
-        self.assert_(isinstance(treetips.TreeTips(view, 1), treetips.TreeTips))
 
-    def test_TreetipCreateNotACheckView(self):
-        self.assertRaises(AssertionError, treetips.TreeTips, 3, 1)
+    ### FIXME: Add optionrenderer
 
-    ### FIXME: Review, optionrenderer
+    #
+    # Review creation functions
+    #
+    def test_ReviewCreateSuccess(self):
+        check = checklist.CheckList(os.path.join(self.dataDir, 'fedoraus.xml'))
+        self.assert_(isinstance(review.Review(check), review.Review))
+
+    def test_ReviewCreateNotACheckList(self):
+        self.assertRaises(AssertionError, review.Review, 3)
+
 def suite():
     highPriority = unittest.makeSuite(TestCreation, 'test0_')
     mediumPriority = unittest.makeSuite(TestCreation, 'test50_')

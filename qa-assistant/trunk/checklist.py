@@ -173,7 +173,7 @@ class CheckList (gtk.TreeStore):
                 gobject.TYPE_PYOBJECT,
                 gobject.TYPE_PYOBJECT,
                 gobject.TYPE_PYOBJECT)
-
+        #gobject.signal_new('resolution-changed', type(self), )
         base = root.xpathEval2('/checklist/base')
         if base:
             # We are loading a savefile.  Just load the base info.
@@ -390,24 +390,6 @@ class CheckList (gtk.TreeStore):
         doc.saveFormatFileEnc(filename, 'UTF-8', True)
         doc.freeDoc()
 
-    ### FIXME: Function not used anywhere.  Consider removing it.
-    def set_output_string(self, key, resolution, output):
-        '''Set the output string for the key and resolution.
-        
-        Arguments:
-        key -- summary that is used to key the entries
-        resolution -- resolution state this output applies to
-        output -- output string to set the entry:resolution to
-
-        `set_output_string` takes care of setting the output in the
-        `CheckList` including formatting it for proper pango display.
-        '''
-       
-        output = self.pangoize_output(resolution, output)
-        entryIter = self.entries[key.lower()]
-        outputList = self.get_value(entryIter, self.OUTPUTLIST)
-        outputList[resolution] = output
-    
     def unpangoize_output(self, output):
         '''Removes pango tags and unescapes pango special chars from output.
 

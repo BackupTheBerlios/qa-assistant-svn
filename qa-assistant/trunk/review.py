@@ -27,8 +27,13 @@ class Review(gtk.VBox):
         Attributes:
         :treeStore: A gtk.TreeModel to operate on.
         '''
+        assert isinstance(treeStore, checklist.CheckList), \
+                "%s is not a CheckList type" % (treeStore)
+
         ### FIXME: Can we use gtk.VBox.__init__() instead?
-        gobject.GObject.__init__(self)
+        # Answer: yes unless we declare our own gproperties
+        #gobject.GObject.__init__(self)
+        gtk.VBox.__init__(self)
 
         # Create the textwrap object for use by the publish method
         self.textwrap = textwrap.TextWrapper(initial_indent='* ',
@@ -282,4 +287,4 @@ class Review(gtk.VBox):
         else:
             self.resolution.set_text('PUBLISH +1')
 
-gobject.type_register(Review)
+#gobject.type_register(Review)
