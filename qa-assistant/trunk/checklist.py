@@ -259,15 +259,6 @@ class CheckList (gtk.TreeStore):
                 node = node.next
 
         checkFile.freeDoc()
-        # More efficient to do the stuff in the signal handlers manually
-        # during setup and only register them afterwards.
-        ### FIXME: I believe this whole setup is now unnecessary.
-        # 1) We no longer track modified rows so there's no need to hook
-        #    into the row-changed signal.
-        # 2) All row insertions go through add_entry() now.  So we should be
-        #    able to perform the row-inserted functions there instead.
-        self.connect('row-inserted', self.__added_row)
-        self.connect('row-changed', self.__modified_row)
 
     def add_entry(self, summary, item=None, display=None,
             desc=None, resolution=None, output=None,
@@ -296,7 +287,7 @@ class CheckList (gtk.TreeStore):
 
         # Make sure this entry isn't already listed.
         if self.entries.has_key(summary):
-            raise error.DuplicateItemError, ('%s is already present in the checklist.' % (self.entries[summary]))
+            raise error.DuplicateItem, ('%s is already present in the checklist.' % (self.entries[summary]))
 
         # Set up all the default values.
         if item == None:
@@ -346,7 +337,7 @@ class CheckList (gtk.TreeStore):
                 self.RESLIST, resList,
                 self.OUTPUTLIST, outputList,
                 self.TEST, None)
-        return newItem
+        self.entries[summary] = newItem
 
     def publish(self, filename=None):
         '''Saves the current state of the `CheckList` into a savefile.
@@ -511,12 +502,12 @@ class CheckList (gtk.TreeStore):
                 return
             if catRes != 'Pass':
                 entryIter = self.iter_children(category)
-                while changedRow:
+                while entryIter:
                     nodeRes = self.get_value(entryIter,
                             self.RESOLUTION)
                     if nodeRes == 'Fail':
                         return
-                    changedRow = self.iter_next(entryIter)
+                    entryIter = self.iter_next(entryIter)
         elif (newValue == 'Pass' or newValue == 'Not-Applicable' or 
                 newValue == 'Non-Blocker'):
             # Unless another entry is Fail or Needs-Reviewing, change to Pass
@@ -533,34 +524,6 @@ class CheckList (gtk.TreeStore):
         self.set(category, self.RESOLUTION, newValue)
         path = self.get_path(category)
         self.row_changed(path, category) ### FIXME: Is this necessary?
-
-    #
-    # Helpers to keep the checklist current.
-    #
-
-    def __modified_row(self, tree, path, entryIter):
-        '''Maintain internal values whenever a row is modified.
-
-        Add new pending checklist items to the entries lookup.  Had to be
-        deferred by `__added_row` because the SUMMARY value might not be
-        the first thing added.
-        '''
-
-        if self.addPaths.has_key(path) and tree.get_value(entryIter, self.SUMMARY):
-            name = tree.get_value(entryIter, self.SUMMARY)
-            self.entries[name] = entryIter
-            del self.addPaths[path]
-
-    def __added_row(self, tree, path, entryIter):
-        """Maintain some internal values whenever a row is added.
-      
-        List the path to the item as needing to be entered into `self.entries`
-        when the summary value becomes available.  `self.entries` allows fast
-        checking for the existence of an entry.
-        """
-
-        # List the path as needing to be entered into our lookup hash.
-        self.addPaths[tree.get_path(entryIter)] = True
 
     #
     # Helpers to read a checklist
