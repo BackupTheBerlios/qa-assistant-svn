@@ -10,10 +10,17 @@ Checklist Reviewer to Aid Quality Assurance
 :Date: $Date$
 
 ..contents::
+
 Version 0.5
 ===========
 This release has a rewritten checklist display that should be both prettier
 to look at and more easily programmed against.
+
+Version 0.4.1
+=============
+This is a bugfix release.
+* Fix a bug in loading saved checklists that caused the custom category to
+  be displayed as an item.
 
 Version 0.4
 ===========

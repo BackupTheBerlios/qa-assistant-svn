@@ -177,8 +177,10 @@ class CheckList:
             raise duplicateItemError, ('%s is already present in the checklist.' % (self.entries[summary]))
 
         # Set up all the default values.
-        item = item or True
-        display = display or True
+        if item == None:
+            item = True
+        if display == None:
+            display = True
         resolution = resolution or 'Needs-Reviewing'
         output = output or None
         desc = desc or None
