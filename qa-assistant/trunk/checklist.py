@@ -324,11 +324,10 @@ class CheckList (gtk.TreeStore):
             category = self.iter_next(category)
         self.resolution = newRes
 
-    def do_resolution_changed(self, newValue):
-        ### FIXME: We need to actually process resolution changed requests
-        # here.
-        # Hmmm... But maybe we don't.  What is there left to be done?
-        pass
+    #def do_resolution_changed(self, newValue):
+        # If we needed to process resolution_changed requests somehow, it
+        # could be done here.  But there doesn't appear to be anything to do.
+        #pass
 
     def add_entry(self, summary, item=None, display=None,
             desc=None, resolution=None, output=None,

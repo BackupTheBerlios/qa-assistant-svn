@@ -12,8 +12,18 @@ Checklist Reviewer to Aid Quality Assurance
 
 .. contents::
 
-Version 0.5
-===========
+Version 0.4.90.1
+================
+*This is a development release.*  It's like a snapshot but with a tad more
+care put in.  It is likely to have major bugs.  Things that you see here
+may change radically before the actual release.  This includes the definition
+of the DTDs and other versioned properties (which may not have their versions
+bumped again before the real release -- so you may need to completely
+uninstall the development version before installing the new release.)
+
+The main reason for the development release is so people unable to use the
+subversion archive can see where the code is headed for the 0.5 release.
+
 This release has a rewritten checklist display that should be both prettier
 to look at and more easily programmed against.  Most changes are developer
 visible but not end-user visible:

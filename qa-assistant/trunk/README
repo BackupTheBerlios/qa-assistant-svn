@@ -48,7 +48,7 @@ Requirements
 * python_ 2.2 (2.3 is now the development platform.  Conditional code to use
   python 2.2 is present but needs testing.)
 * python bindings for libxml2_
-* pygtk_ version 2.2.0 or higher.
+* pygtk_ version 2.2.0 or higher. (Note: 0.5 will require 2.4.0)
 * `gnome-python-gconf`__ 2.0.0 or higher.
 * `gnome-python`__ version 2.0.0 or higher.
 * `python-rpm`_

@@ -66,11 +66,28 @@ directory everytime the program starts and change as the program progresses.)
 (Hmmm is this a gpg option instead?)
 * Keyserver to download new keys from
 
-Properties?
-* Submit to bugzilla or publish to file
+Druid
+-----
+In the new scheme of things we need to know what checklist to load before we
+can do useful things.  Once we know what checklist to load, we should be able
+to invoke functions to take onLoad information from users.
 
-Druid?
-* Default QA checklist to load
+The Druid will have the following pathways:
+1) Info screen.
+2) (A) Load savefile (B) New checklist
+3A) Open a file chooser with the CWD for the user to pick from
+3B) Open a selector of the system installed checklists
+4pre) Load checklist
+4) Display a properties dialog to get the properties that the checklist
+   requires (onLoad) if any.
+5) Start the program.
+
+When loading a new checklist after the program is started, we should skip
+1 & 2 and go directly to 3A.
+
+When loading a saved checklist we want to popup a file selector (could be
+the Druid page or the Druid file selector could be the load checklist file
+selector.)  Then proceed to 4pre.
 
 Properties
 ----------
@@ -85,6 +102,21 @@ the checklist object.
 
 We have a properties dict in the CheckList right now.
 What are we going to do with that?
+
+We need the following attributes on functions:
+
+* automatic/userinput/useroverride
+* onLoad(Mandatory before we start)/onPublish(mandatory before we end)/optional
+
+The current checklist.dtd encapsulates these in the following ways.  As
+RequireTypes:
+
+* onLoad (start, user)
+* onPublish (end, user)
+* automatic (when its dependencies resolve, automatic)
+* optional (optional, user)
+
+overrides are implemented as user invocable functions.
 
 Functions
 ---------
@@ -108,3 +140,11 @@ Create a QAMenu class that takes the checklist as its model.  When the
 Functions that are not in the menu are functions used by the properties
 themselves.  These functions often need to specify dependency information on
 other properties.
+
+Other things that get set depending on the checklist:
+
+* Application's title bar: app.set_title()
+* Appplication's status bar: app.mainWinAppBar.push()
+  - Ideas for statusbar info:
+    + The main identifier of the review (SRPM name)
+    + Number of pass/fail/needs-reviewing/etc

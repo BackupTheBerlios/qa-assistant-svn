@@ -60,12 +60,20 @@
      revision: Revision of this checklist
      type: Type of this checklist
   -->
-<!ELEMENT checklist (base?, properties?, functions, category+)>
+<!ELEMENT checklist (summary, base?, properties?, functions, category+)>
   <!ATTLIST checklist
     version CDATA #FIXED '0.3'
     name CDATA #REQUIRED
     revision CDATA #REQUIRED
   >
+  
+  <!-- A brief description of the checklist
+  
+       This is mostly used when showing users of a checklist what the
+       checklist is for.
+    -->
+  <!ELEMENT summary (#PCDATA)>
+  
   <!-- Information on the base checklist used to create this one
   
        Attributes:

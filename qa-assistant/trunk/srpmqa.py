@@ -83,3 +83,54 @@ Relative priority: Enhancement sometime after new review from SRPM. (Rather low)
 Relative Priority: Publish will be the primary submission for now.  This is an enhancement and should depend on having better editing of the review first."""
         self.app.not_yet_implemented(msg)
         pass
+
+    ### FIXME: THis is copied here from the main qareviewer file.  It doesn't
+    # belong here but this is becoming a holding ground for all SRPM related
+    # functions until I have a chance to integrate them properly.
+    def SRPM_into_properties(self, filename):
+        '''Add an SRPM file into our properties structure.
+        
+        Keyword -- arguments:
+        filename -- filename of the SRPM
+
+        Sets our properties to use the specified SRPM file for the checklist.
+        '''
+        
+        msg = 'Please select "QA Action => From SRPM"\nor "QA Action => From Bugzilla" to start the QA process.'
+        self.lastSRPMDir = os.path.dirname(filename)+'/'
+        try:
+            self.properties.load_SRPM(filename)
+        except Properties.FileError, message:
+            self.startLabel.set_text("Unable to process that SRPM: %s\n%s" % (message.__str__(), msg))
+        except Properties.SecurityError, message:
+            ### FIXME: 
+            # Set up a review based on the security error
+            # Information needed from SRPM:
+            # nice message suitable for sticking into a review
+            # MD5Sum of file
+            # Also -- there are two types of Security Errors right now:
+            # SRPM problems and general unrpm problems related to race
+            # conditions.  Need to separate:  SecurityError
+            # MalFormedSRPMError
+            # Dialog to display review and ask user if they want to publish
+            # If user selects then publish it to file
+            # [DIALOG]
+            # PUBLISH -1
+            # MD5Sum of src.rpm
+            # Description of problem
+            # [Publish] [Submit to Bugzilla] [Cancel]
+            # [END DIALOG]
+            # else allow user to select a new file
+            #
+            # Everything from here to pass is a hack and needs to go
+            self.startLabel.set_text("SECURITY Error processing SRPM: %s" % (message))
+            del self.properties.SRPM
+            self.properties.SRPM = None
+            pass
+
+        self.__check_readiness()
+
+        ### FIXME: Eventually properties should be a gobject and this
+        # should be caught by a signal.connect in the Review Widget.
+        # Moving it into the checklist
+        #self.reviewView.update_hash()

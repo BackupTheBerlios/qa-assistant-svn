@@ -1,6 +1,7 @@
 <?xml version='1.0' ?>
 <!DOCTYPE checklist PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.3//EN" "http://qa-assistant.sf.net/dtds/checklist/0.3/checklist.dtd">
-<checklist version="0.3" name="fedoraus" revision="0.3">
+<checklist version="0.3" name="Fedora.us SRPM QA" revision="0.3">
+  <summary>Run QA on SRPMS according to the fedora.us rules</summary>
   <properties>
     <property name="ticketURL" type="url">
       <require type="optional"/>

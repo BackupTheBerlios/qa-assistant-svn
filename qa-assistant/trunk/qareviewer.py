@@ -21,7 +21,7 @@ import gnome
 from qaconst import *
 import gnomeglade
 import error
-from properties import Properties
+import checkload
 from review import Review
 from checklist import CheckList
 from checkview import CheckView
@@ -38,14 +38,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         Keyword -- arguments:
         arguments: A commandline to process when setting up the environment
         """
-
-        # Create the properties for this checklist
-        ### FIXME: Properties is hard-coded right now.
-        # We need to distribute the remaining code in here to:
-        # Property values -> GConf2
-        # Methods -> SRPMQA... except that's getting radically changed too.
-        self.properties = Properties()
-
         # Load the interface
         gladefile = 'glade/qa-assistant.glade'
         gnomeglade.GnomeApp.__init__(self, PROGRAMNAME, __version__,
@@ -66,8 +58,8 @@ class QAReviewer(gnomeglade.GnomeApp):
             else:
                 iconFile = iconFile[0]
         if iconFile:
-            self.ReviewerWindow.set_property('icon', gnomeglade.load_pixbuf(iconFile))
-            #self.NewDruid.set_property('icon', gnomeglade.load_pixbuf(iconFile))
+            self.logo = gnomeglade.load_pixbuf(iconFile)
+            self.ReviewerWindow.set_property('icon', self.logo)
 
         # Create the views onto the checklist
         self.checkView = CheckView()
@@ -84,34 +76,69 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         self.reviewScroll.hide()
 
+        ### FIXME: Get rid of startlabel altogether when we have Druid support.
+        self.startLabel.set_text(
+                'Please select File::New or File::Load to begin.')
+        
         # Create our Clipboard
         self.clipboard = gtk.Clipboard(gtk.gdk.display_get_default(),
                 'CLIPBOARD')
         self.clipPrimary = gtk.Clipboard(gtk.gdk.display_get_default(),
                 'PRIMARY')
 
-        #
-        # Command line initialization
-        #
-        ### FIXME: take care of the command line args
-
-        ### FIXME: When checking for commandline args also use it to change
-        # these values.
+        # Set default paths for File Dialogs to look in
         self.lastSRPMDir = './'
         self.lastSaveFileDir = './'
         self.lastReviewDir = './'
 
-        ### FIXME: Absolute dependence on arguments[1] being an SRPM without a
-        # check to make sure of it.  Need to fix that up with cmd-line args.
-        if len(arguments) == 2:
-            self.SRPM_into_properties(arguments[1])
+        #
+        # Command line initialization
+        #
+
+        self.checklist = None
+        ### FIXME: Read commandline for things like a checklist file specified.
+        # If there is a checklist on the commandline, send it to the druid to
+        # be loaded.
+        # load that.  The
+        # properties tell us if there's any information that must be taken
+        # from the user.  Or if it's already been filled out.
 
         #
         # Blast off!
         #
-        self.__check_readiness()
-        self.ReviewerWindow.show()
-
+        
+        if self.checklist:
+            ### FIXME: Decide if there's additional properties that must be
+            # filled out.
+            self.ReviewerWindow.show()
+        else:
+            ### FIXME: While the Druid is onscreen, set everything in the
+            # ReviewerWindow to be insensitive.
+            # If no checklist is loaded, only file::New and file::Load should
+            # work.... (?)
+            self.druid = checkload.NewDruid(self, checkload.START)
+            self.druid.show_all()
+            ### FIXME: Note that the druid must destroy itself when it is
+            # finished.
+            # If there's no checklist on the commandline, popup the Druid that
+            # asks the user to select a checklist from the installed defaults
+            # or a savefile.  (Same type of file, but they have distinctly
+            # different needs in terms of selecting.
+            # CheckLists will all be located someplace in the system that the
+            # program knows about.  so a simple selector can be used.
+            # savefiles will be inplaces that the user knows about (maybe in the
+            # home directory or in the CWD.)  So the user should get a file
+            # selector for this.
+            #
+            # Once the user selects a checklist file to load, we look at the
+            # properties and decide if we have to ask the user for additional
+            # information about the checklist.
+            #
+            # Question for self:  Does it make sense to have the user verify all
+            # the properties at load time or should the user only enter when the
+            # properties are required and not loaded?
+       
+            
     #
     # Helper Functions
     # 
@@ -128,14 +155,14 @@ class QAReviewer(gnomeglade.GnomeApp):
             else:
                 checkFile = checkFile[0]
         if not checkFile:
-            ### FIXME: When we can select checklists via property, we need to
+            ### FIXME: We can select checklists via property, we need to
             # print error and recover.
             sys.stderr.write("Unable to find checklist: %s\n" % (filename))
             sys.exit(1)
         try:
             self.checklist = CheckList(checkFile)
         except (libxml2.parserError, libxml2.treeError, error.InvalidChecklist), msg:
-            ### FIXME: When we can select checklists via property, we need to
+            ### FIXME: We can select checklists via property, we need to
             # print error and recover.
             sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
             sys.exit(1)
@@ -143,6 +170,11 @@ class QAReviewer(gnomeglade.GnomeApp):
         ### FIXME: We need to assemble the qamenu from the list of requested
         # checklist.functions instead of from the type variable.  Currently
         # breaking it totally by making it always pretend to have a SRPM.
+        #
+        # I think we'll have a module qamenu that takes a checklist as its
+        # model.  The qamenu will instantiate a gtk.Menu suitable for calling
+        # self.QAMenuItem.set_submenu() on.  The QAMenu will change when the
+        # checklist model changes.
         #if self.checklist.type == 'SRPM':
         if True:
             from srpmqa import SRPMQA
@@ -158,54 +190,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.reviewView.show()
         self.checkView.set_model(self.checklist)
         self.checkView.show()
-
-    def SRPM_into_properties(self, filename):
-        '''Add an SRPM file into our properties structure.
-        
-        Keyword -- arguments:
-        filename -- filename of the SRPM
-
-        Sets our properties to use the specified SRPM file for the checklist.
-        '''
-        
-        msg = 'Please select "QA Action => From SRPM"\nor "QA Action => From Bugzilla" to start the QA process.'
-        self.lastSRPMDir = os.path.dirname(filename)+'/'
-        try:
-            self.properties.load_SRPM(filename)
-        except Properties.FileError, message:
-            self.startLabel.set_text("Unable to process that SRPM: %s\n%s" % (message.__str__(), msg))
-        except Properties.SecurityError, message:
-            ### FIXME: 
-            # Set up a review based on the security error
-            # Information needed from SRPM:
-            # nice message suitable for sticking into a review
-            # MD5Sum of file
-            # Also -- there are two types of Security Errors right now:
-            # SRPM problems and general unrpm problems related to race
-            # conditions.  Need to separate:  SecurityError
-            # MalFormedSRPMError
-            # Dialog to display review and ask user if they want to publish
-            # If user selects then publish it to file
-            # [DIALOG]
-            # PUBLISH -1
-            # MD5Sum of src.rpm
-            # Description of problem
-            # [Publish] [Submit to Bugzilla] [Cancel]
-            # [END DIALOG]
-            # else allow user to select a new file
-            #
-            # Everything from here to pass is a hack and needs to go
-            self.startLabel.set_text("SECURITY Error processing SRPM: %s" % (message))
-            del self.properties.SRPM
-            self.properties.SRPM = None
-            pass
-
-        self.__check_readiness()
-
-        ### FIXME: Eventually properties should be a gobject and this
-        # should be caught by a signal.connect in the Review Widget.
-        # Moving it into the checklist
-        #self.reviewView.update_hash()
 
 
     def __check_readiness(self):
@@ -240,7 +224,7 @@ class QAReviewer(gnomeglade.GnomeApp):
     #
 
     def on_menu_open_activate(self, *extra):
-        """Open a saved review"""
+        '''Open a saved review'''
         fileSelect = gtk.FileSelection(title='Select the checklist file to load.')
         if (os.path.isdir(self.lastSaveFileDir) and
                 os.access(self.lastSaveFileDir, os.R_OK|os.X_OK)):
