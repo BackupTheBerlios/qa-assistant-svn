@@ -125,7 +125,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         ### FIXME: Absolute dependence on arguments[1] being an SRPM without a
         # check to make sure of it.  Need to fix that up with cmd-line args.
         if len(arguments) == 2:
-            self.__SRPM_into_properties(arguments[1])
+            self.SRPM_into_properties(arguments[1])
 
         #
         # Blast off!
@@ -178,7 +178,15 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.QAMenuItem.set_submenu(qamenu)
         qamenu.show_all()
 
-    def __SRPM_into_properties(self, filename):
+    def SRPM_into_properties(self, filename):
+        '''Add an SRPM file into our properties structure.
+        
+        Keyword -- arguments:
+        filename -- filename of the SRPM
+
+        Sets our properties to use the specified SRPM file for the checklist.
+        '''
+        
         msg = "Please select 'New => From SRPM'\nor 'New => From Bugzilla' to start the QA process."
         try:
             self.properties.load_SRPM(filename)
@@ -496,7 +504,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             if response == gtk.RESPONSE_OK:
                 filename = fileSelect.get_filename()
                 self.properties.lastSRPMDir = os.path.dirname(filename)+'/'
-                self.__SRPM_into_properties(filename)
+                self.SRPM_into_properties(filename)
         finally:
             fileSelect.destroy()
             del fileSelect

@@ -8,7 +8,10 @@
 """
 __revision__ = "$Rev$"
 
+import os
+
 import gtk
+
 from genericqa import GenericQA
 
 class SRPMQA(GenericQA):
@@ -44,7 +47,7 @@ class SRPMQA(GenericQA):
             if response == gtk.RESPONSE_OK:
                 filename = fileSelect.get_filename()
                 self.app.properties.lastSRPMDir = os.path.dirname(filename)+'/'
-                self.app.__SRPM_into_properties(filename)
+                self.app.SRPM_into_properties(filename)
         finally:
             fileSelect.destroy()
             del fileSelect
@@ -54,7 +57,7 @@ class SRPMQA(GenericQA):
         msg = """Associates this review with a bugzilla report.  The program needs to be able to use this to pick out information from a bugzilla report in order to autodownload packages and otherwise set up an environment for reviewing.  Although definitely cool, there's a good deal of work necessary for this to work.
         
 Relative priority: Enhancement sometime after new review from SRPM. (Rather low)"""
-        self.not_yet_implemented(msg)
+        self.app.not_yet_implemented(msg)
         pass
 
     def submit_to_bugzilla_callback(self, menuEntry):

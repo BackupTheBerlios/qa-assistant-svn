@@ -66,7 +66,7 @@ class GenericQA(gtk.Menu):
         # RESOLUTIONLIST (all)
         # If no category "My Items", create
         # Append new item to My Items.
-        msg = """This item will allow you to add your own checklist item to the current review.  Since the checklist authors could have missed an entry that you know to be wrong with the program, this is desirable.  For instance: "Program does not call my dog:  gdogcaller fails to make my dog come when I run it which is what I assume such a program to do.
+        msg = """This item will allow you to add your own checklist item to the current review.  Since the checklist authors could have missed an entry that you know to be wrong with the program, this is desirable.  For instance: "Program does not call my dog:  gdogcaller fails to make my dog come when I run it which is what I assume such a program to do."
         
 I consider this a must have feature.  QA Assistant cannot be considered complete without this.  However, it is still possible to perform without this and it entails some non-trivial coding so it is a low priority necessity."""
         self.app.not_yet_implemented(msg)

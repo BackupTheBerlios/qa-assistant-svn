@@ -21,11 +21,6 @@ glade/GUI:
   make it happen?  A field in the XML file under state?  And that causes
   qa-assistant to pop up a textEntry dialog when the item enters that state?
 
-- There should be a menu for actions specific to the checklist.  And the
-  checklist should have some hand in defining this.  For instance, type=
-  SRPMQA could list From SRPM, From Bugzilla, Publish Review, Submit Review,
-  Recheck MD5sum hashes, etc.
-
 Extra GNOME Functionality:
 ==========================
 - Create preferences infrastructure : check PREFERENCES for ideas.
