@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+ Identifiers:
+ PUBLIC "-//BadgerWare//DTD QA Assistant Save File 0.1//EN"
+ SYSTEM "http://qa-assistant.sf.net/qasave/0.1/qasave.dtd"
+-->
+<!-- All possible resolutions of a QA Checklist Item -->
+<!ENTITY % Resolutions '(Needs-Reviewing|Pass|Fail|Non-Blocker|Not-Applicable)'>
+
+<!-- Root Node -->
+<!ELEMENT qasave (checklist, properties?, entries)>
+  <!ATTLIST qasave
+    version CDATA #FIXED '0.1'
+  >
+
+  <!-- The checklist this save file modifies. -->
+  <!ELEMENT checklist (#PCDATA)>
+    <!ATTLIST checklist
+      name CDATA #REQUIRED
+      revision CDATA #REQUIRED
+    >
+  
+  <!-- Properties associated with the checklist such as filename,
+       Issue tracking number, etc. -->
+  <!ELEMENT properties (property+)>
+    <!ELEMENT property (#PCDATA)>
+      <!ATTLIST property
+        name CDATA #REQUIRED
+      >
+  
+  <!-- Entries in the checklist that have been modified by the program.
+       These are meant to layer on top of the original checklist.  -->
+  <!ELEMENT entries (entry+)>
+    <!ELEMENT entry (states?)>
+      <!ATTLIST entry
+        name CDATA #REQUIRED
+        display (true|false) "false"
+        state %Resolutions; #REQUIRED
+      >
+        <!ELEMENT states (state+)>
+          <!ELEMENT state (#PCDATA)>
+            <!ATTLIST state
+              name %Resolutions; #REQUIRED
+            >

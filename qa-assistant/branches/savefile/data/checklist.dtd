@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+ Identifiers:
+ PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.2//EN"
+ SYSTEM "http://qa-assistant.sf.net/checklist/0.2/checklist.dtd"
+-->
+<!ENTITY % Resolutions
+  '(Needs-Reviewing|Pass|Fail|Non-Blocker|Not-Applicable)'
+>
+<!ENTITY % ChecklistType
+  '(SRPM|generic)'
+>
+<!ENTITY % Boolean
+  '(true|false)'
+>
+<!ELEMENT checklist (category+)>
+  <!ATTLIST checklist
+    version CDATA #FIXED '0.2'
+    name CDATA #REQUIRED
+    revision CDATA #REQUIRED
+    type %ChecklistType; "generic"
+  >
+  <!ELEMENT category (description, entry+)>
+    <!ATTLIST category
+      name CDATA #REQUIRED
+    >
+    <!ELEMENT description (#PCDATA)>
+    <!ELEMENT entry (states, description)>
+      <!ATTLIST entry
+        name CDATA #REQUIRED
+	display %Boolean; "false"
+      >
+      <!ELEMENT states (state+)>
+        <!ELEMENT state (#PCDATA)>
+          <!ATTLIST state
+            name %Resolutions; #REQUIRED
+          >
