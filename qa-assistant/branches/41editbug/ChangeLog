@@ -1,0 +1,226 @@
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r37    
+    * data/fedoraus.xml: Add Non-Blocker status to Buildroot.
+    * ChangeLog: Update
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r36    
+    Add Id and Rev keyword expansion to source code
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r35    
+    * fedora-md5, fedora-qatemplate: Removed files that have no part in this
+      program (except as ideas.)
+    * TODO: Add note to work on scripts to install and distribute the program
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r34    
+    * Copy fedora-rpmdevtools over to the new project.  Will delete extaneous
+      files shortly.
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r33    
+    * ChangeLog: Create a ChangeLog with the current svn changes
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r31    
+    * qareviewer.py: Fix argument handling to really only take one argument
+    * data/fedoraus.xml: Set SRPM GPG signed entry to display by default
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r30    
+    * TODO: Add note about fedora-startqa script
+    * data/fedoraus.xml: Finish inputting the fedoraus checklist
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r29    
+    * qareviewer.py:
+      - Only load an SRPM if one is given on the commandline.  Print a usage
+        message otherwise.
+      - Catch exceptions from loading the SRPM -- but don't do anything
+        useful with them yet.
+      - Fix the Auto-display of non-Pass items to display non-blockers as well.
+    * TODO: update SRPM.py entry
+    * SRPM.py:
+      - Added some simple exceptions.  May need more refinement as we progress.
+      - Check if the SRPM file exists and is readable instead of just if the
+        file has the potential to be readable.
+      - Some cleanups to how we use python file objects.
+      - Reordered the functions to be somewhat more logical.  Still some work
+        to be done there.
+      - Check for previous unarchival of rpm.  Still needs a few problem cases
+        resolved nicely.
+      - Fix up the internal rpm2cpio code.  It now works with gzip compressed
+        payloads.  BZ2 stuff needs python-2.3 and someone to take a look at the
+        different interface.  
+    
+2004-03-30 Toshio Kuratomi <toshio@tiki-lounge.com> - r28    
+    * checklist.py: Change the Display tag to an attribute of entry
+    * data/checklist.dtd: Ditto
+    * data/fedoraus.xml: Ditto
+      - Also take out display altogether when it's the default value of false.
+    
+2004-03-30 Toshio Kuratomi <toshio@tiki-lounge.com> - r27    
+    * review.py: Fix logic in deciding the overall review resolution
+    * checklist.py:
+      - Removed INPUT from the checklist file.  Needs some rethinking before we
+        add something like it back in.
+      - Validate the checklist file with the checklist.dtd
+      - Fixed the Exception names.
+      - Removed 'output' tag from checklist.  Output is now the content of the
+        state tag rather than having its own tag.
+    * qareviewer.py: Catch exceptions from libxml2.treeError as well as
+      libxml2.parserError
+    * TODO: Logo item and needing something to "force" the user to edit output
+      items when they could add useful information that the program can't guess.
+    * data/checklist.dtd:
+      - Remove input
+      - Set false as the default display state
+      - Remove output: information is now directly in the state tag
+    * data/fedoraus.xml:
+      - Add DoCTYPE line to associate with checklist.dtd
+      - Add many more entries from the Fedora Checklist
+      - Changes to output and input for new dtd.
+    
+2004-03-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r26    
+    * qareviewer.py:
+      - Reorder menu callbacks in depth first order they appear in the menu bar.
+      - publish_activate: Prompt user for a filename to save the review to.
+    * TODO: Remove items that have been completed and notes to enhance others.
+    * glade/qa-assistant.strings, glade/qa-assistant.glade: Remove the
+      FileSelection dialog from the glade definition.  It's very easy to add
+      fileSelectionDialogs programmatically so that's how I'm going to do it.
+    
+2004-03-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r25    
+    * review.py: publish(filename) method implemented.  Call the publish method
+      on a review object to print out the review.  Note:  further work could be
+      done for word wrapping and WYSIWYG-ness.
+    * qareviewer.py: connect publish menu item to review.publish()
+    
+2004-03-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r24    
+    * review.py: Finish the display methods.  Implemented as a listStore that
+      connects to the QAReviewer.checklist.tree row-changed signal and mirrors
+      the data there.
+    * checklist.py: Change resolution state from 'Needs Reviewing' to
+      'Needs-Reviewing' because of limitations of DTD (Wish libxml2 did
+      XML Schemas...)
+    * qareviewer.py:
+      - Allow editing the OUTPUT Field
+      - Change resolution state names because of DTD
+      - Change the reviewPane toggle to use hide/show rather than 
+        remove/insert
+    * TODO: Minor reorganizations
+    * checklist.dtd: Initial DTD for our checklist data files.  Preparatory
+      for adding validation to the checklist.py script.
+    * fedoraus.xml: Changes to naming due to DTD limitations
+    * glade/qa-assistant.glade: Add a ViewPort into the ScrolledWindow.
+      Renamed ViewPort to reviewPane and ScrolledWindow as reviewScroll
+    
+2004-03-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r23    
+    * glade/fedora-qareviewer.glade, glade/fedora-qareviewer.strings:
+      Renamed to qa-assistant.glade and qa-assistant.strings
+    
+2004-03-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r22    
+    * glade/fedora-qareviewer.strings, glade/fedora-qareviewer.glade,
+      TODO, qareviewer.py: Change reference to editorPane to reviewPane
+    * fedora-qareviewer: Rename to qa-assistant.
+      - Remove constants from here that are going into qareviewer.py instead
+    * qareviewer.py: Change fedora-* file names to qa-assistant* files
+    * glade/fedora-qareviewer.glade, glade/fedora-qareviewer.gladep,
+      glade/fedora-qareviewer.strings: Changed text inside the files to match
+      the new name.
+    * Renamed glade/fedora-qareviewer.gladep to qa-assistant.gladep
+    
+    
+2004-03-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r21    
+    * pixmaps, pixmaps/qa-icon.xcf, pixmaps/qa-icon.png: icon file for QA
+      Assistant
+    * properties.py: Initial work on a properties class to keep properties
+      for the review
+    * review.py: Initial, non-working start on the review widget.  May implement
+      as a glade custom widget
+    * PREFERENCES: split into preferences/properties
+    * qareviewer.py: add SRPM and Properties code
+      - Reorganized the method ordering to be more logical
+      - Added docstrings for all completed methods
+      - Small reworking of logic in resolution_changed
+      - Implement Not Yet Implemented dialog for every menu item that's not yet
+        working
+    * TODO: Reorganized
+    * SRPM.py: Initial work at an SRPM class to track the SRPM associated with
+      the Review.  Works just barely.  Currently uses a system call to
+      fedora-unrpm for part of its work and unrpms to a directory without
+      being able to deal with that directory already existing.
+    * glade/fedora-qareviewer.strings glade/fedora-qareviewer.glade: 
+      - Added icons to the windows (Note: Probably should be done within the
+        program instead.)
+      - Added menu entries for all the features I can think of wanting to add.
+    
+2004-03-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r20    
+    * TODO: View Menu and preferences notes
+    * PREFERENCES: Start a list of preferences to add once we have GConf stuff
+    * optionrenderer.py: Set 'selectedoption' when we change the resolved state
+    * qareviewer.py: Change Category resolution when we change the state of the
+      individual checklist items
+    
+2004-03-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r19    
+    * TODO: 
+    * data/fedoraus.xml: Change from all lowercase to mixed case.
+    * checklist.py, qareviewer.py, optionrenderer.py: Many changes to use my
+      custom optionrenderer that simulates a combo box. 
+    
+2004-03-09 Toshio Kuratomi <toshio@tiki-lounge.com> - r18    
+    Able to switch from review view to in-list view.
+
+2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r17    
+    Parsing the checklist is done.  Doesn't display well or do anything yet.
+    
+2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r16    
+    * qareviewer.py, fedora-qareviewer: Split QAReviewer Class to its own file.
+
+2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r15    
+    * fedora-qareviewer, checklist.py: Split checklist class into its own file.
+
+2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r14    
+    * Start of a TODO list
+
+2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r13    
+    * Change <help> to <description>
+
+2004-03-02 Toshio Kuratomi <toshio@tiki-lounge.com> - r12    
+    Set up svn properties on the files.
+
+2004-03-02 Toshio Kuratomi <toshio@tiki-lounge.com> - r11    
+    Initial import of fedora-qareviewer, a program to aid Quality Assurance Reviews
+
+2004-03-02 Toshio Kuratomi <toshio@tiki-lounge.com> - r10    
+    * COPYING: checkin a copy of the GPL version 2
+
+2004-02-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r9    
+    * fedora-qatemplate: Merge sensible things from my version of fedora-md5.
+      - Update version to 0.2
+      - Add --checkhdr to check whether the rpm header agrees with the
+        actual MD5Sums.
+      - Redo the argument parsing because the old version only worked by
+        accident.
+      - Rework hash_file/hash_directory to output a hash rather than writing
+        to an opened filehandle.
+      - New functions get_hashes_from_rpm and perform_header_check to verify
+        the RPM header MD5's against the actual md5s
+    
+2004-02-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r8    
+    * fedora.md5: Note that the regex check for directory structure isn't exact.
+    
+2004-02-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r7    
+    Set keyword expansion on the file
+    
+2004-02-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r6    
+    Remove some comments that aren't going to be implemented now
+
+2004-02-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r5    
+    New Program fedora-md5 that replaces the old shell script of the same name
+
+2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r4    
+    $ keyword should be $
+
+2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r3    
+    Get svn:keywords right
+
+2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r2    
+    Expand keywords in the script
+    
+2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r1    
+    Checkin my script and a directory layout.  The script performs hashing of source files fine but doesn't do any of the other stuff I have planned.
+
