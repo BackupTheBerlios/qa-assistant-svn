@@ -412,6 +412,36 @@ class QAReviewer(gnomeglade.GnomeApp):
                 ### FIXME: MSG Dialog that we were unable to load the file
                 pass
 
+            self.checklist = newList
+            ### FIXME: This is copied from __load_checklist().
+            # __load_checklist needs to be split to have this method...
+            # sync_checklist which will perform this sync of checklistView to
+            # data.  And a load_checklist which is a special case of this
+            # function (and thus should be merged with it.)
+            self.checkView.set_model(self.checklist.tree)
+            
+            if self.checklist.type == 'SRPM':
+                from srpmqa import SRPMQA
+                qamenu = SRPMQA(self)
+            else:
+                from genericqa import GenericQA
+                qamenu = GenericQA(self)
+            self.QAMenuItem.set_submenu(qamenu)
+            qamenu.show_all()
+            ### End of __load_checklist copy.
+
+    def on_menu_save_activate(self, *extra):
+        """Save the current review to a file"""
+
+        if self.saveFile.filename:
+            try:
+                self.saveFile.publish()
+            except IOError, msg:
+                ### FIXME: MSG Dialog that we were unable to save this file
+                pass
+        else:
+            self.on_menu_save_as_activate(extra)
+        
     def on_menu_save_as_activate(self, *extra):
         """Save the current review to a file"""
        
@@ -440,18 +470,6 @@ class QAReviewer(gnomeglade.GnomeApp):
                 ### FIXME: MSG Dialog that we were unable to save the file
                 pass
                 
-    def on_menu_save_activate(self, *extra):
-        """Save the current review to a file"""
-
-        if self.saveFile.filename:
-            try:
-                self.saveFile.publish()
-            except IOError, msg:
-                ### FIXME: MSG Dialog that we were unable to save this file
-                pass
-        else:
-            self.on_menu_save_as_activate(extra)
-        
     def on_menu_quit_activate(self, *extra):
         """End the program.
 

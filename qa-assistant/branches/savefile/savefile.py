@@ -184,7 +184,7 @@ class SaveFile:
 
         saveFile.freeDoc()
 
-        return newList 
+        return newList
 
     def set_filename(self, filename):
         '''Updates the filename to be used.'''

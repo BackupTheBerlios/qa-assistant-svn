@@ -1,19 +1,25 @@
-QA Assistant -- A checklist reviewer to aid Quality Assurance
 ============
+QA Assistant
+============
+
+Checklist Reviewer to aid Quality Assurance
+-------------------------------------------
 
 0.4
 ===
 This release marks completeness of core features.  Everything needed to write
-a review from within QA Assistant is now available.  Future work will be
-directed towards adding "enhancements" to the core feature set.  Still on the
-schedule to be added are GConf2 preferences, interaction with issue trackers,
-prettification, and a visit from the Human Interface Guidelines fairy.
+a review from within QA Assistant is now available.  I'm now using qa-assistant
+to write QA reports for the fedora-us system.  The save and checklist formats
+used in this release are not permanent.  Talks with Erik LaBianca are leading
+to a new combined format that will allow embedding tests for items within
+the checklist, thus being much more flexible in what can be provided.
 
 * You can now add your own checklist items to a review.  Use the
   "QA Actions::Add checklist item" menu item when you want to add a comment
   that the standard checklist does not support.
 * Saving and loading in-progress reviews is now supported.
 * Some minor bugfixes to the python build process.
+* Fix output entry when the output contains angle brackets "<>"
 
 0.3
 ===

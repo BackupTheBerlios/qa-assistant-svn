@@ -63,3 +63,5 @@ Programming:
   file:///usr/share/doc/libxml2-devel-2.6.6/guidelines.html
   (Namespace, URL, Make sure I follow recommendations for element/attribute,
   catalogs!, and catalog setup)
+* Create a common XML save format/checklist with Erik LaBianca for the
+  checklist.  This will involve integrating XML with test infrastructure.
