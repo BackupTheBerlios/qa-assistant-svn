@@ -228,6 +228,7 @@ if __name__ == "__main__":
     unpackdir=rpmCmd.readline()
     rpmCmd.close()
     # Check that we got a valid file
+    # Note: Must allow output to have more than 3 '-'s in it.
     if not re.match('^.+-.+-.+$', unpackdir):
         sys.stderr.write("Received error when trying to access SRPM.  The error was:\n")
         sys.stderr.write("  %s" % (unpackdir))
