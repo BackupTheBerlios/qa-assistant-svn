@@ -24,10 +24,9 @@ import gnome
 import gnomeglade
 import error
 from properties import Properties
-from optionrenderer import OptionCellRenderer
 from review import Review
-from treetips import TreeTips
 from checklist import CheckList
+from checkview import CheckView
 
 class QAReviewer(gnomeglade.GnomeApp):
     #
@@ -65,48 +64,9 @@ class QAReviewer(gnomeglade.GnomeApp):
         if iconFile:
             self.ReviewerWindow.set_property('icon', gnomeglade.load_pixbuf(iconFile))
 
-        # Create a treeview for our listPane
-        self.checkView = gtk.TreeView()
-        self.checkView.set_rules_hint(True)
-        
         # load the checklist data (Associates itself with checkView)
         self.__load_checklist()
-
-        renderer = gtk.CellRendererToggle()
-        renderer.set_radio(False)
-        column = gtk.TreeViewColumn('Display', renderer,
-                                    active=self.checklist.DISPLAY,
-                                    visible=self.checklist.ISITEM)
-        renderer.connect('toggled', self.display_toggle)
-        self.checkView.append_column(column)
-
-        renderer = OptionCellRenderer()
-        column = gtk.TreeViewColumn('Resolution', renderer,
-                                    optionlist=self.checklist.RESLIST,
-                                    selectedoption=self.checklist.RESOLUTION,
-                                    mode=self.checklist.ISITEM)
-        column.set_cell_data_func(renderer, self.__translate_option_mode)
-        renderer.connect('changed', self.resolution_changed)
-        self.checkView.append_column(column)
-       
-        renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Summary', renderer,
-                                    text=self.checklist.SUMMARY)
-        self.checkView.append_column(column)
-        
-        renderer = gtk.CellRendererText()
-        renderer.connect('edited', self.output_edited)
-        column = gtk.TreeViewColumn('Output', renderer,
-                                    markup=self.checklist.OUTPUT,
-                                    visible=self.checklist.DISPLAY,
-                                    editable=self.checklist.DISPLAY)
-        self.outputColumn = column
-        self.checkView.append_column(column)
-
-        self.tips = TreeTips(self.checkView, self.checklist.DESC)
-
-        self.listPane.add(self.checkView)
-        self.checkView.show()
+        self.checkView = CheckView()
 
         self.grabArrow=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
         self.grabArrow.set_size_request(4,4)
@@ -167,8 +127,6 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
             sys.exit(1)
 
-        self.checkView.set_model(self.checklist)
-
         ### FIXME: We need to assemble the qamenu from the list of requested
         # checklist.functions instead of from the type variable.  Currently
         # breaking it totally by making it always pretend to have a SRPM.
@@ -190,6 +148,15 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.reviewView.update_hash()
         self.reviewView.show()
         self.reviewPane.add(self.reviewView)
+        # Create the primary view on our checklist for the listPane
+        try:
+            self.checkView.destroy()
+        except AttributeError:
+            # No problems as long as checkView doesn't exist at this point
+            pass
+        self.checkView = CheckView(self.checklist)
+        self.listPane.add(self.checkView)
+        self.checkView.show()
 
     def SRPM_into_properties(self, filename):
         '''Add an SRPM file into our properties structure.
@@ -266,149 +233,6 @@ class QAReviewer(gnomeglade.GnomeApp):
             self.mainWinAppBar.pop()
             self.mainWinAppBar.push("No SRPM selected")
 
-    def __translate_option_mode(self, column, cell, model, rowIter):
-        """Translate from header/item value to mode type.
-
-        Keyword -- arguments:
-        column: column we're rendering
-        cell: cell to perform our transformation on
-        model: tree model our data lives in
-        rowIter: reference to the cell we're operating on
-
-        The mode of the cell depends on whether it is a header/category or an
-        item/entry.  However, that is a boolean value and the mode needs to
-        be of mode type.  So this function selects the proper mode type
-        depending on whether we're rendering a header or an entry.
-        """
-        item = cell.get_property('mode')
-        if item:
-            mode=gtk.CELL_RENDERER_MODE_ACTIVATABLE
-        else:
-            mode=gtk.CELL_RENDERER_MODE_INERT
-        cell.set_property('mode', mode)
-
-    #
-    # Treeview Callbacks
-    # 
-    def output_edited(self, cell, row, newValue):
-        """Change the text of the output string"""
-        rowIter = self.checklist.get_iter_from_string(row)
-        path = self.checklist.get_path(rowIter)
-        name = self.checklist.get_value(rowIter, self.checklist.RESOLUTION)
-        newValue = self.checklist.pangoize_output(name, newValue)
-
-        outDict = self.checklist.get_value(rowIter, self.checklist.OUTPUTLIST)
-        outDict[name] = newValue
-        self.checklist.set(rowIter, self.checklist.OUTPUT, newValue)
-        self.checklist.row_changed(path, rowIter)
-
-    def resolution_changed(self, renderer, newValue, changedRow):
-        """Changes the display when the user changes an item's state.
-
-        Keyword -- arguments:
-        renderer: renderer object emitting the signal
-        newValue: resolution type we're changing to
-        changedRow: iter pointing to the node in the tree we're operating on
-
-        When the user changes the resolution of a checklist item, we need to
-        change the value in our model.  Other parts of the model may also be
-        affected by this change as well.
-        """
-        ### FIXME: When option renderer value changes, set the checklist
-        # using these values:
-
-        # Set the checklist to the new resolution and output values
-        self.checklist.set(changedRow, self.checklist.RESOLUTION, newValue)
-       
-        ### FIXME: The rest of this might belong in the checklist.
-        # Pro:
-        # Conceptually we are modifying data and want that to cause an update
-        # of some other data.  This is best thought of as being encapsulated
-        # inside the checklist.  When the data changes, the row is notified to
-        # Update itself.
-        # 
-        # Con:
-        # It seems slower.  When called from here, we know that we are
-        # specifically asking for a RESOLUTION changed.  The checklist will
-        # just get a row_changed (not column...) and therefore will have to
-        # make a decision as to what type of change this is.
-        #
-        # OTOH: We could create a new checkView method/signal
-        # Then when we change the checkView, it will emit the signal and we
-        # can go ahead and update the checkList's RESOLUTIONS.  Look into this
-        # option.
-        outputlist = self.checklist.get_value(changedRow, self.checklist.OUTPUTLIST)
-        out = outputlist[newValue]
-        self.checklist.set(changedRow, self.checklist.OUTPUT, out)
-        
-        # Signal that this row has been changed
-        path = self.checklist.get_path(changedRow)
-        self.checklist.row_changed(path, changedRow)
-
-        # Load category information to check if it needs updating too.
-        category = self.checklist.iter_parent(changedRow)
-        catRes = self.checklist.get_value(category, self.checklist.RESOLUTION)
-
-        if newValue == 'Fail' or newValue == 'Non-Blocker':
-            ### FIXME: Check preferences for auto-display on fail
-            # Auto display to review if it's a fail
-            self.checklist.set(changedRow, self.checklist.DISPLAY, True)
-
-        # Check if the change makes the overall review into a pass or fail
-        if newValue == 'Fail':
-            # Unless it's already set to Fail, we'll change it.
-            if catRes == 'Fail':
-                return
-        elif newValue == 'Needs-Reviewing':
-            # If there's no entries for Fail, we'll change to Needs-Reviewing
-            if catRes == 'Needs-Reviewing':
-                return
-            if catRes != 'Pass':
-                entryIter = self.checklist.iter_children(category)
-                while changedRow:
-                    nodeRes = self.checklist.get_value(entryIter,
-                            self.checklist.RESOLUTION)
-                    if nodeRes == 'Fail':
-                        return
-                    changedRow = self.checklist.iter_next(entryIter)
-        elif (newValue == 'Pass' or newValue == 'Not-Applicable' or 
-                newValue == 'Non-Blocker'):
-            # Unless another entry is Fail or Needs-Reviewing, change to Pass
-            newValue = 'Pass'
-            entryIter = self.checklist.iter_children(category)
-            while entryIter:
-                nodeRes = self.checklist.get_value(entryIter, self.checklist.RESOLUTION)
-                if nodeRes == 'Needs-Reviewing':
-                    newValue = 'Needs-Reviewing'
-                elif nodeRes == 'Fail':
-                    return
-                entryIter = self.checklist.iter_next(entryIter)
-
-        self.checklist.set(category, self.checklist.RESOLUTION, newValue)
-        path = self.checklist.get_path(category)
-        self.checklist.row_changed(path, category)
-
-    def display_toggle(self, cell, path, *data):
-        """Toggles outputting a message for the review.
-
-        Keyword -- arguments:
-        cell: displayed cell we were called on
-        path: path to the cell
-        data: additional user data.  None for now.
-
-        The display toggle allows the user to choose whether to write a
-        message about the Pass or Failure state of the reviewed item.  This
-        callback takes care of setting the state in the TreeStore.
-        """ 
-        
-        entryIter = self.checklist.get_iter(path)
-        value = self.checklist.get_value(entryIter, self.checklist.DISPLAY)
-
-        if value:
-            self.checklist.set(entryIter, self.checklist.DISPLAY, False)
-        else:
-            self.checklist.set(entryIter, self.checklist.DISPLAY, True)
-
     #
     # Menu/Toolbar callbacks
     #
@@ -456,7 +280,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             # data.  And a load_checklist which is a special case of this
             # function (and thus should be merged with it.)
             self.checkView.set_model(self.checklist)
-           
+
             ### FIXME: This is tre broken.  But it will have to do for now.
             # Later we will implement loading functions from the XML file.
             #if self.checklist.type == 'SRPM':
@@ -542,11 +366,11 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         if self.grabArrow.get_property('arrow-type') == gtk.ARROW_LEFT:
             self.grabArrow.set(gtk.ARROW_RIGHT, gtk.SHADOW_NONE)
-            self.checkView.remove_column(self.outputColumn)
+            self.checkView.display_output(False)
             self.reviewScroll.show()
         else:
             self.grabArrow.set(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
-            self.checkView.append_column(self.outputColumn)
+            self.checkView.display_output(True)
             self.reviewScroll.hide()
             
     def on_menu_about_activate(self, *extra):
@@ -623,6 +447,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             # load the checklist data (Associates itself with checkView)
             self.SRPM_into_properties(filename)
             self.__load_checklist()
+            self.checkView.set_model(self.checklist)
 
     ### FIXME: Features we want to implement but haven't had the time yet:
     def on_menu_submit_activate(self, *extra):

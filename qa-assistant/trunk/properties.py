@@ -26,8 +26,6 @@ class Properties:
         # working right now.
         self.checklist = checklist
         self.SRPM = None
-        self.bugzillaURL = None
-        self.bugzillaNumber = None
 
         ### FIXME: The following need to go into preferences (GConf)
         # Directories last searched (for FileSelect Dialogs)

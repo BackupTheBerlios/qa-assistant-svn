@@ -14,7 +14,6 @@ glade/GUI:
 * Publish Button should be added to toolbar
 * Submit Button should be added to toolbar
   - Pressing Submit will build the review and submit upstream and down.
-* Save & Load buttons for toolbar.
 * Add a New dialog to take input about bugzilla
   - If new then make sure we have both a bugzilla # and an SRPM
 * Create a logo to go along with the icon.  Think up some other small pixmaps

@@ -20,6 +20,8 @@ visible but not end-user visible:
 * Changed checklist into a subclass of gtk.TreeStore.
 * CheckList and SaveFile formats have been combined into the checklist 0.3 dtd.
 * Support for automated tests embedded within the XML files.
+* Made the checklist code more generic.  We are no longer so strictly tied to
+  Quality Assurance of SRPM files.
 
 Version 0.4.1
 =============
@@ -27,6 +29,7 @@ This is a bugfix release.
 
 * Fix a bug in loading saved checklists that caused the custom category to
   be displayed as an item.
+* Fix for distuninstallcheck which was picking up on the XML catalogs.
 
 Version 0.4
 ===========

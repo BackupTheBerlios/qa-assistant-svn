@@ -19,6 +19,16 @@ import gobject
 
 import error
 
+ISITEM=0     # Entry is an item as opposed to category
+DISPLAY=1    # Write the output to the review
+SUMMARY=2    # Unique title for the entry
+DESC=3       # Long description of what to do to verify the entry
+RESOLUTION=4 # Current resolution
+OUTPUT=5     # Current resolution's output
+RESLIST=6    # Python list of possible resolutions
+OUTPUTLIST=7 # Python hash of outputs keyed to resolution
+TEST=8       # Python class that holds any automated test information
+
 class CheckList (gtk.TreeStore):
     '''Holds the data associated with the checklist.
 
@@ -129,7 +139,10 @@ class CheckList (gtk.TreeStore):
         self.__unspan = re.compile(r'([^<]*)(<span[^>]*>)?([^<]*)(</span>)?(.*)')
         libxml2.registerErrorHandler(self.__no_display_parse_error, None)
         ctxt = libxml2.newParserCtxt()
-        checkFile = ctxt.ctxtReadFile(path, None, libxml2.XML_PARSE_DTDVALID)
+        try:
+            checkFile = ctxt.ctxtReadFile(path, None, libxml2.XML_PARSE_DTDVALID)
+        except libxml2.treeError:
+            raise error.InvalidChecklist('%s was not an XML file' % (path))
 
         if ctxt.isValid() == False:
             raise error.InvalidChecklist('File does not validate against ' \
@@ -167,6 +180,7 @@ class CheckList (gtk.TreeStore):
             self.baseName = base[0].prop('name')
             self.baseRevision = base[0].prop('revision')
             self.baseFilename = base[0].content
+            self.revision = int(self.revision)
         else:
             # We are loading an original checklist definition.  Set its values
             # as the base and set the CheckList info to good values.
@@ -247,6 +261,11 @@ class CheckList (gtk.TreeStore):
         checkFile.freeDoc()
         # More efficient to do the stuff in the signal handlers manually
         # during setup and only register them afterwards.
+        ### FIXME: I believe this whole setup is now unnecessary.
+        # 1) We no longer track modified rows so there's no need to hook
+        #    into the row-changed signal.
+        # 2) All row insertions go through add_entry() now.  So we should be
+        #    able to perform the row-inserted functions there instead.
         self.connect('row-inserted', self.__added_row)
         self.connect('row-changed', self.__modified_row)
 
@@ -448,6 +467,72 @@ class CheckList (gtk.TreeStore):
             output = ('<span foreground="' + color + '">' +
                     output + '</span>')
         return output
+    
+    def check_category_resolution(self, changedRow, newValue):
+        '''Checks a rows category to see if its status should change.
+        
+        Arguments:
+        changedRow -- The entry row that has changed.
+        newValue -- The new value of the row.
+
+        This function is a small hack.  It really should be a signal handler
+        that gets called when a resolution is changed on the CheckList.
+        Unfortunately, `gtk.TreeStore` only supports row-changed, not a
+        column-changed signal.  So we are instead calling this function when
+        the changed signal occurs on the checkView column looking at
+        RESOLUTION.
+        '''
+        outputlist = self.get_value(changedRow, self.OUTPUTLIST)
+        out = outputlist[newValue]
+        self.set(changedRow, self.OUTPUT, out)
+       
+        ### FIXME: Is this necessary?
+        # Signal that this row has been changed
+        path = self.get_path(changedRow)
+        self.row_changed(path, changedRow)
+
+        # Load category information to check if it needs updating too.
+        category = self.iter_parent(changedRow)
+        catRes = self.get_value(category, self.RESOLUTION)
+
+        if newValue == 'Fail' or newValue == 'Non-Blocker':
+            ### FIXME: Check GConf2 preferences for auto-display on fail
+            # Auto display to review if it's a fail
+            self.set(changedRow, self.DISPLAY, True)
+
+        # Check if the change makes the overall review into a pass or fail
+        if newValue == 'Fail':
+            # Unless it's already set to Fail, we'll change it.
+            if catRes == 'Fail':
+                return
+        elif newValue == 'Needs-Reviewing':
+            # If there's no entries for Fail, we'll change to Needs-Reviewing
+            if catRes == 'Needs-Reviewing':
+                return
+            if catRes != 'Pass':
+                entryIter = self.iter_children(category)
+                while changedRow:
+                    nodeRes = self.get_value(entryIter,
+                            self.RESOLUTION)
+                    if nodeRes == 'Fail':
+                        return
+                    changedRow = self.iter_next(entryIter)
+        elif (newValue == 'Pass' or newValue == 'Not-Applicable' or 
+                newValue == 'Non-Blocker'):
+            # Unless another entry is Fail or Needs-Reviewing, change to Pass
+            newValue = 'Pass'
+            entryIter = self.iter_children(category)
+            while entryIter:
+                nodeRes = self.get_value(entryIter, self.RESOLUTION)
+                if nodeRes == 'Needs-Reviewing':
+                    newValue = 'Needs-Reviewing'
+                elif nodeRes == 'Fail':
+                    return
+                entryIter = self.iter_next(entryIter)
+
+        self.set(category, self.RESOLUTION, newValue)
+        path = self.get_path(category)
+        self.row_changed(path, category) ### FIXME: Is this necessary?
 
     #
     # Helpers to keep the checklist current.

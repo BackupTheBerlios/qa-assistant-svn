@@ -24,7 +24,7 @@
      these types.
   -->
 <!ENTITY % PropType
-  '(string|URL|number|md5sum|sha1sum)'
+  '(string|url|number|md5sum|sha1sum)'
 >
 
 <!-- Top level element

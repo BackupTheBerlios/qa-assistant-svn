@@ -5,7 +5,9 @@
 # making and distribution of the whole program.
 # $Id$
 
-bin_SCRIPTS = qa-assistant
+bin_SCRIPTS = qa-assistant qa-convert
+
+qa-convert: qa-assistant
 qa-assistant: paths.py
 
 qa_assistantdir = $(datadir)/qa-assistant
@@ -13,6 +15,8 @@ qa_assistantdir = $(datadir)/qa-assistant
 qa_assistant_PYTHON = \
 		SRPM.py \
 		checklist.py \
+		checkview.py \
+		error.py \
 		genericqa.py \
 		gnomeglade.py \
 		optionrenderer.py \
@@ -20,7 +24,6 @@ qa_assistant_PYTHON = \
 		qareviewer.py \
 		review.py \
 		srpmqa.py \
-		savefile.py \
 		treetips.py
 
 # Generated program files
@@ -54,6 +57,9 @@ Desktopdir = $(datadir)/applications
 Desktop_in_files = qa-assistant.desktop.in
 Desktop_DATA = $(Desktop_in_files:.desktop.in=.desktop)
 
+# remove xml catalogs from the check
+distuninstallcheck_listfiles = find $(prefix) -type f -not -path $(ROOTCATALOG) -not -path $(CATALOG) -print
+
 # Need to use INTLTOOL to do this when we i18n the code
 $(Desktop_DATA): $(Desktop_in_files)
 	cp $< $@
@@ -62,6 +68,7 @@ EXTRA_DIST = \
 	PREFERENCES \
 	TODO \
 	qa-assistant.pyin \
+	qa-convert.pyin \
 	paths.py.pyin \
 	autogen.sh \
 	qa-assistant.spec \
@@ -77,6 +84,7 @@ EXTRA_DIST = \
 CLEANFILES= \
 	   $(nodist_qa_assistant_PYTHON) \
 	   qa-assistant \
+	   qa-convert \
 	   *.pyc \
 	   *.pyo \
 	   qa-assistant*.tar.*

@@ -4,7 +4,7 @@
   <properties>
     <property name="SRPMfile" type="string"></property>
     <property name="SRPMMD5sum" type="md5sum"></property>
-    <property name="ticketURL" type="string"></property>
+    <property name="ticketURL" type="url"></property>
   </properties>
   <functions>
     <function>from_srpm</function>

@@ -10,6 +10,7 @@ __revision__ = "$Rev$"
 
 import os
 import gtk
+import error
 
 class GenericQA(gtk.Menu):
 
@@ -130,7 +131,7 @@ class GenericQA(gtk.Menu):
                             output=output,
                             resList=resList,
                             outputList=outputList)
-                except checklist.duplicateItemError:
+                except error.DuplicateItemError:
                     msgDialog = gtk.MessageDialog(self.app.ReviewerWindow,
                             gtk.DIALOG_DESTROY_WITH_PARENT,
                             gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
@@ -144,7 +145,15 @@ class GenericQA(gtk.Menu):
                     ### FIXME: This probably should go into checklist.  Which
                     # Means that resolution_changed probably belongs there
                     # as well.
-                    self.app.resolution_changed(None, res, newItem)
+                    # ??? Moved this to CheckView.  Now the question is:
+                    # when the checklist is changed, will the checkView
+                    # recognize that and call resolution_changed?
+                    # It seems like it is plugged into the renderer's changed
+                    # signal.... But this operation is on the underlying data.
+                    # So when the data is changed, does gtk automatically
+                    # update the renderer?
+                    # In any cae.  It doesn't work here any longer.
+                    #self.app.resolution_changed(None, res, newItem)
                     break
             else:
                 # User decided not to write a new entry

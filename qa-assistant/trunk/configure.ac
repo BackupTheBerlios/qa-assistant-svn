@@ -8,7 +8,7 @@ AC_INIT([QA Assistant], [0.5], [abadger1999@sourceforge.net], qa-assistant)
 AC_CONFIG_SRCDIR([qareviewer.py])
 AM_INIT_AUTOMAKE([gnu check-news dist-bzip2 -Wall])
 
-AC_SUBST(CHECKLISTVER, [0.2])
+AC_SUBST(CHECKLISTVER, [0.3])
 AC_SUBST(QASAVEVER, [0.1])
 
 AM_MAINTAINER_MODE
