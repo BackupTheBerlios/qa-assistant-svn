@@ -9,6 +9,7 @@
 __revision__ = '$Rev$'
 
 import os
+import libxml2
 
 import gtk
 import gobject
@@ -53,13 +54,16 @@ class NewDruid(gtk.Window):
         if mode == START or mode == NEW:
             # Figure out which items are in the site checklists directory
             checklistDirName = os.path.join(PROGRAMNAME, 'data')
+            ### FIXME: Expand qaDataDir to include checklists in user
+            # directories
             qaDataDir = app.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
                     checklistDirName)
             checklists = []
             for directory in qaDataDir:
                 files = os.listdir(directory)
                 for oneFile in files:
-                    checklists.append(os.path.join(directory, oneFile))
+                    if oneFile.endswith('.xml'):
+                        checklists.append(os.path.join(directory, oneFile))
             self.build_selector(checklists)
         if mode == START or mode == LOAD:
             # Create the sequence of pages for selecting a checklist to load
@@ -153,38 +157,50 @@ class NewDruid(gtk.Window):
                 " Please consider contributing one if that's the case.")
         selectorLabel.set_line_wrap(True)
         selectorGroup.add(selectorLabel)
-        ### FIXME: Stuff to allow nice name/summary instead of filename.
-        # This incidentally can also be used to check that the listed
-        # checklists are valid checklist files and let us omit junk in the
-        # directories.
-        # Look for the checklist entries in gconf
-        # If they aren't there, attempt to create a new entry
-        # If they are there, use the gconf cache
-        # For each, look up key of filename to checksum/name/summary(add to
-        # DTD) if checksum matches then don't recache entry (in gconf)
-        # otherwise, reget the value by parsing the checklist....  Going to
-        # have a separate tool anyhow.  So, maybe merge the qa-convert tool
-        # with a tool to cache checklists?  then reuse the caching code here
-        # -- but have the tool be a front-end that can create a cache schema
-        # at build time.
-        
         
         # Create a selection menu to choose from the available checklists
         checkStore = gtk.ListStore(gobject.TYPE_STRING,
                 gobject.TYPE_STRING,
                 gobject.TYPE_STRING)
         for filename in checklists:
+            summary = None
+            name = None
+            # Set up a stream reader for the checklist file.
+            try:
+                checkReader = libxml2.newTextReaderFilename(filename)
+            except:
+                print '%s was not a CheckList file' % (filename)
+                continue
+            
+            # Read in the summary and name for the checklist
+            status = checkReader.Read()
+            while status == 1:
+                if (checkReader.LocalName() == 'checklist' and
+                        checkReader.NodeType() == 1):
+                    name = checkReader.GetAttribute('name')
+                elif checkReader.LocalName() == 'summary':
+                    status = checkReader.Read()     # Get the text element
+                    if status == 1:
+                        summary = checkReader.Value()
+                    break
+                status = checkReader.Read()
+            
+            if not (summary and name):
+                print 'Unable to get a summary and name from %s' % (filename)
+                continue
+            
+            # Enter the information into the checkStore
             checkIter = checkStore.append(None)
             checkStore.set(checkIter, self.__FILENAME, filename,
-                    self.__CHECKNAME, 'Nice name not yet implemented',
-                    self.__CHECKSUMMARY, 'Summaries not yet implemented')
+                    self.__CHECKNAME, name,
+                    self.__CHECKSUMMARY, summary)
                    
         checkList = gtk.TreeView(checkStore)
         self.selectorSelection = checkList.get_selection()
         self.selectorSelection.set_mode(gtk.SELECTION_SINGLE)
 
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('filename', renderer, text=0)
+        column = gtk.TreeViewColumn('Name', renderer, text=1)
         checkList.append_column(column)
 
         renderer = gtk.CellRendererText()
