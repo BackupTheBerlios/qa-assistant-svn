@@ -18,6 +18,7 @@ This is a bugfix release.
 * Fix a bug in loading saved checklists that caused the custom category to
   be displayed as an item.
 * Fix for distuninstallcheck which was picking up on the XML catalogs.
+* Backport fixes to the rpm specfile.
 * Implement the cut, copy, and paste features.  This isn't really a bugfix
   but it adds significant value with a very small amount of code.
 

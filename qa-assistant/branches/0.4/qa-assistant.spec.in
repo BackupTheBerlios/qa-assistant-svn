@@ -1,4 +1,6 @@
+%define pyver %(%{__python} -c "import sys; print sys.version[:3]")
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
+%{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
 Name:           qa-assistant
 Version:        @VERSION@
@@ -8,19 +10,27 @@ Summary:        Graphical quality assurance report generator
 Group:          Development/Tools
 License:        GPL
 URL:            http://sourceforge.net/projects/qa-assistant
-Source0:        http://dl.sourceforge.net/projects/qa-assistant/qa-assistant-%{version}.tar.bz2
+Source0:        http://dl.sourceforge.net/qa-assistant/qa-assistant-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:	noarch
-BuildRequires:  python-devel, sed
+BuildRequires:  python-devel
+BuildRequires:	sed
 BuildRequires:	desktop-file-utils
 # Needed to get xmlcatalog
 BuildRequires:  libxml2
-Requires:       python, %{python_sitelib}
+BuildRequires:	pygtk2-devel >= 0:2.2.0
+BuildRequires:	pkgconfig
+BuildRequires:	gtk2-devel
+BuildRequires:	gnome-python2
+# Additional Python 2.2 requirement
+#BuildRequires:	python-optik
+#Requires:	python-optik
+Requires:	python-abi = %{pyver}
 Requires:	libxml2-python
 Requires:	gnome-python2
-Requires:	gnome-python2-gconf
-Requires:	pygtk2
+#Requires:	gnome-python2-gconf
+Requires:	pygtk2 >= 0:2.2.0
 Requires:	rpm-python
 Requires(post): /usr/bin/xmlcatalog
 Requires(postun): /usr/bin/xmlcatalog
@@ -60,24 +70,24 @@ rm -rf $RPM_BUILD_ROOT
 %post
 CATALOG=%{_datadir}/xml/qa-assistant/xmlcatalog
 #
-# Register it in the super catalog with the appropriate delegates
+# Register the DTDs in the super catalog with the appropriate delegates
 #
-ROOTCATALOG=/etc/xml/catalog
+ROOTCATALOG=%{_sysconfdir}/xml/catalog
 
 if [ ! -r $ROOTCATALOG ]
 then
-    /usr/bin/xmlcatalog --noout --create $ROOTCATALOG
+    %{_bindir}/xmlcatalog --noout --create $ROOTCATALOG
 fi
 
 if [ -w $ROOTCATALOG ]
 then
-        /usr/bin/xmlcatalog --noout --add "delegatePublic" \
+        %{_bindir}/xmlcatalog --noout --add "delegatePublic" \
                 "-//BadgerWare//DTD QA Assistant" \
                 "file://$CATALOG" $ROOTCATALOG
-        /usr/bin/xmlcatalog --noout --add "delegateSystem" \
+        %{_bindir}/xmlcatalog --noout --add "delegateSystem" \
                 "http://qa-assistant.sf.net/dtds" \
                 "file://$CATALOG" $ROOTCATALOG
-        /usr/bin/xmlcatalog --noout --add "delegateURI" \
+        %{_bindir}/xmlcatalog --noout --add "delegateURI" \
                 "http://qa-assistant.sf.net/dtds" \
                 "file://$CATALOG" $ROOTCATALOG
 fi
@@ -98,16 +108,15 @@ fi
 # On removal, unregister the xmlcatalog from the supercatalog
 #
 if [ "$1" = 0 ]; then
-    CATALOG=/usr/share/sgml/xhtml1/xmlcatalog
-    ROOTCATALOG=/etc/xml/catalog
+    ROOTCATALOG=%{_sysconfdir}/xml/catalog
 
     if [ -w $ROOTCATALOG ]
     then
-            /usr/bin/xmlcatalog --noout --del \
+            %{_bindir}/xmlcatalog --noout --del \
                     "-//BadgerWare//DTD QA Assistant" $ROOTCATALOG
-            /usr/bin/xmlcatalog --noout --del \
+            %{_bindir}/xmlcatalog --noout --del \
                     "http://qa-assistant.sf.net/dtds" $ROOTCATALOG
-            /usr/bin/xmlcatalog --noout --del \
+            %{_bindir}/xmlcatalog --noout --del \
                     "http://qa-asistant.sf.net/dtds" $ROOTCATALOG
     fi
 fi
@@ -128,6 +137,12 @@ fi
 %{_datadir}/xml/%{name}
 
 %changelog
+* Sat Oct 16 2004 Toshio Kuratomi <toshio@tiki-lounge.com> - 0:0.4.1-0.fdr.1
+- Update to version 0.4.1
+
+* Sun Aug 8 2004 Toshio Kuratomi <toshio{here}tiki-lounge.com> - 0:0.4-0.fdr.3
+- Substitute macros for file paths in the install/uninstall scriptlets
+
 * Sun Apr 25 2004 Toshio Kuratomi <toshio@tiki-lonuge.com> - 0:0.4-0.fdr.1
 - Fix the desktop file install
 - Add some Requires lines because the python modules don't cascade.
