@@ -18,7 +18,7 @@ import libxml2
 import gtk
 import sys
 
-from SRPM import SRPM
+import SRPM
 from properties import Properties
 import checklist
 import gnomeglade
@@ -39,7 +39,29 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         ### FIXME: Absolute dependence on arguments[0] being an SRPM without a
         # check to make sure of it.  Need to fix that up with cmd-line args.
-        self.SRPM = SRPM(arguments[1])
+        self.SRPM = None
+        if len(arguments) == 1:
+            try:
+                self.SRPM = SRPM.SRPM(arguments[1])
+            except SRPM.FileError, message:
+                ### FIXME: Display message to the statusbar
+                sys.stderr.write("Error reading SRPM: %s\n" % (message))
+                sys.exit(1)
+                pass
+            except SRPM.SecurityError, message:
+                ### FIXME:  Write a Review with PUBLISH -1 and security
+                # violation message
+                sys.stderr.write("SECURITY: Problems with SRPM: %s\n" % (message))
+                sys.exit(100)
+                pass
+
+        if not self.SRPM:
+            ### FIXME:  Hide the checklist
+            # Display note to start by selecting New from SRPM
+            sys.stderr.write("In this release qa-assistant must have the SRPM file as the only argument.\n")
+            sys.exit(1)
+            pass
+
         ### FIXME: Properties is too hard-coded right now.  Needs some love.
         self.properties = Properties('fedoraus.xml', self.SRPM)
         
@@ -169,11 +191,14 @@ class QAReviewer(gnomeglade.GnomeApp):
         category = self.checklist.tree.iter_parent(iter)
         catRes = self.checklist.tree.get_value(category, checklist.RESOLUTION)
 
-        # Check if the change makes the overall review into a pass or fail
-        if newValue == 'Fail':
+        ### FIXME: Should this go in its own function somewhere else?
+        if newValue == 'Fail' or newValue == 'Non-Blocker':
             ### FIXME: Check preferences for auto-display on fail
             # Auto display to review if it's a fail
             self.checklist.tree.set(iter, checklist.DISPLAY, True)
+
+        # Check if the change makes the overall review into a pass or fail
+        if newValue == 'Fail':
 
             if catRes == 'Fail':
                 return

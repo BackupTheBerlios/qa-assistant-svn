@@ -52,8 +52,8 @@ Programming:
   + checksig
   + verify source against spec file/canonical URL
 
-- SRPM.py needs a lot of work.  It currently barely works.
-  + Exceptions
+- SRPM.py needs some more work.  Two known problem areas related to unarchiving
+  when a directory of that name.
 
 - review.publish needs to do wordwrapping of lines.  Look into whether a
   textBuffer object has the necessary wordwrapping even without a textView.
