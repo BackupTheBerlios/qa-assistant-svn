@@ -45,14 +45,13 @@ Features
 
 Requirements
 ------------
-* python_ 2.2 (2.3 is now the development platform.  Conditional code to use
-  python 2.2 is present but needs testing.)
+* python_ 2.3 (pygtk-2.4.0 needs python 2.3 or higher)
 * python bindings for libxml2_
-* pygtk_ version 2.2.0 or higher. (Note: 0.5 will require 2.4.0)
+* pygtk_ version 2.4.0 or higher.
 * `gnome-python-gconf`__ 2.0.0 or higher.
 * `gnome-python`__ version 2.0.0 or higher.
 * `python-rpm`_
-* Unix system to run on
+* Unix system to run on.
 
 .. _python: http://www.python.org
 .. _libxml2: http://wwww.xmlsoft.org

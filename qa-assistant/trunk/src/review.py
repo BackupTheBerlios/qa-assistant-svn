@@ -9,8 +9,7 @@
 __revision__ = "$Rev$"
 
 import gtk
-import checklist
-
+import gconf
 try:
     import textwrap
 except ImportError:
@@ -18,6 +17,11 @@ except ImportError:
         from optik import textwrap
     except ImportError:
         from optparse import textwrap
+
+from qaconst import *
+import checklist
+import gpg
+import error
 
 class Review(gtk.VBox):
 
@@ -35,6 +39,10 @@ class Review(gtk.VBox):
         # Create the textwrap object for use by the publish method
         self.textwrap = textwrap.TextWrapper(initial_indent='* ',
                 subsequent_indent='  ')
+
+        # Create the gconf client to retrieve the gpg options
+        self.gconfClient = gconf.client_get_default()
+        self.gconfClient.add_dir(GCONFPREFIX, gconf.CLIENT_PRELOAD_NONE)
 
         # Create the widgets:
         self.reviewBoxes = {}
@@ -87,7 +95,7 @@ class Review(gtk.VBox):
         ### FIXME: This is probably going to change in favor of a checklist
         # header method.  As it currently stands, it still needs to be
         # translated into PUBLISH +1, NEEDSWORK, etc.
-        outBuf = [self.checklist.resolution + '\n']
+        outBuf = self.checklist.resolution + '\n'
         # Loop through the review areas:
         for box in ('Pass', 'Fail', 'Non-Blocker', 'Notes'):
             reviewBox = self.reviewBoxes[box]
@@ -101,6 +109,72 @@ class Review(gtk.VBox):
             if tempOutBuf:
                 outBuf += self.reviewTitles[box].get_text() + '\n' + tempOutBuf
 
+        # Sign the review if the user has decided to
+        key = GCONFPREFIX + '/user/use-gpg'
+        try:
+            sign = self.gconfClient.get_bool(key)
+        except gobject.GError:
+            sign = self.gconfClient.get_default_from_schema(key).get_bool()
+        if sign:
+            key = GCONFPREFIX + '/user/gpg-identity'
+            try:
+                gpgId = self.gconfClient.get_string(key)
+            except gobject.GError:
+                # If no ID is set, we'll use whatever gpg considers the
+                # default.
+                gpgId = None
+
+            key = GCONFPREFIX + '/files/gpg-path'
+            try:
+                gpgPath = self.gconfClient.get_string(key)
+            except gobject.GError:
+                gpgPath = self.gconfClient.get_default_from_schema(key).get_string()
+            reenterPassphrase = False
+            while True:
+                passphrase = gpg.get_passphrase(gpgId, reenterPassphrase)
+                if passphrase == None:
+                    break
+                try:
+                    outBuf = gpg.sign_buffer(outBuf, gpgId, gpgPath, passphrase)
+                except error.BadPassphrase:
+                    reenterPassphrase = True
+                except error.NoSecretKey:
+                    errorDialog = gtk.MessageDialog(None,
+                            gtk.DIALOG_DESTROY_WITH_PARENT,
+                            gtk.MESSAGE_WARNING,
+                            gtk.BUTTONS_CLOSE,
+                            'No secret key was found for that user ID.  Please'
+                            ' go to the Edit::Preferences Menu.  Select'
+                            ' another id to sign with in the Preferences'
+                            ' Dialog.')
+                    errorDialog.set_title('No Signing Key')
+                    errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
+                    response = errorDialog.run()
+                    errorDialog.destroy()
+                    return
+                except error.NoOut:
+                    errorDialog = gtk.MessageDialog(None,
+                            gtk.DIALOG_DESTROY_WITH_PARENT,
+                            gtk.MESSAGE_WARNING,
+                            gtk.BUTTONS_CLOSE,
+                            'No output was created by GPG when trying to'
+                            ' sign the review.  This is likely a problem'
+                            ' with the way gpg is setup.  Please take a look'
+                            ' in the Edit::Preferences menu and see if there'
+                            ' are any errors there.  If not, you may want to'
+                            ' disable automatic gpg signing and publish your'
+                            ' review.  Then sign it manually using your gpg'
+                            ' number.')
+                    errorDialog.set_title('No Output Created')
+                    errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
+                    response = errorDialog.run()
+                    errorDialog.destroy()
+                    return
+                else:
+                    # Success!
+                    break
+
+        # Output review
         outfile = file(filename, 'w')
         outfile.writelines(outBuf)
         outfile.close()

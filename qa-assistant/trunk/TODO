@@ -56,12 +56,11 @@ glade/GUI:
 
 Extra GNOME Functionality:
 ==========================
-* Create preferences infrastructure : check PREFERENCES for ideas.
 * Druid on New (In progress)
 * Update to pygtk-2.4.
   - Embed the 2.4 file selector widget in the druid..
-  - Switch to the 2.4 ComboBox Renderer instead of optionrenderer.
   - Change gobjects to use the new chained calls.
+  - Switch to the 2.6 ComboBox Renderer instead of optionrenderer.
 
 Programming:
 ============
@@ -116,3 +115,7 @@ Programming:
  * Finish writing unittests for the program.  We've barely scratched the
    surface of this.  When completed it should allow one to quickly figure
    out what's working and what's broken in the package.
+
+Done -- Needs testing
+=====================
+* Create preferences infrastructure : check PREFERENCES for ideas. [Nearly done]

@@ -13,22 +13,23 @@ variables.
 
 Person
 (Probably happen in the review widget, publish function.)
-* Whether to sign [s]
-* Signing identity [s]
+* Whether to sign [s] [d] [c]
+* Signing identity [s] [d] [c]
+* Path to gpg binary [s] [d] [c]
 
 Files
 (Probably happen in the main program)
-* Directory to unrpm into [s]
+* Directory to unrpm into [s] [d]
 
 Display
 (Happen in the checklist.)
-* Automatically display failed reviews [s] [c]
-* Text colours [s] [c]
+* Automatically display failed reviews [s] [c] [d]
+* Text colours [s] [c] [d]
 
   (These can probably be implemented in the checkview and cause settings
   to change on the checkview's treetip.)
-* Tooltip DESCRIPTION enable/disable [s] [c]
-* Tooltip timeout [s] [c]
+* Tooltip DESCRIPTION enable/disable [s] [c] [d]
+* Tooltip timeout [s] [c] [d]
 
 Status Key:
   [s] In schema
@@ -46,21 +47,22 @@ Coding wise we need three things:
     seem to create a new client, just get a reference to a main gconf client.
     The app keeps a copy of it, then it needs to pass the client to the other
     modules somehow. [Going with each module that uses it]
-  [Mostly done.  Still need to use the gpg keys to sign the review]
+    [Test then Done]
 
 3) We need to have a dialog box that has entries for all the properties.
    This can be a glade dialog as the box should be the same for all checklists.
    The dialog needs to take input about all the preferences listed here.
    When the submit button is pressed, put the information into the gconf
    database and change the effect of the values on the program.
-   [Dialog completed in glade still need to 1) utilize the dialog.
-    2) set values from the dialog in preferences.py]
+   [Test then Done]
 
 http://developer.gnome.org/doc/API/2.0/gconf/
 
-(This one is a program property.  It should start out as the current working
-directory everytime the program starts and change as the program progresses.)
-* File directories
+(These are program properties.  It should start out as the current working
+directory everytime the program starts and change as the program progresses.
+The passphrase will be asked for every time.)
+* File directories [done]
+* user/gpg-pasphrase  [done]
 
 (Hmmm is this a gpg option instead?)
 * Keyserver to download new keys from
@@ -149,3 +151,9 @@ Other things that get set depending on the checklist:
   - Ideas for statusbar info:
     + The main identifier of the review (SRPM name)
     + Number of pass/fail/needs-reviewing/etc
+
+* So we don't have to inline all our code, we probably want to have a method
+  to callout to other code.  Maybe there should be a certain set of standard
+  functions.  Then we can add per checklist functions in a separate file.  The
+  checklist can let us know which functions its using via a name/sha1sum pair.
+  They can then reference the functions in that external file.
