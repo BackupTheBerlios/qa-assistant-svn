@@ -160,9 +160,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.stderr.write("Unable to find checklist: %s\n" % (filename))
             sys.exit(1)
         try:
-            self.checklist = checklist.CheckList(checkFile,
-                    self.properties.failColor, self.properties.minorColor,
-                    self.properties.passColor)
+            self.checklist = checklist.CheckList(checkFile, self.properties)
         except (libxml2.parserError, libxml2.treeError, checklist.Error), msg:
             ### FIXME: When we can select checklists via property, we need to
             # print error and recover.
