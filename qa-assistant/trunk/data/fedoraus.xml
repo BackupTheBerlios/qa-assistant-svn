@@ -154,12 +154,14 @@
       <states>
         <state name='Pass'>Buildroot has all required elements</state>
         <state name='Fail'>Buildroot lacks certain elements</state>
+        <state name='Non-Blocker'>Buildroot lacks certain elements</state>
       </states>
-      <description>The spec file's BuildRoot: must contain %{_tmppath} in as a prefix
-        so the local user can define where packages are temporarily installed.
-        It should also contain a unique identifier to prevent collisions
-        should multiple users be creating packages.  The Fedora suggested
-        BuildRoot is:
+      <description>The spec file must have a  BuildRoot: field.  This must
+        contain %{_tmppath} as a prefix so the local user can define where
+        packages are temporarily installed.  It should also contain a unique
+        identifier to prevent collisions should multiple users be creating
+        packages.  The Fedora suggested BuildRoot which address all of these
+        concerns is:
         %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)</description>
     </entry>
     <entry name="Paths begin with macros">

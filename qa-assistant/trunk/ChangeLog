@@ -1,3 +1,18 @@
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r36    
+    Add Id and Rev keyword expansion to source code
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r35    
+    * fedora-md5, fedora-qatemplate: Removed files that have no part in this
+      program (except as ideas.)
+    * TODO: Add note to work on scripts to install and distribute the program
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r34    
+    * Copy fedora-rpmdevtools over to the new project.  Will delete extaneous
+      files shortly.
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r33    
+    * ChangeLog: Create a ChangeLog with the current svn changes
+    
 2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r31    
     * qareviewer.py: Fix argument handling to really only take one argument
     * data/fedoraus.xml: Set SRPM GPG signed entry to display by default
