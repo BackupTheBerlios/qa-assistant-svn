@@ -20,7 +20,8 @@ _checklistFileVersion_='0.1'
 DISPLAY=0
 RESOLUTION=1
 SUMMARY=2
-OUTPUT=3
+DESC=3
+OUTPUT=4
 
 class Error(Exception):
     def __init__(self, msg):
@@ -56,28 +57,35 @@ class CheckList:
         self.tree = gtk.TreeStore(gobject.TYPE_BOOLEAN,
                                        gobject.TYPE_STRING,
                                        gobject.TYPE_STRING,
+                                       gobject.TYPE_STRING,
                                        gobject.TYPE_STRING)
         categories = root.xpathEval2('/checklist/category')
         # Record each category as a toplevel in the tree
         for category in categories:
             iter = self.tree.append(None)
-            self.tree.set(iter, RESOLUTION, ' \npass\nfail',
+            self.tree.set(iter, DISPLAY, None,
+                    RESOLUTION, ' \npass\nfail',
                     SUMMARY, category.prop('name'))
 
             # Entries are subheadings
             node = category.children
             while node:
                 if node.name == 'description':
-                    ### FIXME: Set a tooltip on the category
-                    pass
+                    # Set DESCRIPTION of the heading
+                    self.tree.set(iter, DESC, node.content)
                 elif node.name == 'entry':
-                    self.__xmlToEntry(node)
+                    entry = self.__xmlToEntry(node)
+                    entryIter=self.tree.append(iter)
+                    ### FIXME: Not the complete entry.
+                    self.tree.set(entryIter, DISPLAY, entry.display,
+                            RESOLUTION, entry.states[0], ### FIXME
+                            SUMMARY, entry.name,
+                            DESC, entry.desc,
+                            OUTPUT, entry.states[0]['output']);
                 else:
-                    # Text or unrecognixed entry.
                     # DTD validation should make this ignorable.
                     pass
-
-                ### FIXME: Put the entry into checklist items
+                  
                 node = node.next
 
         checkFile.freeDoc()
@@ -109,19 +117,27 @@ class CheckList:
                 while state:
                     if state.name == 'state':
                         entry.states.append({'name' : state.prop('name')})
-                        ### Get output entry from underneath or default output.
-                        # entry.states[n].append('output',content)
-                        # else:
-                        # entry.states[n].append('output',
-                        # entry.name ': ' state.prop('name'))
+                        output = state.children
+                        while output:
+                            if output.name == 'output':
+                                entry.states[n]['output']=output.content
+                            output=output.next
+                        if not entry.states[n].has_key('output'):
+                            entry.states[n]['output'] = entry.name + ': ' + state.prop('name')
+                        n+=1
                     else:
-                        # DTD validation means we don't have to
-                        # check this
+                        # DTD validation should catch things that aren't
+                        # supposed to end up here.
                         pass
-                    n+=1
                     state=state.next
-            # entry.desc
-            # entry.input
+            elif fields.name == 'description':
+                entry.desc = fields.content
+            elif fields.name == 'input':
+                entry.input = fields.content
+            else:
+                # DTD validation should prevent anything uwated from
+                # ending up here.
+                pass
             fields=fields.next
-        ### Create a new entry
-        pass
+
+        return entry

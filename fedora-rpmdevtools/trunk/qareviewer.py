@@ -48,6 +48,10 @@ class QAReviewer(gnomeglade.GnomeApp):
         # column = gtk.TreeViewColumn('pass/fail', renderer, initial=RESOLUTION)
         # column.set_?clickable?(True)
         # checkView.append_column(column)
+        renderer = gtk.CellRendererText()
+        column = gtk.TreeViewColumn('pass/fail/n\\a', renderer, text=checklist.RESOLUTION)
+        column.set_clickable(True)
+        checkView.append_column(column)
         
         renderer = gtk.CellRendererText()
         column = gtk.TreeViewColumn('Description', renderer, text=checklist.SUMMARY)
