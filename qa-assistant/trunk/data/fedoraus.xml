@@ -36,10 +36,10 @@
         source tarball from an unknown entity.  Using google to search for
         canonical home pages is one good way to verify this.</description>
     </entry>
-    <entry name='MD5Sum verified' display='true'>
+    <entry name='Upstream source verified' display='true'>
       <states>
-        <state name='Pass'>Upstream MD5Sum verified</state>
-        <state name='Fail'>Upstream MD5Sum does not match!</state>
+        <state name='Pass'>Upstream source tarball verified</state>
+        <state name='Fail'>Upstream source tarball does not match!</state>
       </states>
       <description>You should always verify that the upstream source matches
         the source provided in the SRPM.  One technique is to download

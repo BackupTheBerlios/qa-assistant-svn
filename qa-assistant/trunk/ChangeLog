@@ -1,3 +1,7 @@
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r37    
+    * data/fedoraus.xml: Add Non-Blocker status to Buildroot.
+    * ChangeLog: Update
+    
 2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r36    
     Add Id and Rev keyword expansion to source code
     

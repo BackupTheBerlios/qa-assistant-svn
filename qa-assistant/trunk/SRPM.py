@@ -6,7 +6,7 @@
 # Id: $Id$
 """A representation of an SRPM.
 """
-__revision__ = "$Revision$"
+__revision__ = "$Rev$"
 
 import rpm
 import os, sys, stat

@@ -9,7 +9,7 @@
 """A class that holds properties on a review file.
 """
 __version__ = "0.1"
-__revision__ = "$Revision$"
+__revision__ = "$Rev$"
 
 class Properties:
     def __init__(self, checklist, SRPM):

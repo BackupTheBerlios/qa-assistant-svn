@@ -6,7 +6,7 @@
 # Id: $Id$
 """A review object with methods to display and publish itself.
 """
-__revision__ = "$Revision$"
+__revision__ = "$Rev$"
 
 import gtk, gobject
 import checklist

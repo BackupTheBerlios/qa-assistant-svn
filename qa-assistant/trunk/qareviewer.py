@@ -12,7 +12,7 @@ events, and send things off for future processing.
 """
 __programName__ = "QA Assistant"
 __version__ = "0.1"
-__revision__ = "$Revision$"
+__revision__ = "$Rev$"
 
 import libxml2
 import gtk
