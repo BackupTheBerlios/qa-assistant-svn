@@ -8,7 +8,7 @@
 """
 __revision__ = "$Rev$"
 
-import re
+import re, string
 
 import gtk, gobject
 import checklist
@@ -155,6 +155,10 @@ class Review(gtk.VBox):
                 if value != None:
                     # Remove the span tags
                     value = unspan.match(value).expand(r'\g<1>\g<3>\g<5>')
+                    # Unescape special chars
+                    value = string.replace(value, '&amp;', '&')
+                    value = string.replace(value, '&lt;', '<')
+                    value = string.replace(value, '&gt;', '>')
                     if res == 'Pass':
                         goodList.append('* ' + value + "\n")
                     elif res == 'Fail':

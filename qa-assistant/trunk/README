@@ -1,4 +1,9 @@
-QA Assistant -- Gnome Quality Assurance checklist
+============
+QA Assistant
+============
+
+Gnome Quality Assurance checklist
+=================================
 
 QA Assistant is a Gnome-Python application that assists a reviewer in
 performing Quality Assurance.  It displays a checklist that the reviewer fills
@@ -6,18 +11,18 @@ in.  When the checklist is filled, the application outputs a review to a file
 for the reviewer to submit.
 
 Quick Install
-=============
-- Download from sourceforge http://www.sourceforge.net/projects/qa-assistant
-$ tar -xzvf qa-assistant-VERSION.tar.gz
-$ cd qa-assistant-VERSION
-$ ./configure
-$ make
-$ python qa-assistant	[OPTIONAL: to test qa-assistant]
-$ su
-Password:
-# make install
-# exit
-$ qa-assistant
+-------------
+* Download from sourceforge http://www.sourceforge.net/projects/qa-assistant
+  $ tar -xzvf qa-assistant-VERSION.tar.gz
+  $ cd qa-assistant-VERSION
+  $ ./configure
+  $ make
+  $ python qa-assistant	[OPTIONAL: to test qa-assistant]
+  $ su
+  Password:
+  # make install
+  # exit
+  $ qa-assistant
 
 Features
 ========
@@ -29,10 +34,10 @@ Features
 
 Requirements
 ============
-* python 2.2 (2.3 not tested.  Conditional code to use python-2.3's features
-  is present and needs testing.)
+* python 2.2 (2.3 is now the development platform.  Conditional code to use
+  python 2.2 is present and needs testing.)
 * python bindings for libxml2
-* pygnome2 and pygtk2
+* pygnome and pygtk version 2.2.0 or higher.
 * python-rpm
 * Unix system to run on
 
@@ -42,7 +47,8 @@ Distribution.  As the code matures, more attention will be focused on
 creating modules for other QA situations.
 
 QA Assistant is currently usable.  It has a GUI, working checklist for the
-Fedora Extras Project, and can output a review.  Still to be worked on are an
+Fedora Extras Project, save and load functionality, adding arbitrary items,
+and can output a review.  Still to be worked on are an
 interface to bugzilla (reading information from a ticket and submitting
 output to a ticket), associating the checklist with a set of actions the
 program can perform automatically, using GConf2 for preferences, a new

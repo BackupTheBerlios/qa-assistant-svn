@@ -145,7 +145,14 @@ class CheckList:
 
     def colorize_output(self, resolution, output):
         """Colorize the output based on the resolution"""
-
+        ### FIXME:
+        # escaping really goes one level up but there are currently several
+        # external functions that call colorize output.  In the future we need
+        # to create a function one level up to change output strings and make
+        # colorize_output a private method.
+        output = string.replace(output, '&', '&amp;')
+        output = string.replace(output, '<', '&lt;')
+        output = string.replace(output, '>', '&gt;')
         if resolution == 'Fail':
             color = self.props.failColor
         elif resolution == 'Non-Blocker' or resolution == 'Needs-Reviewing':

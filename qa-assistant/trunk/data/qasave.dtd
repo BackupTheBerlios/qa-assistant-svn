@@ -36,6 +36,7 @@
         name CDATA #REQUIRED
         display (true|false) "false"
         state %Resolutions; #REQUIRED
+        item (true|false) "true"
       >
         <!ELEMENT states (state+)>
           <!ELEMENT state (#PCDATA)>

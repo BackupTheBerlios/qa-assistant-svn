@@ -103,7 +103,7 @@ class SaveFile:
         root = saveFile.getRootElement()
         if root.name != 'qasave':
             ### FIXME create something less generic
-            raise Exception('File us not a valid qa save file.')
+            raise Exception('File is not a valid qa save file.')
         if root.prop('version') != _qaSaveFileVersion_:
             ### FIXME create something less generic
             raise Exception('Save file is of a different version than I understand.')
@@ -168,7 +168,7 @@ class SaveFile:
                 #   new value there.  Add entry.prop('name') into the iter.
                 #   Add None for checklist.DESC
                 pass
-            newList.tree.set(iter, checklist.ISITEM, True,
+            newList.tree.set(iter, checklist.ISITEM, entry.item,
                     checklist.DISPLAY, entry.display,
                     checklist.MODIFIED, True,
                     checklist.SUMMARY, entry.name,
@@ -202,7 +202,10 @@ class SaveFile:
             entry.display = True
         else:
             entry.display = False
-            
+        if node.prop('item') == 'false':
+            entry.item = False
+        else:
+            entry.item = True
         states = node.children
         while states.name != 'states':
             states = states.next
@@ -240,6 +243,8 @@ class SaveFile:
                 display = 'false'
             else:
                 display = 'true'
+            if tree.get_value(iter, checklist.ISITEM) == False:
+                entry.setProp('item', 'false')
             entry.setProp('display', display)
             entry.setProp('state', tree.get_value(iter, checklist.RESOLUTION))
             resolutions = tree.get_value(iter, checklist.RESLIST)
