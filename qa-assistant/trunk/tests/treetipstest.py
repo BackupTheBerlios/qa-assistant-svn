@@ -1,5 +1,5 @@
 #!/usr/bin/python -tt
-# File: testtreetips.py
+# File: treetipstest.py
 # Author: Toshio Kuratomi <toshio@tiki-lounge.com>
 # Date: 3 Oct 2004
 # Copyright: Toshio Kuratomi

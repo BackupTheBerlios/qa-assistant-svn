@@ -1,5 +1,5 @@
 #!/usr/bin/python -tt
-# File: testchecklist.py
+# File: checklisttest.py
 # Author: Toshio Kuratomi <toshio@tiki-lounge.com>
 # Date: 24 Sept 2004
 # Copyright: Toshio Kuratomi

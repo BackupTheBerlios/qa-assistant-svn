@@ -20,6 +20,7 @@ import gconf
 
 from qaconst import *
 import error
+import properties
 
 # TreeStore entries displayed on the screen
 ISITEM=0     # Entry is an item as opposed to category
@@ -86,23 +87,6 @@ class CheckList (gtk.TreeStore):
     class __Entry:
         '''Private class.  Holds entry information until ready to output.'''
 
-    class __Property:
-        '''Property information.'''
-
-        def __init__(self, type, value, require, function=None, functionType=None, args=None):
-            '''Initialize a property.
-            
-            Attributes:
-            type -- Type of the property.
-            value -- Property value.
-            '''
-            self.type = type
-            self.value = value
-            self.require = require
-            self.args = args
-            self.function = function
-            self.functionType = functionType
-
     class __Test:
         '''Information related to automated tests embedded in the XML files.
         
@@ -133,7 +117,8 @@ class CheckList (gtk.TreeStore):
         self.filename = path # Filename of the checklist we're implementing
         self.resolution = 'Needs-Reviewing' # Resolution of the checklist
         self.functions = [] # List of functions available on the checklist
-        self.properties = {} # List of properties available on the checklist
+        # Properties available on the checklist
+        self.properties = properties.Properties()
         self.customItemsIter = None # Iter to the custom items category
         self.colors = {}
         self.__unspan = re.compile(r'([^<]*)(<span[^>]*>)?([^<]*)(</span>)?(.*)')
@@ -218,30 +203,27 @@ class CheckList (gtk.TreeStore):
             self.revision = 0
         
         # Extract properties from the CheckList file
-        properties = root.xpathEval2('/checklist/properties/property')
-        for p in properties:
+        props = root.xpathEval2('/checklist/properties/property')
+        for p in props:
             propChild = p.children
-            value = None
-            function = None
-            functionType = None
-            args = []
+            propEntry = properties.PropEntry()
+            propEntry.valueType = p.prop('type')
             while propChild:
                 if propChild.name == 'require':
-                    require = propChild.prop('type')
+                    propEntry.propType = propChild.prop('type')
                     requireChild = propChild.children
                     while requireChild:
                         if requireChild.name == 'arg':
-                            args.append(requireChild.content)
+                            propEntry.args.append(requireChild.content)
                         elif requireChild.name == 'function':
-                            function = requireChild.content
-                            functionType = requireChild.prop('type')
+                            propEntry.function = requireChild.content
+                            propEntry.functionType = requireChild.prop('type')
                         requireChild = requireChild.next
                 elif propChild.name == 'value':
                     value = propChild.content
                 propChild = propChild.next
             # Set the property
-            self.properties[p.prop('name')] = self.__Property(p.prop('type'),
-                    value, require, function, functionType, args)
+            self.properties[p.prop('name')] = propEntry
 
         # Extract functions for the QA menu
         functions = root.xpathEval2('/checklist/functions/function')
@@ -466,14 +448,14 @@ class CheckList (gtk.TreeStore):
         node.setProp('revision', self.baseRevision)
        
         # Output properties we're concerned with
-        properties = root.newChild(None, 'properties', None)
+        props = root.newChild(None, 'properties', None)
         for propName in self.properties.keys():
             prop = self.properties[propName]
-            node = properties.newChild(None, 'property', None)
+            node = props.newChild(None, 'property', None)
             node.setProp('name', propName)
-            node.setProp('type', prop.type)
+            node.setProp('type', prop.valueType)
             require = node.newChild(None, 'require', None)
-            require.setProp('type', prop.require)
+            require.setProp('type', prop.propType)
             for arg in prop.args:
                 require.newTextChild(None, 'arg', arg)
             if prop.function:

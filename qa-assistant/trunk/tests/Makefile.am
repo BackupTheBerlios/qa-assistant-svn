@@ -2,16 +2,15 @@
 # Date: 24 September 2004
 # $Id$
 
-#TESTS = test.py
-TESTS = propertiestest.py \
-	testcreation.py \
-	testtreetips.py \
-	testchecklist.py 
-EXTRA_DIST = propertiestest.py \
-	     test.py \
-	     testchecklist.py \
-	     testtreetips.py \
-	     testcreation.py
+TESTS =	checklisttest.py \
+	creationtest.py \
+	propertiestest.py \
+	treetipstest.py
+EXTRA_DIST =	test.py \
+		checklisttest.py \
+		creationtest.py \
+		propertiestest.py \
+		treetipstest.py
 CLEANFILES = \
 	     *.pyc \
 	     *.pyo

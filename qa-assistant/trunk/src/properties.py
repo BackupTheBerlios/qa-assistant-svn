@@ -24,12 +24,22 @@ class PropEntry(object):
     entry.valueType = 'url'
     entry.propType = 'onload'
     entry.function = 'srpm_from_ticket'
+    entry.functionType = 'propset'
     entry.args = ['ticketURL',]
     props = Properties()
     props['SRPMfile'] = entry
     
     '''
-    __slots__ = ('value', 'valueType', 'propType', 'function', 'args')
+    __slots__ = ('value', 'valueType', 'propType', 'function',
+            'functionType', 'args')
+
+    def __init__(self):
+        self.value = None
+        self.valueType = None
+        self.propType = None
+        self.function = None
+        self.functionType = None
+        self.args = []
 
 class Properties(dict):
     ''' Holds the CheckList Properties.
@@ -46,7 +56,11 @@ class Properties(dict):
     #
     # Set Property values
     #
-    
+
+    ### FIXME: two things are not yet implemented:
+    # 1) Functions are invoked somehow when entries are changed.
+    # 2) Have checks that verify that a given type is correct:
+    #    (int, URL, etc)
     def __setitem__(self, key, value):
         '''Set a property to a value.
 
@@ -64,7 +78,7 @@ class Properties(dict):
                 raise KeyError, (
                         'This checklist has no %s Property' % (key))
             attrib.value = value
-        
+
     def keys(self, sorted=True):
         '''Return a sorted list of keys.
 
