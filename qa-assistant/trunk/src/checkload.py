@@ -17,6 +17,7 @@ import gnome.ui
 from qaconst import *
 import error
 from checklist import CheckList
+from propview import PropertiesWidget
 
 #
 # Druid Modes
@@ -246,14 +247,14 @@ class NewDruid(gtk.Window):
         propertiesPage.set_title('Set Checklist Properties')
         propertiesPage.set_logo(self.logo)
         
-        propertiesPage.append_item('Eventually setting of required checklist'
-                ' properties will go here.  Currently, properties are not'
-                ' handled at all within the program.', gtk.Label(), '')
+        propForm = PropertiesWidget()
+        self.propertiesPage.append_item('', propForm, '')
       
         self.druidWidget.add(propertiesPage)
-        # The main part of the page is built at runtime because we need to
-        # adapt to whatever properties we find in the checklist.
-        propertiesPage.connect('prepare', self.properties_create)
+
+        # Rebuild the properties entry widget as it may be using a new
+        # checklist.
+        propertiesPage.connect('prepare', self.properties_create, propForm)
 
     def build_end(self):
         '''
@@ -266,23 +267,12 @@ class NewDruid(gtk.Window):
         self.druidWidget.add(endPage)
         endPage.connect('finish', self.finish)
 
-    def properties_create(self, page, druid):
+    def properties_create(self, page, druid, propForm):
         '''
 
         '''
-        # checklist.properties['name'].(type|value|require|function|functionType|args)
-        for i in self.newList.properties.keys():
-            ### FIXME:
-            # Create an entry for each property
-            pass
-        ### FIXME:
-        # We really need to do some processing of the properties here.  Or
-        # perhaps, we need a widget that exports a properties widget.  The
-        # widget is simply imported here.  The properties widget can also be
-        # put into a properties dialog for the main program.  It can also be
-        # saved between instantiations so we don't have to recreate it each
-        # time we use it.
-        pass
+        propForm.set_model(self.newList.properties)
+        propForm.show_all()
 
     def finish(self, page, druid):
         '''
