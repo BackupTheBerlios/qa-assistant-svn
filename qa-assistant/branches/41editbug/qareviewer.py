@@ -116,23 +116,24 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.checkView.append_column(column)
 
         self.listPane.add(self.checkView)
+        self.checkView.show()
 
         self.grabArrow=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
         self.grabArrow.set_size_request(4,4)
         label=self.grabBar.get_child()
         self.grabBar.remove(label)
         self.grabBar.add(self.grabArrow)
+        self.grabArrow.show()
 
         self.reviewView = Review(self.checklist.tree, self.properties)
+        self.reviewView.show()
         self.reviewPane.add(self.reviewView)
 
         self.tips = TreeTips(self.checkView, checklist.DESC)
-        ### FIXME: There are reasons to avoid show_all.  We aren't doing
-        # anything that exposes those problems yet, but I should look into
-        # how problematic it would be to show individually.  (How hard with
-        # glade?)
-        self.ReviewerWindow.show_all()
+
         self.reviewScroll.hide()
+
+        self.ReviewerWindow.show()
 
     #
     # Helper Functions
@@ -260,9 +261,15 @@ class QAReviewer(gnomeglade.GnomeApp):
         """Publish a review to a file."""
         
         # File select dialog for use in file selecting callbacks.
-        fileSelect = gtk.FileSelection(title='Select a file to save the review into')
+        fileSelect = gtk.FileSelection(title='Select a file to publish the review into')
+        if (os.path.isdir(self.properties.lastSRPMDir) and
+                os.access(self.properties.lastSRPMDir, os.R_OK|os.X_OK)):
+            fileSelect.set_filename(self.properties.lastReviewDir)
         response = fileSelect.run()
         if response == gtk.RESPONSE_OK:
+            filename = fileSelect.get_filename()
+            print filename
+            self.properties.lastReviewDir = os.path.dirname(filename)+'/'
             self.reviewView.publish(fileSelect.get_filename())
         fileSelect.destroy()
         del fileSelect
