@@ -138,6 +138,9 @@ fi
 %{_datadir}/xml/%{name}
 
 %changelog
+* Tue Jan 4 2005 Toshio Kuratomi <toshio-tiki-lounge-com> - 0:0.4.90.2-0.fdr.1
+- Update to development version 0.4.90.2
+
 * Sun Nov 7 2004 Toshio Kuratomi <toshio-tiki-lounge-com> - 0:0.4.90.1-0.fdr.1
 - Update to development version 0.4.90.1
 

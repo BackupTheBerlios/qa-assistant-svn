@@ -56,12 +56,12 @@
         configure correctly assess what is available on the system?  Or does
         it perform its tests incorrectly?</description>
     </entry>
-    <entry name="make dist-check" display="true">
+    <entry name="make distcheck" display="true">
       <states>
-        <state name="Pass">make dist-check successfully creates a new distribution</state>
-        <state name="Fail">make dist-check fails</state>
+        <state name="Pass">make distcheck successfully creates a new distribution</state>
+        <state name="Fail">make distcheck fails</state>
       </states>
-      <description>Running make dist-check should create a new distribution
+      <description>Running make distcheck should create a new distribution
         tarfile.  It performs checks of the documentation, the build, and runs
         the package's regression tests to try to verify the package is
         correct.</description>
@@ -73,15 +73,6 @@
       </states>
       <description>Creating an rpm for the distribution via rpmbuild -ta
         &lt;source tarball&gt; is helpful for distributing the program.</description>
-    </entry>
-    <entry name="make dist-check" display="true">
-      <states>
-        <state name="Pass">make dist-check successfully creates a new distribution</state>
-        <state name="Fail">make dist-check fails</state>
-      </states>
-      <description>Running make dist-check should create a new distribution
-        tarfile.  It performs some checks of the documentation and build to
-        make sure that is correct.</description>
     </entry>
   </category>
   <category name="Manual steps">
@@ -98,10 +89,12 @@
     </entry>
     <entry name="runs fine" display="true">
       <states>
-        <state name="Pass"></state>
-        <state name="Fail"></state>
+        <state name="Pass">Only minor bugs noted in the BUGS file</state>
+        <state name="Fail">Critical bugs found</state>
       </states>
-      <description>
+      <description>Attempting to run the program through a couple test runs
+        should not reveal any major or unexpected BUGS.  Any bugs discovered
+        but not fixed should be noted in the BUGS file.
       </description>
     </entry>
   </category>
