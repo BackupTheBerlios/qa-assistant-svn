@@ -128,7 +128,7 @@ class Preferences(gnomeglade.Component):
                 self.set_use_gpg)
         self.gconfClient.notify_add(key, self.toggle_gpg_options)
 
-        # files/gpg-path
+        # path to gpg
         key = GCONFPREFIX + '/files/gpg-path'
         try:
             gpgPath = self.gconfClient.get_string(key)
@@ -138,9 +138,11 @@ class Preferences(gnomeglade.Component):
         self.GPGPathEntry.connect('changed', self.set_gpg_path)
         self.gconfClient.notify_add(key, self.change_gpg_path)
 
+        # GPG identity
         self.create_gpg_ids_list(gpgPath)
         self.SignIdCombo.connect('changed', self.set_gpg_identity)
         
+        # Temporary directory for files
         key = GCONFPREFIX + '/files/user-state-dir'
         try:
             stateDir = self.gconfClient.get_string(key)
@@ -150,13 +152,20 @@ class Preferences(gnomeglade.Component):
         self.StateDirEntry.set_filename(stateDir)
         self.StateDirEntry.connect('changed', self.set_state_dir)
 
-        ### FIXME:
-        # If Ok button is pressed, we need to close the dialog.
-        # If Help is pressed, we need to popup Not Yet Implemented.
+        self.PreferencesOkButton.connect('clicked', self.close_win)
+        self.PreferencesDialog.connect('destroy_event', self.close_win)
+        self.PreferencesHelpButton.connect('clicked', self.NYI)
+
+    #
+    # Misc dialog methods
+    #
         
-    #
-    # Functions to create the dialog
-    #
+    def NYI(self, *extra):
+        print "Feature not yet implemented"
+
+    def close_win(self, *extra):
+        self.PreferencesDialog.destroy()
+        del(self.xml)
         
     def create_gpg_ids_list(self, gpgPath):
         '''

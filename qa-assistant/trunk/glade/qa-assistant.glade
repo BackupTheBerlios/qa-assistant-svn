@@ -558,7 +558,7 @@ Contributors:
 	  <property name="layout_style">GTK_BUTTONBOX_END</property>
 
 	  <child>
-	    <widget class="GtkButton" id="helpbutton2">
+	    <widget class="GtkButton" id="PreferencesHelpButton">
 	      <property name="visible">True</property>
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
@@ -571,7 +571,7 @@ Contributors:
 	  </child>
 
 	  <child>
-	    <widget class="GtkButton" id="okbutton2">
+	    <widget class="GtkButton" id="PreferencesOkButton">
 	      <property name="visible">True</property>
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>

@@ -113,7 +113,9 @@ class QAReviewer(gnomeglade.GnomeApp):
             # ReviewerWindow to be insensitive.
             # If no checklist is loaded, only file::New and file::Load should
             # work.... (?)
-            checkload.NewDruid(self, checkload.START).show_all()
+            startDruid = checkload.NewDruid(self, checkload.START)
+            startDruid.set_icon(self.logo)
+            startDruid.show_all()
             ### FIXME: Note that the druid must destroy itself when it is
             # finished.
             # If there's no checklist on the commandline, popup the Druid that
@@ -307,7 +309,7 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         prefDialog = Preferences(gladeFile)
         if self.logo:
-            prefDialog.PreferencesDialog.set_property('icon', self.logo)
+            prefDialog.PreferencesDialog.set_icon(self.logo)
 
         prefDialog.PreferencesDialog.show()
 
@@ -353,6 +355,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             about.set_property('logo', self.logo)
 
         about.show()
+        del(about)
        
     def on_toolbar_new_activate(self, button, *extra):
         """Popup the menu to select a new review from bugzilla or SRPM"""
