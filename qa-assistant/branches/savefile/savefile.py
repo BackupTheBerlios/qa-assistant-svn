@@ -28,7 +28,7 @@ class SaveFile:
 
     publicID = '-//BadgerWare//DTD QA Assistant Save File ' + _qaSaveFileVersion_ + '//EN'
     canonicalURL = 'http://qa-assistant.sf.net/qasave/' + _qaSaveFileVersion_ + '/qasave.dtd'
-    def __init__(self, checklist, properties, dtd, filename='None'):
+    def __init__(self, checklist, properties, dtd, filename=None):
         ''' '''
         self.checklist = checklist
         self.properties = properties
@@ -147,7 +147,7 @@ class SaveFile:
                 self.properties.set(property.prop('name'), property.content)
             except AttributeError, id:
                 if id == 1:
-                    # save pr/perty.prop(name) and .content into a hash.
+                    # save property.prop(name) and .content into a hash.
                     # When we are done with the loop, check the hash.
                     # If there are values in it, popup a warning dialog
                     # that the save file had invalid entries that will be
@@ -163,14 +163,14 @@ class SaveFile:
         
         saveEntries = root.xpathEval2('/qasave/entries/entry')
         for node in saveEntries:
-            entry = self.__xml_to_entry(node)
-            iter = newList.entries(entry.name)
+            entry = self.__xml_to_entry(node, newList)
+            iter = newList.entries[entry.name]
             if not iter:
                 #   Create the Custom Entries area and get an iter referencing a
                 #   new value there.  Add entry.prop('name') into the iter.
                 #   Add None for checklist.DESC
                 pass
-            newList.tree.set_values(iter, checklist.ISITEM, True,
+            newList.tree.set(iter, checklist.ISITEM, True,
                     checklist.DISPLAY, entry.display,
                     checklist.MODIFIED, True,
                     checklist.SUMMARY, entry.name,
@@ -194,9 +194,10 @@ class SaveFile:
     #
     # Helper methods
     #
-    def __xml_to_entry(self, node):
+    def __xml_to_entry(self, node, newList):
         '''Reformats an XML node into an entry structure.'''
-
+        ### FIXME: When we combine with checklist, we won't need to pass
+        # newList in any longer.
         entry = self.__Entry()
         entry.name = node.prop('name')
         if node.prop('display') == 'true':
@@ -215,7 +216,7 @@ class SaveFile:
         while state:
             if state.name == 'state':
                 entry.reslist.append(state.prop('name'))
-                entry.outlist.append(checklist.CheckList.colorize_output(
+                entry.outlist.append(newList.colorize_output(
                     state.prop('name'), state.content))
                 if state.prop('name') == entry.res:
                     entry.out = entry.outlist[-1]

@@ -68,7 +68,7 @@ class TreeTips(gtk.Widget):
         timeoutID = random.randint(1, 10000)
         self.timeoutID = timeoutID
         gobject.timeout_add(self.DELAY, self.__treetip_show, tree,
-                event.x, event.y, timeoutID)
+                int(event.x), int(event.y), timeoutID)
 
     def __treetip_show(self, tree, xEvent, yEvent, ID):
         if self.timeoutID != ID:

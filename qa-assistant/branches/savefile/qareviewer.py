@@ -386,6 +386,32 @@ class QAReviewer(gnomeglade.GnomeApp):
     # Menu/Toolbar callbacks
     #
 
+    def on_menu_open_activate(self, *extra):
+        """Open a saved review"""
+        fileSelect = gtk.FileSelection(title='Select the checklist file to load.')
+        if (os.path.isdir(self.properties.lastSaveFileDir) and
+                os.access(self.properties.lastSaveFileDir, os.R_OK|os.X_OK)):
+            fileSelect.set_filename(self.properties.lastSaveFileDir)
+
+        filename = None
+        response = fileSelect.run()
+        try:
+            if response == gtk.RESPONSE_OK:
+                filename = fileSelect.get_filename()
+        finally:
+            fileSelect.destroy()
+            del fileSelect
+
+        if filename:
+            ### FIXME: Check if file exists
+            self.properties.lastSaveFileDir = os.path.dirname(filename)+'/'
+            self.saveFile.set_filename(filename)
+            try:
+                newList = self.saveFile.load()
+            except IOError, msg:
+                ### FIXME: MSG Dialog that we were unable to load the file
+                pass
+
     def on_menu_save_as_activate(self, *extra):
         """Save the current review to a file"""
        
@@ -414,6 +440,18 @@ class QAReviewer(gnomeglade.GnomeApp):
                 ### FIXME: MSG Dialog that we were unable to save the file
                 pass
                 
+    def on_menu_save_activate(self, *extra):
+        """Save the current review to a file"""
+
+        if self.saveFile.filename:
+            try:
+                self.saveFile.publish()
+            except IOError, msg:
+                ### FIXME: MSG Dialog that we were unable to save this file
+                pass
+        else:
+            self.on_menu_save_as_activate(extra)
+        
     def on_menu_quit_activate(self, *extra):
         """End the program.
 
@@ -523,26 +561,6 @@ Relative Priority: Publish will be the primary submission for now.  This is an e
         self.not_yet_implemented(msg)
         pass
 
-    def on_menu_open_activate(self, *extra):
-        """Open a saved review"""
-        msg = """Open a saved review. In the future, this function will allow us to access a review that we've already saved.
-
-Relative priority: after save functionality."""
-        
-        self.not_yet_implemented(msg)
-        self.saveFile.load()
-        pass
-
-    def on_menu_save_activate(self, *extra):
-        """Save the current review to a file"""
-        msg = """Saves a review to a file.  This is a snapshot of the review at this moment.  The publish/submit features will allow one to print the review out and submit to bugzilla.
-
-***Note*** 'Save as' is currently working.  Need a little extra logic to get 'save' itself to work.  Please use save as until then.
-        
-Relative priority: After load partial review from file."""
-        self.not_yet_implemented(msg)
-        pass
-        
     def on_menu_new_bugzilla_activate(self, *extra):
         """Open a new review with bugzilla report ID"""
         msg = """Associates this review with a bugzilla report.  The program needs to be able to use this to pick out information from a bugzilla report in order to autodownload packages and otherwise set up an environment for reviewing.  Although definitely cool, there's a good deal of work necessary for this to work.
@@ -578,7 +596,7 @@ Relative Priority: Low.  There's too much programming to do for me to spend too 
         pass
         
     ### FIXME: Part 2: Editing features are not currently encouraged.
-    # Have to recconcile these with our need to keep each checklist item in
+    # Have to reconcile these with our need to keep each checklist item in
     # its place.
     def on_menu_cut_activate(self, *extra):
         """Cut some text"""
