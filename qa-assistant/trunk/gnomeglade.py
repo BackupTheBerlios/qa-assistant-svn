@@ -111,7 +111,7 @@ class GtkApp(Base):
         """
         gtk.mainloop()
 
-    def quit(*args):
+    def quit(self, *args):
         """Signal the gtk main loop to quit.
         """
         gtk.main_quit()
@@ -193,7 +193,7 @@ class GnomeApp(GtkApp):
             attrName = gnome.PARAM_GNOME_DATADIR
             attrRel = "pixmaps"
         elif fileDomain == gnome.FILE_DOMAIN_CONFIG:
-            attrName = gnome.PARAM_GNOME_SYSCONFIGDIR
+            attrName = gnome.PARAM_GNOME_SYSCONFDIR
             attrRel = ""
         elif fileDomain == gnome.FILE_DOMAIN_HELP:
             attrName = gnome.PARAM_GNOME_DATADIR

@@ -1,3 +1,10 @@
+# File: Makefile.am
+# Author: Toshio Kuratomi <toshio@tiki-lounge.com>
+# Date: 27 April, 2004
+# Description: Toplevel Makefile.am for the program.  Currently controls the
+# making and distribution of the whole program.
+# $Id$
+
 bin_SCRIPTS = qa-assistant
 qa-assistant: paths.py
 

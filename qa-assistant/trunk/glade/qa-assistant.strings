@@ -10,17 +10,16 @@ gchar *s = N_("From _SRPM");
 gchar *s = N_("Start a review from a Bugzilla Entry");
 gchar *s = N_("From Bug_zilla");
 gchar *s = N_("Actions associated with this checklist");
-gchar *s = N_("QA A_ctions");
+gchar *s = N_("QA _Actions");
 gchar *s = N_("_Toggle Preview");
 gchar *s = N_("_Contents");
 gchar *s = N_("Create a new QA report");
 gchar *s = N_("Open an existing QA report");
 gchar *s = N_("Save your QA report");
-gchar *s = N_("Please select 'New => From SRPM'\n"
-              "or 'New => From Bugzilla' to get started");
+gchar *s = N_("Please select 'QA Actions => From SRPM'\n"
+              "or 'QA Actions => From Bugzilla' to get started");
 gchar *s = N_("© 2004 Toshio Kuratomi");
 gchar *s = N_("A tool to help write QA reviews of RPM Packaged Contributed Software");
-gchar *s = N_("translator_credits");
 gchar *s = N_("Not Yet Implemented");
 gchar *s = N_("<span weight='bold' size='larger'>Feature Not Yet Implemented</span>");
 gchar *s = N_("This feature is planned for the future but has not yet been implemented.  If you are interested in implementing this feature, please email the developers.");

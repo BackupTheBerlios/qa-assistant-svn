@@ -17,6 +17,8 @@ BuildRequires:	desktop-file-utils
 Requires:       python, %{python_sitelib}
 Requires:	libxml2-python
 Requires:	gnome-python2
+Requires:	gnome-python2-gconf
+Requires:	pygtk2
 Requires:	rpm-python
 
 %description
@@ -77,6 +79,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Sun Apr 25 2004 Toshio Kuratomi <toshio@tiki-lonuge.com> - 0:0.4-0.fdr.1
 - Fix the desktop file install
+- Add some Requires lines because the python modules don't cascade.
 
 * Tue Apr 20 2004 Toshio Kuratomi <toshio@tiki-lounge.com> - 0:0.3-0.fdr.1
 - Initial release.

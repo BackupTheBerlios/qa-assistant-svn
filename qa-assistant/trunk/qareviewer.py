@@ -360,11 +360,9 @@ class QAReviewer(gnomeglade.GnomeApp):
         
         iter = self.checklist.tree.get_iter(path)
         value = self.checklist.tree.get_value(iter, checklist.DISPLAY)
-        name = self.checklist.tree.get_value(iter, checklist.SUMMARY)
 
-        if value == True:
+        if value:
             self.checklist.tree.set(iter, checklist.DISPLAY, False) 
-            pass
         else:
             self.checklist.tree.set(iter, checklist.DISPLAY, True)
 
@@ -553,7 +551,7 @@ Relative priority: Comes after New from SRPM but before feature enhancements lik
 
     def on_menu_preferences_activate(self, *extra):
         """Sets program properties."""
-        msg = """Please see the PREFERENCES file for a list of preferences that are going to be added to oreferences once we get GConf set up.
+        msg = """Please see the PREFERENCES file for a list of preferences that are going to be added to preferences once we get GConf set up.
 
 Relative Priority: Not before the first release.  Sensible defaults is my hope for that release."""
         self.not_yet_implemented(msg)
@@ -563,7 +561,7 @@ Relative Priority: Not before the first release.  Sensible defaults is my hope f
         """Display program help."""
         msg = """There's currently no help file written so this is pretty useless.  When we write some documentation this will display the standard gnome help browser.
         
-Relative Priority: _Low_.  Developers are going to use this, not end-users so a willingness to use something that's relatively undocumented is expected."""
+Relative Priority: Low.  There's too much programming to do for me to spend too much time documenting it right now.  However, as features of the code near staility, I'll start adding documentation."""
         self.not_yet_implemented(msg)
         pass
         

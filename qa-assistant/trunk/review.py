@@ -149,7 +149,7 @@ class Review(gtk.VBox):
         notesList = []
         unspan = re.compile(r'([^<]*)(<span[^>]*>)?([^<]*)(</span>)?(.*)')
         while iter:
-            if self.list.get_value(iter, self.__DISPLAY) == True:
+            if self.list.get_value(iter, self.__DISPLAY):
                 res = self.list.get_value(iter, self.__RESOLUTION)
                 value = self.list.get_value(iter, self.__OUTPUT)
                 if value != None:
