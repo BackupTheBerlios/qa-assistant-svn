@@ -117,17 +117,17 @@ class CheckView(gtk.TreeView):
         Callback to handle changes to the row's output string.  We update
         the row in the checklist to have the new value.
         '''
-        checklist = self.get_model()
-        rowIter = checklist.get_iter_from_string(row)
-        path = checklist.get_path(rowIter)  ### FIXME: Do we really need this?
-        name = checklist.get_value(rowIter, checklist.RESOLUTION)
-        newValue = checklist.pangoize_output(name, newValue)
+        cl = self.get_model()
+        rowIter = cl.get_iter_from_string(row)
+        path = cl.get_path(rowIter)  ### FIXME: Do we really need this?
+        name = cl.get_value(rowIter, checklist.RESOLUTION)
+        newValue = cl.pangoize_output(name, newValue)
 
-        outDict = checklist.get_value(rowIter, checklist.OUTPUTLIST)
+        outDict = cl.get_value(rowIter, checklist.OUTPUTLIST)
         outDict[name] = newValue
-        checklist.set(rowIter, checklist.OUTPUT, newValue)
+        cl.set(rowIter, checklist.OUTPUT, newValue)
         ### FIXME: Is the following necessary?
-        checklist.row_changed(path, rowIter)
+        cl.row_changed(path, rowIter)
 
     def __translate_option_mode(self, column, cell, model, rowIter):
         '''Translate from header/item value to mode type.

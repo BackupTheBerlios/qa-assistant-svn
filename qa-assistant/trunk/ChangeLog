@@ -1,3 +1,26 @@
+2004-10-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r120    
+    * review.py:
+      - Note that publish doesn't work.
+      - Revert CheckList constants back to module level.
+      - Remove __resolution_check() as it's now implemented in the checklist.
+    * checklist.py:
+      - Revert CheckList constants back to module level.
+      - Add more values to __Property.
+      - Fixes to load and save the new, complex properties from the XML file.
+      - Fixes to load and save the more complex functions from the XML file.
+      - Add code to __init__() to figure out the category and checklist
+        resolutions on load.  A lot of commonality with __check_resolution().
+        Look into merging.
+      - Rename check_category_resolution to __check_resolution.
+      - Simplify logic in __check_resolution to use else instead of elif.
+    * qareviewer.py:
+      - Create the CheckView before loading the CheckList.
+      - Use CheckView.set_model to set to the new CheckList instead of detroying
+        the CheckView and recreating it.
+      - Remove self.properties from a call to create a Review().
+    * ChangeLog: Update to (r119)
+    * checkview.py: Made resolution_changed a single line.
+    
 2004-10-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r119    
     * checklist.py:
       - Create a resolution attribute that holds the CheckList's resolution.

@@ -66,7 +66,9 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         # load the checklist data (Associates itself with checkView)
         self.checkView = CheckView()
-        self.__load_checklist()
+        self.listPane.add(self.checkView)
+        self.reviewView = Review()
+        self.reviewPane.add(self.reviewView)
 
         self.grabArrow=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
         self.grabArrow.set_size_request(4,4)
@@ -139,26 +141,12 @@ class QAReviewer(gnomeglade.GnomeApp):
             qamenu = GenericQA(self)
         self.QAMenuItem.set_submenu(qamenu)
         qamenu.show_all()
-        try:
-            self.reviewView.destroy()
-        except AttributeError:
-            # No problems as long as reviewView doesn't exist
-            pass
-        self.reviewView = Review(self.checklist)
+        self.reviewView.set_model(self.checklist)
         ### FIXME: This must be replaced with a header method in the checklist.
         #self.reviewView.update_hash()
         self.reviewView.show()
-        self.reviewPane.add(self.reviewView)
-        # Create the primary view on our checklist for the listPane
-        #try:
-        #    self.checkView.destroy()
-        #except AttributeError:
-        #    # No problems as long as checkView doesn't exist at this point
-        #    pass
-        #self.checkView = CheckView(self.checklist)
-        #self.listPane.add(self.checkView)
-        #self.checkView.show()
         self.checkView.set_model(self.checklist)
+        self.checkView.show()
 
     def SRPM_into_properties(self, filename):
         '''Add an SRPM file into our properties structure.
@@ -283,6 +271,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             # data.  And a load_checklist which is a special case of this
             # function (and thus should be merged with it.)
             self.checkView.set_model(self.checklist)
+            self.checkView.show()
 
             ### FIXME: This is tre broken.  But it will have to do for now.
             # Later we will implement loading functions from the XML file.
@@ -295,16 +284,9 @@ class QAReviewer(gnomeglade.GnomeApp):
                 qamenu = GenericQA(self)
             self.QAMenuItem.set_submenu(qamenu)
             qamenu.show_all()
-            try:
-                self.reviewView.destroy()
-            except AttributeError:
-                # No problems as long as reviewView no longer exists.
-                pass
-            self.reviewView = Review(self.checklist)
-            ### FIXME: This must be replaced with a header method in the checklist
-            #self.reviewView.update_hash()
+
+            self.reviewView.set_model(self.checklist)
             self.reviewView.show()
-            self.reviewPane.add(self.reviewView)
             ### End of __load_checklist copy.
 
     def on_menu_save_activate(self, *extra):
@@ -314,9 +296,13 @@ class QAReviewer(gnomeglade.GnomeApp):
             try:
                 self.checklist.publish()
             except IOError, msg:
+                print "We were unable to save for some reason."
                 ### FIXME: MSG Dialog that we were unable to save this file
+
                 pass
+
         else:
+
             self.on_menu_save_as_activate(extra)
         
     def on_menu_save_as_activate(self, *extra):
@@ -411,20 +397,6 @@ class QAReviewer(gnomeglade.GnomeApp):
     def on_toolbar_new_activate(self, button, *extra):
         """Popup the menu to select a new review from bugzilla or SRPM"""
 
-        ### FIXME: pygtk bug
-        # In pygtk 2.0 get_current_event_time returns a Python Long but
-        # menu.popup expects a Python Int.  The problem arises because the
-        # time is a guint32 which causes problems because Python does not have
-        # an unsigned int type
-        # This hack munges current_event_time to match what event.time
-        # provides but it's less than ideal.
-        # -- This has been fixed in 2.2.0 have to require that?
-        """
-        time = gtk.get_current_event_time()
-        offset = time - int(0x7FFFFFFF)
-        if offset > 0:
-            time = int(-2147483648 + offset)
-        """
         self.new1_menu.popup(None, None, None, 0, gtk.get_current_event_time())
         
     def on_menu_new_srpm_activate(self, *extra):
@@ -496,9 +468,12 @@ Relative Priority: Low.  There's too much programming to do for me to spend too 
         self.not_yet_implemented(msg)
         pass
         
-    ### FIXME: Part 2: Editing features are not currently encouraged.
+    ### FIXME: Part 2: Editing features are not currently implemented.
     # Have to reconcile these with our need to keep each checklist item in
     # its place.
+    # Looking at the pygtk clipboard info, it doesn't look too hard to
+    # implement this in the current scheme because we use separate widgets for
+    # each item.
     def on_menu_cut_activate(self, *extra):
         """Cut some text"""
         self.not_yet_implemented()

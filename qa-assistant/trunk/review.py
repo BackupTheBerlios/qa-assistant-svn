@@ -21,18 +21,15 @@ except ImportError:
 
 class Review(gtk.VBox):
 
-    def __init__(self, treeStore):
+    def __init__(self, treeStore=None):
         ''' Create a new Review object. 
         
         Attributes:
         :treeStore: A gtk.TreeModel to operate on.
         '''
-        assert isinstance(treeStore, checklist.CheckList), \
-                "%s is not a CheckList type" % (treeStore)
-
-        ### FIXME: Can we use gtk.VBox.__init__() instead?
-        # Answer: yes unless we declare our own gproperties
-        #gobject.GObject.__init__(self)
+        if treeStore:
+            assert isinstance(treeStore, checklist.CheckList), \
+                    '%s is not a CheckList type' % (treeStore)
         gtk.VBox.__init__(self)
 
         # Create the textwrap object for use by the publish method
@@ -40,7 +37,6 @@ class Review(gtk.VBox):
                 subsequent_indent='  ')
 
         # Create the widgets:
-
         self.reviewBoxes = {}
 
         self.header = gtk.Label()
@@ -68,22 +64,21 @@ class Review(gtk.VBox):
 
         # Copy data from the checklist into internal structures and add to
         # our display.
-        self.set_model(treeStore)
+        if treeStore:
+            self.set_model(treeStore)
         
-        ### FIXME: Need to work on CheckList to make these work.
-        # Resolution should now be a part of checklist.
-        # Displaying it has to somehow be propogated through the CheckList
-        # function header entry.
-        # Hash also needs to be propogates through the CheckList header entry.
-
-        ### FIXME: Need to connect to a signal when the SRPM changes.
-        # self.properties.connect('hash-change', self.__update_hash)
-
     def show(self):
         """Display the new widget"""
         self.show_all()
 
     ## FIXME: This definitly doesn't work.
+    # Part of the problem is resolution is now a property on the CheckList
+    # Another piece of the problem is the hashes are properties in the
+    # CheckList's properties structure.
+    # I want to make these available through some sort of header method but I
+    # haven't designed that yet.
+    # - The remainder of the problem is easy, simply translating from the old
+    # gtk.ListStores into our internal lists.
     def publish(self, filename):
         """Write the review to a file."""
 
@@ -164,6 +159,7 @@ class Review(gtk.VBox):
                 key  = (treeStore.get_value(treeIter, checklist.RESOLUTION),
                         lastEntry)
                 value = gtk.Label(treeStore.get_value(treeIter, checklist.OUTPUT))
+                value.set_use_markup(True)
                 value.set_line_wrap(True)
                 value.set_property('xalign', 0.0)
                 self.displayList[key] = value
@@ -173,10 +169,10 @@ class Review(gtk.VBox):
         self.lastEntry = lastEntry
         # Clear out the Boxes that hold review items
         try:
-            for box in self.reviewBoxes:
+            for box in self.reviewBoxes.values():
                 self.remove(box)
         except AttributeError:
-            # As long as self.passBox does not exist, it's safe to continue.
+            # As long as the reviewBoxes do not exist, it's safe to continue.
             pass
         for box in ('Pass', 'Fail', 'Non-Blocker', 'Notes'):
             self.reviewBoxes[box] = gtk.VBox()
@@ -204,7 +200,6 @@ class Review(gtk.VBox):
         :path: The path to the value that was changed.
         :updateIter: Iter to the changed Row.
         '''
-
         # row-changed gets called once for each item that is updated, even
         # when there's a group.  So we have to wait until we get a proper
         # summary (our key value) when we add the entry to the list
@@ -212,7 +207,7 @@ class Review(gtk.VBox):
         res = treeStore.get_value(updateIter, checklist.RESOLUTION)
         if not (summary and res and len(path) > 1):
             # 1) Don't care about Categories (toplevel items)
-            # 2) Items that don't have summary's and resolutions yet are in
+            # 2) Items that don't have summaries and resolutions yet are in
             #    the process of being added.
             return
 

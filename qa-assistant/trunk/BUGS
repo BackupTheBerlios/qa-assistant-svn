@@ -19,6 +19,8 @@ Packaging Errors
 
 Programming Errors
 ------------------
+* Using the save function (rather than save_as) doesn't seem to be saving the
+  file.
 * We don't need to create a checklist on program start anymore.  Wait until
   we have data (A savefile load or SRPM load) to instantiate.
 * Need to hook the properties into the checklist.  Right now things are just
