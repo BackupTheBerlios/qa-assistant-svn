@@ -194,8 +194,6 @@ class QAReviewer(gnomeglade.GnomeApp):
             del self.properties.SRPM
             self.properties.SRPM = None
             pass
-        else:
-            self.__load_checklist()
 
         self.__check_readiness()
 
