@@ -537,11 +537,13 @@ class CheckList (gtk.TreeStore):
         for listIndex in range(0, len(columnValues), 2):
             if columnValues[listIndex] == RESOLUTION:
                 res = columnValues[listIndex+1]
+                gtk.TreeStore.set(self, row,
+                        RESOLUTION, res)
                 # Change the OUTPUT as well
                 outputlist = self.get_value(row, OUTPUTLIST)
-                gtk.TreeStore.set(self, row,
-                        OUTPUT, self.pangoize_output(res, outputlist[res]),
-                        RESOLUTION, res)
+                if outputlist:
+                    gtk.TreeStore.set(self, row,
+                            OUTPUT, self.pangoize_output(res, outputlist[res]))
 
                 # Auto display to review if it's a fail
                 if (not self.noAutoDisplay) and (res == 'Fail' or

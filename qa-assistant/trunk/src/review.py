@@ -265,14 +265,16 @@ class Review(gtk.VBox):
         # row-changed gets called once for each item that is updated, even
         # when there's a group.  So we have to wait until we get a proper
         # summary (our key value) when we add the entry to the list
-        summary = treeStore.get_value(updateIter, checklist.SUMMARY).lower()
+        summary = treeStore.get_value(updateIter, checklist.SUMMARY)
         res = treeStore.get_value(updateIter, checklist.RESOLUTION)
+        output = treeStore.get_value(updateIter, checklist.OUTPUT) or ''
         if not (summary and res and len(path) > 1):
             # 1) Don't care about Categories (toplevel items)
             # 2) Items that don't have summaries and resolutions yet are in
             #    the process of being added.
             return
 
+        summary = summary.lower()
         if self.entries.has_key(summary):
             # Update an old item
             key = self.entries[summary]
@@ -304,14 +306,13 @@ class Review(gtk.VBox):
                 else:
                     self.reviewBoxes[key[0]].add(label)
             # Change output
-            label.set_markup(treeStore.get_value(updateIter, checklist.OUTPUT))
+            label.set_markup(output)
         else:
             # New item
             if treeStore.get_value(updateIter, checklist.DISPLAY):
                 key = (res, self.lastEntry)
                 self.entries[summary] = key
-                label = gtk.Label(treeStore.get_value(updateIter,
-                    checklist.OUTPUT))
+                label = gtk.Label(output)
                 label.set_use_markup(True)
                 label.set_property('xalign', 0.0)
                 label.set_selectable(True)

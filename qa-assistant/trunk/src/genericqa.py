@@ -91,6 +91,8 @@ class GenericQA(gtk.Menu):
         for res in resList:
             outputList[res] = ''
             resMenu.append(gtk.MenuItem(res))
+        ### FIXME: resEntry needs to become a gtk.ComboBox as OptionMenu
+        # is deprecated
         resEntry = gtk.OptionMenu()
         resEntry.set_menu(resMenu)
         resEntry.set_history(1)
