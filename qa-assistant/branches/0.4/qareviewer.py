@@ -641,23 +641,33 @@ Relative Priority: Low.  There's too much programming to do for me to spend too 
         self.not_yet_implemented(msg)
         pass
         
-    ### FIXME: Part 2: Editing features are not currently encouraged.
-    # Have to reconcile these with our need to keep each checklist item in
-    # its place.
     def on_menu_cut_activate(self, *extra):
-        """Cut some text"""
-        self.not_yet_implemented()
-        pass
+        '''Cut some text'''
+        owner = self.clipPrimary.get_owner()
+        if owner:
+            if isinstance(owner, gtk.Editable):
+                owner.cut_clipboard()
+            else:
+                ### FIXME: Is this behaviour consistent?
+                # Or are apps supposed to fail if editing of the selection is
+                # not allowed?
+                selectionText = self.clipPrimary.wait_for_text()
+                if selectionText:
+                    self.clipboard.set_text(selectionText, -1)
 
     def on_menu_copy_activate(self, *extra):
-        """Copy some text"""
-        self.not_yet_implemented()
-        pass
+        '''Copy from the current selection into the clipboard.'''
+        if self.clipPrimary.get_owner():
+            selectionText = self.clipPrimary.wait_for_text()
+            if selectionText:
+                self.clipboard.set_text(selectionText, -1)
 
     def on_menu_paste_activate(self, *extra):
-        """Paste some text"""
-        self.not_yet_implemented()
-        pass
+        '''Copy from the clipboard into the selection.'''
+        entry = self.ReviewerWindow.focus_widget
+        if isinstance(entry, gtk.Editable):
+            print entry
+            entry.paste_clipboard()
 
     def on_menu_clear_activate(self, *extra):
         """Clear some text"""
