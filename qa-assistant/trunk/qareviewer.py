@@ -302,8 +302,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.checklist.set(rowIter, self.checklist.OUTPUT, newValue)
         self.checklist.row_changed(path, rowIter)
 
-    ### FIXME: I believe this should go into checklist.  Possibly this whole
-    # section belongs in checklist.
     def resolution_changed(self, renderer, newValue, changedRow):
         """Changes the display when the user changes an item's state.
 
@@ -316,9 +314,29 @@ class QAReviewer(gnomeglade.GnomeApp):
         change the value in our model.  Other parts of the model may also be
         affected by this change as well.
         """
+        ### FIXME: When option renderer value changes, set the checklist
+        # using these values:
 
         # Set the checklist to the new resolution and output values
         self.checklist.set(changedRow, self.checklist.RESOLUTION, newValue)
+       
+        ### FIXME: The rest of this might belong in the checklist.
+        # Pro:
+        # Conceptually we are modifying data and want that to cause an update
+        # of some other data.  This is best thought of as being encapsulated
+        # inside the checklist.  When the data changes, the row is notified to
+        # Update itself.
+        # 
+        # Con:
+        # It seems slower.  When called from here, we know that we are
+        # specifically asking for a RESOLUTION changed.  The checklist will
+        # just get a row_changed (not column...) and therefore will have to
+        # make a decision as to what type of change this is.
+        #
+        # OTOH: We could create a new checkView method/signal
+        # Then when we change the checkView, it will emit the signal and we
+        # can go ahead and update the checkList's RESOLUTIONS.  Look into this
+        # option.
         outputlist = self.checklist.get_value(changedRow, self.checklist.OUTPUTLIST)
         out = outputlist[newValue]
         self.checklist.set(changedRow, self.checklist.OUTPUT, out)

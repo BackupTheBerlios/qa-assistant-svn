@@ -80,6 +80,20 @@ class CheckList (gtk.TreeStore):
 
     class __Entry:
         '''Private class.  Holds entry information until ready to output.'''
+
+    class __Property:
+        '''Property information.'''
+
+        def __init__(self, type, value):
+            '''Initialize a property.
+            
+            Attributes:
+            type -- Type of the property.
+            value -- Property value.
+            '''
+            self.type = type
+            self.value = value
+
     class __Test:
         '''Information related to automated tests embedded in the XML files.
         
@@ -154,7 +168,7 @@ class CheckList (gtk.TreeStore):
             self.baseRevision = base[0].prop('revision')
             self.baseFilename = base[0].content
         else:
-            # We are loading an original checklist definiton.  Set its values
+            # We are loading an original checklist definition.  Set its values
             # as the base and set the CheckList info to good values.
             self.baseName = self.name
             self.baseRevision = self.revision
@@ -166,8 +180,8 @@ class CheckList (gtk.TreeStore):
         # Extract properties from the CheckList file
         properties = root.xpathEval2('/checklist/properties/property')
         for p in properties:
-            ### FIXME: Have to save p.prop('type') as well
-            self.properties[p.prop('name')] = p.content
+            self.properties[p.prop('name')] = self.__Property(p.prop('type'), \
+                    p.content)
 
         # Extract functions for the QA menu
         functions = root.xpathEval2('/checklist/functions/function')
@@ -209,21 +223,21 @@ class CheckList (gtk.TreeStore):
                     self.entries[entry.name] = entryIter
                     
                     # Construct the resolution from multiple states
-                    resolutions={'Needs-Reviewing': None}
+                    outputList={'Needs-Reviewing': None}
                     resolutionList=['Needs-Reviewing']
                     for i in range(len(entry.states)):
                         name = entry.states[i]['name']
                         output = self.pangoize_output(name,
                                 entry.states[i]['output'])
-                        resolutions[name] = output
+                        outputList[name] = output
                         if name != 'Needs-Reviewing':
                             resolutionList.append(entry.states[i]['name'])
                         
                     self.set(entryIter,
                             self.RESLIST, resolutionList,
-                            self.OUTPUTLIST, resolutions,
-                            self.RESOLUTION, 'Needs-Reviewing',
-                            self.OUTPUT, resolutions['Needs-Reviewing'])
+                            self.OUTPUTLIST, outputList,
+                            self.RESOLUTION, entry.state,
+                            self.OUTPUT, outputList[entry.state])
                 else:
                     # DTD validation should make this ignorable.
                     pass
@@ -348,8 +362,9 @@ class CheckList (gtk.TreeStore):
         properties = root.newChild(None, 'properties', None)
         for prop in self.properties.keys():
             node = properties.newTextChild(None, 'property',
-                    self.properties[prop])
+                    self.properties[prop].value)
             node.setProp('name', prop)
+            node.setProp('type', self.properties[prop].type)
 
         # Output functions
         functions = root.newChild(None, 'functions', None)
@@ -441,8 +456,9 @@ class CheckList (gtk.TreeStore):
     def __modified_row(self, tree, path, entryIter):
         '''Maintain internal values whenever a row is modified.
 
-        Add new pending checklist items.  Had to be deferred by `__added_row`
-        because the SUMMARY value might not be the first thing added.
+        Add new pending checklist items to the entries lookup.  Had to be
+        deferred by `__added_row` because the SUMMARY value might not be
+        the first thing added.
         '''
 
         if self.addPaths.has_key(path) and tree.get_value(entryIter, self.SUMMARY):
@@ -481,11 +497,11 @@ class CheckList (gtk.TreeStore):
         entry.test = None
 
         entry.name = node.prop('name')
+        entry.state = node.prop('state')
         if node.prop('display') == 'true':
             entry.display = True
         else:
             entry.display = False
-
         fields = node.children
         while fields:
             if fields.name == 'states':
@@ -573,9 +589,9 @@ sys.exit(4)
             # Entry node
             entry = root.lastChild().newChild(None, 'entry', None)
             if tree.get_value(entryIter, self.DISPLAY):
-                entry.setProp('display', 'false')
-            else:
                 entry.setProp('display', 'true')
+            else:
+                entry.setProp('display', 'false')
             entry.setProp('state', tree.get_value(entryIter, self.RESOLUTION))
 
             # state nodes
