@@ -34,7 +34,7 @@ current working directory.
 
 __programName__ = "fedora-qatemplate"
 __version__ = "0.1"
-__revision__ = "$Revision$"
+__revision__ = "$Rev$"
 
 # 8K block size for now.
 BLOCKSIZE=8192
