@@ -57,7 +57,6 @@ glade/GUI:
 
 Extra GNOME Functionality:
 ==========================
-* Druid on New (In progress)
 * Update to pygtk-2.4.
   - Embed the 2.4 file selector widget in the druid..
   - Change gobjects to use the new chained calls.
@@ -128,12 +127,12 @@ Programming:
   that information into the program file, we can play with path information
   in just that one file to make uninstalled testing work.
 
- * Finish writing unittests for the program.  We've barely scratched the
-   surface of this.  When completed it should allow one to quickly figure
-   out what's working and what's broken in the package.
-   - Basically need a set of unittests for each object defined in the program.
-     Don't yet know how to unittest the widgets.  The model objects and the
-     program object should work much better, though.
+* Finish writing unittests for the program.  We've barely scratched the
+  surface of this.  When completed it should allow one to quickly figure
+  out what's working and what's broken in the package.
+  - Basically need a set of unittests for each object defined in the program.
+    Don't yet know how to unittest the widgets.  The model objects and the
+    program object should work much better, though.
 
 Done -- Needs testing
 =====================

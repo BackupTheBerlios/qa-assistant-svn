@@ -58,6 +58,7 @@ EXTRA_DIST = \
 	qa-assistant.spec \
 	qa-assistant.spec.in \
 	$(datafiles_DATA) \
+	$(noinst_DATA) \
 	$(checklistdtd_DATA) \
 	$(qasavedtd_DATA) \
 	$(uifiles_DATA) \

@@ -35,7 +35,7 @@ Features
 --------
 * Graphical GNOME Checklist Application
 * Uses an XML definition of it's checklist for extensibility
-* Current checklist targets Fedora.us/Fedora Extras Quality Assurance Process
+* Included checklist targets Fedora.us/Fedora Extras Quality Assurance Process
   for verifying SRPM Packages
 * A few automated tasks associated with SRPM QA
 * Outputs a review suitable for publishing on fedora.us
@@ -46,8 +46,8 @@ Features
 Requirements
 ------------
 * python_ 2.3 (pygtk-2.4.0 needs python 2.3 or higher)
-* python bindings for libxml2_
-* pygtk_ version 2.4.0 or higher.
+* python bindings for libxml2_ version 2.5 or higher (For xmlTextReader)
+* pygtk_ version 2.4.0 or higher (For the file selector widget)
 * `gnome-python-gconf`__ 2.0.0 or higher.
 * `gnome-python`__ version 2.0.0 or higher.
 * `python-rpm`_
