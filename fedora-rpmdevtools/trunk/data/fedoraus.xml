@@ -1,5 +1,6 @@
 <?xml version='1.0' ?>
-<checklist version='0.1' name="fedoraus" revision="1.0">
+  
+<checklist version='0.1' name="fedoraus" revision="0.1">
   <category name='Security'>
     <description>Security Concerns</description>
     <entry name='Canonical Source'>
@@ -32,7 +33,6 @@
         the pristine source from a known canonical web site and take the MD5
         hash of it with md5sum.  Comparing this hash to the hash of the
         source in the SRPM should be identical.</description>
-      <output>Source matches with upstream.</output>
     </entry>
     <entry name='Upstream GPG Checked'>
       <display default='false'/>
@@ -43,7 +43,7 @@
         <state name='Fail'>
           <output>Upstream GPG Signatures do not match: %s</output>
         </state>
-        <state name='N/A'>
+        <state name='Not-Applicable'>
           <output>No upstream GPG</output>
         </state>
       </states>

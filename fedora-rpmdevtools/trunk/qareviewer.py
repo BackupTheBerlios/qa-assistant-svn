@@ -23,6 +23,7 @@ from properties import Properties
 import checklist
 import gnomeglade
 from optionrenderer import OptionCellRenderer
+from review import Review
 
 class QAReviewer(gnomeglade.GnomeApp):
     #
@@ -81,9 +82,12 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.checkView.append_column(column)
         
         renderer = gtk.CellRendererText()
+        renderer.connect('edited', self.output_edited, self.checklist.tree)
         column = gtk.TreeViewColumn('Output', renderer,
                                     text=checklist.OUTPUT,
-                                    visible=checklist.DISPLAY)
+                                    visible=checklist.DISPLAY,
+                                    ### FIXME: Need na editable seetting
+                                    editable=checklist.DISPLAY)
         self.outputColumn = column
         self.checkView.append_column(column)
 
@@ -95,14 +99,15 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.grabBar.remove(label)
         self.grabBar.add(self.grabArrow)
 
-        # Hide the reviewPane until the user asks to see it.
-        self.mainDisplay.remove(self.reviewPane)
+        self.reviewView = Review(self.checklist.tree, self.properties)
+        self.reviewPane.add(self.reviewView)
 
         ### FIXME: There are reasons to avoid show_all.  We aren't doing
         # anything that exposes those problems yet, but I should look into
         # how problematic it would be to show individually.  (How hard with
         # glade?)
         self.ReviewerWindow.show_all()
+        self.reviewScroll.hide()
 
     #
     # Helper Functions
@@ -131,6 +136,16 @@ class QAReviewer(gnomeglade.GnomeApp):
     #
     # Treeview Callbacks
     # 
+    def output_edited(self, cell, row, newValue, model):
+        """Change the text of the output string"""
+        iter = model.get_iter_from_string(row)
+        path = self.checklist.tree.get_path(iter)
+        name = self.checklist.tree.get_value(iter, checklist.RESOLUTION)
+        outDict = self.checklist.tree.get_value(iter, checklist.OUTPUTLIST)
+        outDict[name] = newValue
+        self.checklist.tree.set(iter, checklist.OUTPUT, newValue)
+        self.checklist.tree.row_changed(path, iter)
+
     def resolution_changed(self, renderer, newValue, iter):
         """Changes the display when the user changes an item's state.
 
@@ -154,12 +169,14 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         # Check if the change makes the overall review into a pass or fail
         if newValue == 'Fail':
+            ### FIXME: Check preferences for auto-display on fail
+            # Auto display to review if it's a fail
+            self.checklist.tree.set(iter, checklist.DISPLAY, True)
+
             if catRes == 'Fail':
                 return
-            ### FIXME: Check preferences for auto-display on fail
-            self.checklist.tree.set(iter, checklist.DISPLAY, True)
-        elif newValue == 'Needs Reviewing':
-            if catRes == 'Needs Reviewing':
+        elif newValue == 'Needs-Reviewing':
+            if catRes == 'Needs-Reviewing':
                 return
             if catRes != 'Pass':
                 iter = self.checklist.tree.iter_children(category)
@@ -168,19 +185,21 @@ class QAReviewer(gnomeglade.GnomeApp):
                     if nodeRes == 'Fail':
                         return
                     iter = self.checklist.tree.iter_next(iter)
-        elif newValue == 'Pass' or newValue == 'N/A':
+        elif (newValue == 'Pass' or newValue == 'Not-Applicable' or 
+                newValue == 'Non-Blocker'):
+            newValue = 'Pass'
             iter = self.checklist.tree.iter_children(category)
             while iter:
                 nodeRes = self.checklist.tree.get_value(iter, checklist.RESOLUTION)
-                if nodeRes != 'Pass' and nodeRes != 'N/A':
+                if nodeRes == 'Needs-Reviewing':
+                    newValue = 'Needs-Reviewing'
+                elif nodeRes == 'Fail':
                     return
                 iter = self.checklist.tree.iter_next(iter)
-            newValue = 'Pass'
 
         self.checklist.tree.set(category, checklist.RESOLUTION, newValue)
         path = self.checklist.tree.get_path(category)
         self.checklist.tree.row_changed(path, category)
-        ### FIXME: Change the reviewPane too
 
     def display_toggle(self, cell, path, *data):
         """Toggles outputting a message for the review.
@@ -201,15 +220,9 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         if value == True:
             self.checklist.tree.set(iter, checklist.DISPLAY, False) 
-            ### FIXME: Hide the displayed output elements in the reviewPane
-            # Find widget by name
-            # widget.destroy()
             pass
         else:
             self.checklist.tree.set(iter, checklist.DISPLAY, True)
-            ### FIXME: Display the output elements in the reviewPane
-            # create testarea widget with name
-            # fill textarea widget with checklist.OUTPUT
 
     #
     # Menu/Toolbar callbacks
@@ -221,8 +234,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         Callback to end the program.
         """
 
-        ### FIXME:
-        # Check for unsaved files.
+        ### FIXME: Check for unsaved files.
         self.quit()
        
     def on_menu_about_activate(self, *extra):
@@ -248,11 +260,11 @@ class QAReviewer(gnomeglade.GnomeApp):
         if self.grabArrow.get_property('arrow-type') == gtk.ARROW_LEFT:
             self.grabArrow.set(gtk.ARROW_RIGHT, gtk.SHADOW_NONE)
             self.checkView.remove_column(self.outputColumn)
-            self.mainDisplay.pack_end(self.reviewPane)
+            self.reviewScroll.show()
         else:
             self.grabArrow.set(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
             self.checkView.append_column(self.outputColumn)
-            self.mainDisplay.remove(self.reviewPane)
+            self.reviewScroll.hide()
             
     ### FIXME: Features we want to implement but haven't had the time yet:
     def on_menu_publish_activate(self, *extra):

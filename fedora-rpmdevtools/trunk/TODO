@@ -2,17 +2,17 @@ Pressing New should prompt for a bugzilla # or URL
 Pressing save should dump the present state to an xml file
 Pressing open should load a dumped xml file
 
-Build Button should be added to toolbar and menu
-Pressing Build should build a review and prompt user for file to save as
-
 glade/GUI:
 ==========
+Publish Button should be added to toolbar and menu
+Pressing Publish should build a review and prompt user for file to save as
+
 Submit Button should be added to toolbar and menu
 Pressing Submit will build the review and submit upstream and down.
 
 Add a New dialog to take input about bugzilla
 
-Add a New Dialog to take input about package
+Add a New Dialog to take input about SRPM
 
 Colorize output depending on the resolution state (green for pass,
 red for blocker, pink for let it slide.)

@@ -77,10 +77,10 @@ class CheckList:
             iter = self.tree.append(None)
             self.tree.set(iter,
                           ISITEM, False,
-                          RESLIST, ['Needs Reviewing', 'Pass', 'Fail'],
-                          RESOLUTION, 'Needs Reviewing',
+                          RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
+                          RESOLUTION, 'Needs-Reviewing',
                           OUTPUT, None,
-                          OUTPUTLIST, {'Needs Reviewing':None, 
+                          OUTPUTLIST, {'Needs-Reviewing':None, 
                                        'Pass':None, 'Fail':None},
                           SUMMARY, category.prop('name'))
 
@@ -100,17 +100,19 @@ class CheckList:
                                   DESC, entry.desc,
                                   INPUT, entry.input)
                     # Construct the resolution from multiple states
-                    resolutions={'Needs Reviewing': None}
-                    resolutionList=['Needs Reviewing']
+                    resolutions={'Needs-Reviewing': None}
+                    resolutionList=['Needs-Reviewing']
                     for i in range(len(entry.states)):
-                        resolutions[entry.states[i]['name']] = entry.states[i]['output']
-                        resolutionList.append(entry.states[i]['name'])
+                        name = entry.states[i]['name']
+                        resolutions[name] = entry.states[i]['output']
+                        if name != 'Needs-Reviewing':
+                            resolutionList.append(entry.states[i]['name'])
                         
                     self.tree.set(entryIter,
                                   RESLIST, resolutionList,
                                   OUTPUTLIST, resolutions,
-                                  RESOLUTION, 'Needs Reviewing',
-                                  OUTPUT, resolutions['Needs Reviewing'])
+                                  RESOLUTION, 'Needs-Reviewing',
+                                  OUTPUT, resolutions['Needs-Reviewing'])
                 else:
                     # DTD validation should make this ignorable.
                     pass

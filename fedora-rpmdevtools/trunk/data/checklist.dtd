@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!ELEMENT checklist (category+)>
+  <!ATTLIST checklist
+    version CDATA #FIXED '0.1'
+    name CDATA #REQUIRED
+    revision CDATA #REQUIRED
+  >
+  <!ELEMENT category (description, entry+)>
+    <!ATTLIST category
+      name CDATA #REQUIRED
+    >
+    <!ELEMENT description (#PCDATA)>
+    <!ELEMENT entry (display, states, description, input?)>
+      <!ATTLIST entry
+        name CDATA #REQUIRED
+      >
+      <!ELEMENT display EMPTY>
+        <!ATTLIST display
+          default (true|false) #REQUIRED
+        >
+      <!ELEMENT states (state+)>
+        <!ELEMENT state (output?)>
+          <!ATTLIST state
+            name (Needs-Reviewing|Pass|Fail|Non-Blocker|Not-Applicable) #REQUIRED
+          >
+          <!ELEMENT output (#PCDATA)>
+        <!ELEMENT input (#PCDATA)>
