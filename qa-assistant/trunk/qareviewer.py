@@ -366,6 +366,10 @@ class QAReviewer(gnomeglade.GnomeApp):
         about.set_property('name', __programName__)
         about.set_property('version', __version__)
         about.show()
+       
+    def on_toolbar_new_activate(self, button, *extra):
+        """Popup the menu to select a new review from bugzilla or SRPM"""
+        self.new1_menu.popup(None, None, None, 0, gtk.get_current_event_time())
         
     def on_menu_new_srpm_activate(self, *extra):
         """Open a new review based on the user selected SRPM"""

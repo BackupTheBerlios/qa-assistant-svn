@@ -7,7 +7,7 @@ This version concentrates on tidying up usability problems in the first
 release.  Tooltip-like help for checklist items and loading SRPMS from the
 menu are the major enhancements.
 
-* Ability to start an SRPM QA from the menu
+* Ability to start an SRPM QA from the menu and the toolbar
 * Description of a checklist item displayed in a tooltip
 * Optionrenderer now looks more like a combo box
 * Speedups to Optionrenderer code

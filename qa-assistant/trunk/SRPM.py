@@ -129,10 +129,10 @@ class SRPM:
                     errArgs = err.__dict__['args']
                 except:
                     errArgs = None
-                if errArgs:
+                if errArgs and len(errArgs) > 1:
                     oldHashes = errArgs[1]
                 else:
-                    oldHashes = []
+                    oldHashes = {}
                     
             pristineHashes = self.__hash_directory(tempDir, hasher)
             try:

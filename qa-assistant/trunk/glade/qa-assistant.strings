@@ -18,6 +18,8 @@ gchar *s = N_("_Contents");
 gchar *s = N_("Create a new QA report");
 gchar *s = N_("Open an existing QA report");
 gchar *s = N_("Save your QA report");
+gchar *s = N_("Please select 'New => From SRPM'\n"
+              "or 'New => From Bugzilla' to get started");
 gchar *s = N_("© 2004 Toshio Kuratomi");
 gchar *s = N_("A tool to help write QA reviews of RPM Packaged Contributed Software");
 gchar *s = N_("translator_credits");
