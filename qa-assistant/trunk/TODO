@@ -16,8 +16,6 @@ glade/GUI:
 - Colorize output depending on the resolution state (green for pass,
   red for blocker, pink for let it slide.)
 
-- tooltip like popup for DESCRIPTIONS of each checklist item
-
 - Identify what SRPM/ bugzilla/ package we're working on in the status bar
 
 - Create a logo to go along with the icon.  Think up some other small pixmaps

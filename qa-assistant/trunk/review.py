@@ -153,15 +153,16 @@ class Review(gtk.VBox):
                 value = self.list.get_value(iter, self.__OUTPUT)
                 if value != None:
                     if res == 'Pass':
-                        goodList.append('- ' + value + "\n")
+                        goodList.append('* ' + value + "\n")
                     elif res == 'Fail':
-                        workList.append('- ' + value + "\n")
+                        workList.append('* ' + value + "\n")
                     elif res == 'Non-Blocker':
-                        minorList.append('- ' + value + "\n")
+                        minorList.append('* ' + value + "\n")
                     elif res == 'Not-Applicable' or res == 'Needs-Reviewing':
-                        notesList.append('- ' + value + "\n")
+                        notesList.append('* ' + value + "\n")
             iter = self.list.iter_next(iter)
             
+        buffer+=("\n", "MD5Sums:\n", self.hashes.get_text())
         if len(goodList) > 0:
             buffer+=["\n", "Good:\n"] + goodList
         if len(workList) > 0:
@@ -170,7 +171,6 @@ class Review(gtk.VBox):
             buffer+=["\n", "Minor:\n"] + minorList
         if len(notesList) > 0:
             buffer+=["\n", "Notes:\n"] + notesList
-        buffer+=("\n", "MD5Sums:\n", self.hashes.get_text())
 
         outfile = file(filename, 'w')
         outfile.writelines(buffer)

@@ -11,7 +11,7 @@ The main program object.  From here we set up the user interface, receive
 events, and send things off for future processing.
 """
 __programName__ = "QA Assistant"
-__version__ = "0.1"
+__version__ = "0.2"
 __revision__ = "$Rev$"
 
 import libxml2
@@ -19,11 +19,12 @@ import gtk
 import sys
 
 import SRPM
-from properties import Properties
 import checklist
 import gnomeglade
+from properties import Properties
 from optionrenderer import OptionCellRenderer
 from review import Review
+from treetips import TreeTips
 
 class QAReviewer(gnomeglade.GnomeApp):
     #
@@ -126,6 +127,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.reviewView = Review(self.checklist.tree, self.properties)
         self.reviewPane.add(self.reviewView)
 
+        self.tips = TreeTips(self.checkView, checklist.DESC)
         ### FIXME: There are reasons to avoid show_all.  We aren't doing
         # anything that exposes those problems yet, but I should look into
         # how problematic it would be to show individually.  (How hard with

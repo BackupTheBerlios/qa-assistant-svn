@@ -79,10 +79,6 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
     def on_activate(self, event, widget, path, backgroundArea, cellArea, flags):
         self.emit('clicked', (widget, event))
 
-    def on_start_editing(self, event, widget, path, backgroundArea, cellArea, flags):
-        print "editing"
-        pass
-
     def on_clicked(self, widget, data):
         self.display_options(widget, data)
        

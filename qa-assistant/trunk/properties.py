@@ -1,5 +1,3 @@
-#! /usr/bin/python
-#
 # File: properties.py
 # Author: Toshio Kuratomi <toshio@tiki-lounge.com>
 # Date: 2 March, 2004
@@ -8,7 +6,6 @@
 # Id: $Id$
 """A class that holds properties on a review file.
 """
-__version__ = "0.1"
 __revision__ = "$Rev$"
 
 class Properties:
