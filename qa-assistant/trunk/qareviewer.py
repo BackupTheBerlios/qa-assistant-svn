@@ -209,7 +209,13 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         This should be called everytime property.SRPM changes.
         """
+        
         if self.properties.SRPM:
+            SRPMName = os.path.basename(self.properties.SRPM.filename)
+            self.mainWinAppBar.pop()
+            self.mainWinAppBar.push(SRPMName)
+            self.ReviewerWindow.set_title(__programHumanName__ + ' - ' +
+                    SRPMName)
             self.startLabel.hide()
             self.listPane.show()
             self.grabBar.show()
@@ -221,6 +227,9 @@ class QAReviewer(gnomeglade.GnomeApp):
             self.grabBar.hide()
             self.listPane.hide()
             self.startLabel.show()
+            self.ReviewerWindow.set_title(__programHumanName__)
+            self.mainWinAppBar.pop()
+            self.mainWinAppBar.push("No SRPM selected")
 
     def __translate_option_mode(self, column, cell, model, iter):
         """Translate from header/item value to mode type.

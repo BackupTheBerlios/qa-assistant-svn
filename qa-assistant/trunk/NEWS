@@ -10,6 +10,7 @@ QA Assistant -- A checklist reviewer to aid Quality Assurance
   http://springer.homelinux.com:8080/svn/fedora/qa-assistant/trunk
 * Now has an automake/autoconf build.  This means the package is now
   installable with standard ./configure ; make; make install steps
+* Displays the SRPM that's being reviewed in the titlebar and statusbar
 
 0.2
 ===

@@ -6,15 +6,15 @@ glade/GUI:
   + Pressing Submit will build the review and submit upstream and down.
 
 - Add a New dialog to take input about bugzilla
+  + If new then make sure we have both a bugzilla # and an SRPM
 
 - Pressing save should dump the present state to an xml file
+  + class SaveFile
 
 - Pressing open should load a dumped xml file
 
 - Colorize output depending on the resolution state (green for pass,
   red for blocker, pink for let it slide.)
-
-- Identify what SRPM/ bugzilla/ package we're working on in the status bar
 
 - Create a logo to go along with the icon.  Think up some other small pixmaps
   for the menu/toolbar: toggle Preview, new from bugzilla, new from SRPM,
@@ -33,12 +33,10 @@ Extra GNOME Functionality:
 ==========================
 - Create preferences infrastructure : check PREFERENCES for ideas.
 
-- Figure out the best way to add default paths to our data files.
-  (Look at gnome-blog)
-
 Programming:
 ============
 - Command line argument parsing
+  + If a savefile is given, open that
 
 - Enhance tracking entries into the editor.  We want
   people to be able to shift text around from Needswork and Non-blocker, and
@@ -61,24 +59,7 @@ Programming:
   textBuffer object has the necessary wordwrapping even without a textView.
   (python's textwrap would do this for publish, not sure about viewing.)
 
+- Update to the fedora QAFormat output style
+
 - Prompt before outputting a review when the review is in state
   'Needs Reviewing'
-
-Build Architecture
-==================
-- Python Distutils or autoconf configure
-  + Install files
-  + Create distribution tarballs
-
-Miscellaneous stuff from code
-=============================
-# Setup gnome environment
-# Parse commandline
-# class SaveFile
-# class ChecklistRulesFile
-# Initialize the sourceview
-# If a savefile is given, open that
-# If new then make sure we have both a bugzilla # and an SRPM
-# Pregenerate MD5Sums/Sha1Sums
-# Check package signature
-# unrpm sources to buildroot
