@@ -135,12 +135,46 @@ class Review(gtk.VBox):
         self.tree.connect('row-changed', self.__update_data)
        
     def show(self):
-        # Display the new widget.
+        """Display the new widget"""
         self.show_all()
-        pass
 
-    def publish(self):
-        pass
+    def publish(self, filename):
+        """Write the review to a file."""
+
+        buffer = [self.resolution.get_text()+"\n"]
+        iter = self.list.get_iter_first()
+        goodList = []
+        workList = []
+        minorList = []
+        notesList = []
+        while iter:
+            if self.list.get_value(iter, self.__DISPLAY) == True:
+                res = self.list.get_value(iter, self.__RESOLUTION)
+                value = self.list.get_value(iter, self.__OUTPUT)
+                if value != None:
+                    if res == 'Pass':
+                        goodList.append('- ' + value + "\n")
+                    elif res == 'Fail':
+                        workList.append('- ' + value + "\n")
+                    elif res == 'Non-Blocker':
+                        minorList.append('- ' + value + "\n")
+                    elif res == 'Not-Applicable' or res == 'Needs-Reviewing':
+                        notesList.append('- ' + value + "\n")
+            iter = self.list.iter_next(iter)
+            
+        if len(goodList) > 0:
+            buffer+=["\n", "Good:\n"] + goodList
+        if len(workList) > 0:
+            buffer+=["\n", "Needswork:\n"] + workList
+        if len(minorList) > 0:
+            buffer+=["\n", "Minor:\n"] + minorList
+        if len(notesList) > 0:
+            buffer+=["\n", "Notes:\n"] + notesList
+        buffer+=("\n", "MD5Sums:\n", self.hashes.get_text())
+
+        outfile = file(filename, 'w')
+        outfile.writelines(buffer)
+        outfile.close()
 
     def submit(self):
         pass

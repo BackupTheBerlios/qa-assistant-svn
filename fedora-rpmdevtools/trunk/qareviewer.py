@@ -269,19 +269,14 @@ class QAReviewer(gnomeglade.GnomeApp):
     ### FIXME: Features we want to implement but haven't had the time yet:
     def on_menu_publish_activate(self, *extra):
         """Publish a review to a file."""
-        msg = """Publish a review to a file.
+        msg = """Currently this is only partially implemented.  It needs two more things:
+1] Connect to the file dialog so the user can select the file to use.  Currently it just outputs to /var/tmp/qa-review.txt
 
-Relative Priority: ASAP.  When this and open new SRPM are done we have a program that is able to meet minimal requirements for usability.  Add some more work to the checklist as well and that will be done."""
-        self.not_yet_implemented(msg)
-        # Review has the following sources of information: 
-        # self.checklist.tree
-        # self.properties
-        buffer = publish.Review(self.checklist.tree, self.properties)
-        # Assemble everything in a buffer
-        # Get file name from the user
-        # Pipe buffer through gpg
-        # Output to file
-        pass
+2] Ask whether to publish when the review is not in a finished state (PUBLISH +1 or NEEDSWORK)
+        """
+        ### FIXME: Get Filename from the user.
+        filename = '/var/tmp/qa-review.txt'
+        self.reviewView.publish(filename)
 
     def on_menu_new_srpm_activate(self, *extra):
         """Open a new review based on the user selected SRPM"""
