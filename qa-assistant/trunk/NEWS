@@ -2,29 +2,25 @@
 QA Assistant
 ============
 
-Checklist Reviewer to aid Quality Assurance
+Checklist Reviewer to Aid Quality Assurance
 -------------------------------------------
 
 :Author: Toshio Kuratomi
 :Contact: toshio[AT]tiki-lounge.com
 :Date: $Date$
-:Revision: $Rev$
 
 ..contents::
 
-0.4
-===
-This release marks completeness of core features.  Everything needed to write
-a review from within QA Assistant is now available.  I'm now using qa-assistant
-to write QA reports for the fedora-us system.  The save and checklist formats
-used in this release are not permanent.  Talks with Erik LaBianca are leading
-to a new combined format that will allow embedding tests for items within
-the checklist, thus being much more flexible in what can now be provided.
+Version 0.4
+===========
+This release marks completeness of core features.  Everything necessary for
+writing a review from within QA Assistant is now available.  I'm now using
+qa-assistant to write QA reports for the fedora.us system.
 
 * You can now add your own checklist items to a review.  Use the
   "QA Actions::Add checklist item" menu item when you want to add a comment
   that the standard checklist does not support.
-* Saving and loading in-progress reviews is now supported.
+* Saving and loading of in-progress reviews is now supported.
 * Output reviews now do textwrap of long lines so GPG signing and submitting
   to bugzilla works better.
 * DTDs are now entered into the system catalog.  XML validation now uses the
@@ -32,8 +28,12 @@ the checklist, thus being much more flexible in what can now be provided.
 * Some minor bugfixes to the python build process.
 * Fix output entry when the output contains angle brackets "<>"
 
-0.3
-===
+The save and checklist formats used in this release are not permanent.
+Talks with Erik LaBianca are expected to lead to a new combined format
+that will allow embedding tests for items within the checklist.
+
+Version 0.3
+===========
 This release is largely an infrastructure and cosmetic enhancement.  The
 program now has a build and install process and there was some work to
 make the current resolution to a checklist item more apparent at a glance.
@@ -56,8 +56,8 @@ from editing the output.
 * Website and downloads moved to sourceforge.
   http://sourceforge.net/projects/qa-assistant
 
-0.2
-===
+Version 0.2
+===========
 This version concentrates on tidying up usability problems in the first
 release.  Tooltip-like help for checklist items and loading SRPMS from the
 menu are the major enhancements.
@@ -71,8 +71,8 @@ menu are the major enhancements.
 * Move hashes to top of review in anticipation of fedora-startqa format
 * Better handling of errors on loading SRPMs
 
-0.1
-===
+Version 0.1
+===========
 Initial Release
 
 * Extensible via an XML checklist definition

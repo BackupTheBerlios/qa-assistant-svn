@@ -5,6 +5,12 @@ QA Assistant
 Gnome Quality Assurance checklist
 =================================
 
+:Author: Toshio Kuratomi
+:Contact: toshio[AT]tiki-lounge.com
+:Date: $Date$
+
+..contents:
+
 QA Assistant is a Gnome-Python application that assists a reviewer in
 performing Quality Assurance.  It displays a checklist that the reviewer fills
 in.  When the checklist is filled, the application outputs a review to a file
@@ -17,7 +23,6 @@ Quick Install
   $ cd qa-assistant-VERSION
   $ ./configure
   $ make
-  $ python qa-assistant	[OPTIONAL: to test qa-assistant]
   $ su
   Password:
   # make install
@@ -25,48 +30,40 @@ Quick Install
   $ qa-assistant
 
 Features
-========
+--------
 * Graphical GNOME Checklist Application
 * Uses an XML definition of it's checklist for extensibility
 * Current checklist targets Fedora.us/Fedora Extras Quality Assurance Process
   for verifying SRPM Packages
 * A few automated tasks associated with SRPM QA
+* Outputs a review suitable for publishing on fedora.us
+* Adding of custom checklist items to a review
+* Save and load functions
+* Informational popup tips for filling in the checklist
 
 Requirements
 ============
 * python 2.2 (2.3 is now the development platform.  Conditional code to use
-  python 2.2 is present and needs testing.)
+  python 2.2 is present but needs testing.)
 * python bindings for libxml2
-* pygnome and pygtk version 2.2.0 or higher.
+* pygtk version 2.2.0 or higher.
+* pygnome version 2.0.0 or higher.
 * python-rpm
 * Unix system to run on
 
 The current code includes a checklist that works with the Quality Assurance
 process of Fedora.us, the contributed packages section of the Fedora Linux
-Distribution.  As the code matures, more attention will be focused on
+Distribution.  As the code matures, more attention will be given to
 creating modules for other QA situations.
 
-QA Assistant is currently usable.  It has a GUI, working checklist for the
-Fedora Extras Project, save and load functionality, adding arbitrary items,
-and can output a review.  Still to be worked on are an
-interface to bugzilla (reading information from a ticket and submitting
-output to a ticket), associating the checklist with a set of actions the
-program can perform automatically, using GConf2 for preferences, a new
-display widget that allows editing of the review, and checklists for other
-Quality Assurance situations.
-
-From version 0.3 on, qa-assistant is being hosted at sourceforge:
+qa-assistant is hosted at sourceforge::
   http://sourceforge.net/projects/qa-assistant
 
-subversion repository is currently offline until Verizon upgrades the DSL
-line at my new house.  When that happens it will be available at:
+Until sourceforge hosts subversion repositories the development source code
+is available from my home system::
   http://springer.homelinux.com:8080/svn/fedora/qa-assistant/trunk
-Command line:
-  svn co http://springer.homelinux.com:8080/svn/fedora/qa-assistant/trunk qa-assistant
 
-The only currently implemented checklist is one to aid in QA of SRPMS for
-the Fedora Linux Project:
-  http://www.fedora.us
-
-A link to the checklist on which this implemention is based:
-  http://www.fedora.us/wiki/QAChecklist
+The currently implemented checklist is to aid Quality Assurance of SRPMS for
+the Fedora Extras Project::
+  http://www.fedora.us -- The Project Home Page.
+  http://www.fedora.us/wiki/QAChecklist -- The checklist.
