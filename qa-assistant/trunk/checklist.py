@@ -36,6 +36,7 @@ class CheckList (gtk.TreeStore):
     name -- Checklist's name
     revision -- Revision of the checklist file
     type -- Type of the checklist file
+    resolution -- Resolution of the CheckList.
     publicID -- Public identifier for the checklist's XML DTD
     canonicalURL -- Canonical URL for the checklist's XML DT
     entries -- Mapping of names to iters of checklist entries
@@ -61,6 +62,11 @@ class CheckList (gtk.TreeStore):
                     use for it.  (Currently saved in the savefile.  Need to
                     remove.)
     
+    * Note: Some attributes should be gproperties.  However, there is a problem
+    currently with gproperties and the initialization of gtk.TreeStore classes.
+    Have to make them simple python attibutes for now and create our own
+    signals instead of using gproperties with the notify signal.
+
     The CheckList class is a subclass of gtk.TreeModel and has all the methods
     that the gtk.TreeModel class has for manipulating the data it save.  It
     overrides the constructor to make a much more directed model that
@@ -132,6 +138,7 @@ class CheckList (gtk.TreeStore):
         Creates a new CheckList.
         '''
         self.filename = path
+        self.resolution = 'Needs-Reviewing'
         self.functions = []
         self.properties = {}
         self.customItemsIter = None
@@ -173,7 +180,6 @@ class CheckList (gtk.TreeStore):
                 gobject.TYPE_PYOBJECT,
                 gobject.TYPE_PYOBJECT,
                 gobject.TYPE_PYOBJECT)
-        #gobject.signal_new('resolution-changed', type(self), )
         base = root.xpathEval2('/checklist/base')
         if base:
             # We are loading a savefile.  Just load the base info.
@@ -259,6 +265,13 @@ class CheckList (gtk.TreeStore):
                 node = node.next
 
         checkFile.freeDoc()
+
+    def do_resolution_changed(self, newValue):
+        ### FIXME: We need to actually process resolution changed requests
+        # here.
+        print "This is a test of the resolution changed signal"
+        print 'The new value is %s' % newValue
+        pass
 
     def add_entry(self, summary, item=None, display=None,
             desc=None, resolution=None, output=None,
@@ -442,7 +455,30 @@ class CheckList (gtk.TreeStore):
             output = ('<span foreground="' + color + '">' +
                     output + '</span>')
         return output
-   
+  
+    def set(self, row, *columnValues):
+        '''Override the base set method to specify special actions if the
+        column is for RESOLUTION.
+        '''
+        # Perform a set to the new data
+        gtk.TreeStore.set(self, row, *columnValues)
+
+        for listIndex in range(0, len(columnValues), 2):
+            if columnValues[listIndex] == RESOLUTION:
+                column = columnValues[listIndex]
+                newValue = columnValues[listIndex+1]
+                # Change the OUTPUT as well
+                outputlist = self.get_value(row, OUTPUTLIST)
+                out = outputlist[newValue]
+                self.set(row, OUTPUT, out)
+
+                ### FIXME: Check GConf2 preferences for auto-display on fail
+                # Auto display to review if it's a fail
+                if newValue == 'Fail' or newValue == 'Non-Blocker':
+                    gtk.TreeStore.set(self, row, self.DISPLAY, True)
+
+                self.check_category_resolution(row, newValue)
+        
     def check_category_resolution(self, changedRow, newValue):
         '''Checks a rows category to see if its status should change.
         
@@ -458,26 +494,8 @@ class CheckList (gtk.TreeStore):
         RESOLUTION.
 
         ### FIXME: Ways to change this function:
-        A) What if I change CheckList to emit a signal when the Resolution
-           changes.  The signal would emit resolution-changed with row
-           and old value.  Then, when CheckView changes the resolution,
-           the checkview can call emit.resolution_changed()
 
-        1) Make it process changes to either entry or category.
-        
-           * Pass in the changedRow and newValue.
-           * It should then start at the first iter at that level of the
-             checklist.
-           * Scan through the resolutions.  Spit back the resolution to change
-             the top level to or None to not change.
-
-             - Changing the category/toplevel resolution will be handled by
-               the calling code? Maybe better to handle that internally as
-               well?
-             - Yes.  so instead of spitting the change back, this code can
-               either figure out which is which and modify or we can write
-               a new public function that calls this one.
-        2) Make it able to resync to the current state of the checklist, not
+        1) Make it able to resync to the current state of the checklist, not
            just on individual entry changes.
 
            * When given no value on newValue, we need to walk the values of
@@ -488,23 +506,16 @@ class CheckList (gtk.TreeStore):
              simplicity or a loss from the lack of shortcuts.  Need to try it
              out and see.
         '''
-        outputlist = self.get_value(changedRow, self.OUTPUTLIST)
-        out = outputlist[newValue]
-        self.set(changedRow, self.OUTPUT, out)
-       
-        ### FIXME: Is this necessary?
-        # Signal that this row has been changed
-        path = self.get_path(changedRow)
-        self.row_changed(path, changedRow)
-
-        # Load category information to check if it needs updating too.
+        # Load category information to check if it needs updating.
         category = self.iter_parent(changedRow)
-        catRes = self.get_value(category, self.RESOLUTION)
-
-        if newValue == 'Fail' or newValue == 'Non-Blocker':
-            ### FIXME: Check GConf2 preferences for auto-display on fail
-            # Auto display to review if it's a fail
-            self.set(changedRow, self.DISPLAY, True)
+        if category:
+            # We are checking through all the entries of a single category
+            catRes = self.get_value(category, self.RESOLUTION)
+            entryIter = self.iter_children(category)
+        else:
+            # We are checking through the categories of a checklist.
+            catRes = self.resolution
+            entryIter = self.get_iter_root()
 
         # Check if the change makes the overall review into a pass or fail
         if newValue == 'Fail':
@@ -516,7 +527,6 @@ class CheckList (gtk.TreeStore):
             if catRes == 'Needs-Reviewing':
                 return
             if catRes != 'Pass':
-                entryIter = self.iter_children(category)
                 while entryIter:
                     nodeRes = self.get_value(entryIter,
                             self.RESOLUTION)
@@ -527,30 +537,21 @@ class CheckList (gtk.TreeStore):
                 newValue == 'Non-Blocker'):
             # Unless another entry is Fail or Needs-Reviewing, change to Pass
             newValue = 'Pass'
-            entryIter = self.iter_children(category)
             while entryIter:
                 nodeRes = self.get_value(entryIter, self.RESOLUTION)
                 if nodeRes == 'Needs-Reviewing':
+                    if catRes == 'Needs-Reviewing':
+                        return
                     newValue = 'Needs-Reviewing'
                 elif nodeRes == 'Fail':
                     return
                 entryIter = self.iter_next(entryIter)
 
-        oldRes = self.get_value(category, self.RESOLUTION)
-        if oldRes == newValue:
-            return
+        if category:
+            self.set(category, RESOLUTION, newValue)
         else:
-            self.set(category, self.RESOLUTION, newValue)
-            ### FIXME: Check whether the overall checklist value has changed
-            # or not.
-            # catIter = treeStore.get_iter_first()
-            #
-            # self.checkRes = 
-
-            ### FIXME: Is this really necessary?
-            path = self.get_path(category)
-            self.row_changed(path, category)
-
+            self.resolution = newValue
+            self.emit('resolution-changed', newValue)
     #
     # Helpers to read a checklist
     #
@@ -699,3 +700,8 @@ sys.exit(4)
         entry.setProp('name', tree.get_value(entryIter, self.SUMMARY))
         descNode = entry.newTextChild(None, 'description',
                 tree.get_value(entryIter, self.DESC))
+
+gobject.signal_new('resolution-changed', CheckList,
+        gobject.SIGNAL_RUN_LAST, gobject.TYPE_BOOLEAN,
+        (gobject.TYPE_STRING,))
+gobject.type_register(CheckList)
