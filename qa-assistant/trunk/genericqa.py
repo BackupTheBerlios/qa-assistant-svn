@@ -120,7 +120,6 @@ class GenericQA(gtk.Menu):
                 res = resEntry.get_history()
                 res = resList[res]
                 output = outputEntry.get_text()
-                output = self.app.checklist.pangoize_output(res, output)
                 outputList[res] = output
 
                 try:

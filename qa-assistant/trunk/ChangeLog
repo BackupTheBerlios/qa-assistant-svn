@@ -1,3 +1,32 @@
+2004-10-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r123    
+    * qa-assistant.schemas: First cut at encoding preferences into a GConf
+      schema.
+    * qareviewer.py: Begin moving the file directories (lastSRPMDir,
+      lastSaveDir, and lastReviewDir into the app instead of the properties.)
+    * PREFERENCES: Expand upon what we're doing with preferences and GConf
+      now that I'm writing the code.
+    * tests/testtreetips.py:
+      - Create treetips with an actual TreeView and TreeModel.
+      - Test reading and setting of all properties.
+    * treetips.py: Slight clarification to the check for a valid view in the 
+      constructor.
+    * Makefile.am: Add the GConf schema.
+    * glade/qa-assistant.strings, glade/qa-asistant.glade:
+      - Begin work on a preferences dialog.
+      - Begin work on a Druid for starting from a new checklist.
+    
+2004-10-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r122    
+    * review.py: Set labels to be selectable so we can use clipboards to copy
+      from them. In the future we'll have to work out editing as well.
+    * BUGS: Move checklist load to Needs Testing.
+    * qareviewer.py, properties.py: Properties is steadily getting eaten away.
+      Remove the need to store the checklist filename there.
+    * qareviewer.py: Code to Cut/copy/paste is now in.
+    * NEWS: Note that cut and paste should now work.
+    * ChangeLog: Update to r121
+    * glade/qa-assistant.glade: Remove the Edit::Clear menu item.  It's a bit
+      ambiguous as to what it means.  Functionality probably already exists.
+    
 2004-10-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r121    
     * review.py:
       - Allow a new Review to be created without specifying a CheckList.

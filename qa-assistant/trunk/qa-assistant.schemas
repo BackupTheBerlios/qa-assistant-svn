@@ -28,17 +28,17 @@
       </locale>
     </schema>
     <schema>
-      <key>/schemas/apps/qa-assistant/auto-display-failed</key>
-      <applyto>/apps/qa-assistant/auto-display-failed</applyto>
+      <key>/schemas/apps/qa-assistant/no-auto-display</key>
+      <applyto>/apps/qa-assistant/no-auto-display</applyto>
       <owner>qa-assistant</owner>
       <type>bool</type>
-      <default>true</default>
+      <default>false</default>
       <locale name="C">
-        <short>Display an item when its result is negative.</short>
+        <short>Do not auto display a negative item.</short>
         <long>
           When an item is reviewed negatively (Fail or Non-Blocker) it
           usually makes sense to display the message in the Review.  Setting
-          this to true allows that to happen.  Setting it to false prevents
+          this to false allows that to happen.  Setting it to true prevents
           that.
         </long>
       </locale>

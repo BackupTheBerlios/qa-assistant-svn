@@ -160,7 +160,8 @@ class Review(gtk.VBox):
             if treeStore.get_value(treeIter, checklist.DISPLAY):
                 key  = (treeStore.get_value(treeIter, checklist.RESOLUTION),
                         lastEntry)
-                value = gtk.Label(treeStore.get_value(treeIter, checklist.OUTPUT))
+                value = gtk.Label(treeStore.get_value(treeIter,
+                    checklist.OUTPUT))
                 value.set_use_markup(True)
                 value.set_line_wrap(True)
                 value.set_selectable(True)
@@ -251,7 +252,8 @@ class Review(gtk.VBox):
             if treeStore.get_value(updateIter, checklist.DISPLAY):
                 key = (res, self.lastEntry)
                 self.entries[summary] = key
-                label = gtk.Label(treeStore.get_value(updateIter, checklist.OUTPUT))
+                label = gtk.Label(treeStore.get_value(updateIter,
+                    checklist.OUTPUT))
                 label.set_use_markup(True)
                 label.set_property('xalign', 0.0)
                 label.set_selectable(True)

@@ -168,7 +168,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         '''
         
         msg = 'Please select "QA Action => From SRPM"\nor "QA Action => From Bugzilla" to start the QA process.'
-        self.properties.lastSRPMDir = os.path.dirname(filename)+'/'
+        self.lastSRPMDir = os.path.dirname(filename)+'/'
         try:
             self.properties.load_SRPM(filename)
         except Properties.FileError, message:
@@ -241,9 +241,9 @@ class QAReviewer(gnomeglade.GnomeApp):
     def on_menu_open_activate(self, *extra):
         """Open a saved review"""
         fileSelect = gtk.FileSelection(title='Select the checklist file to load.')
-        if (os.path.isdir(self.properties.lastSaveFileDir) and
-                os.access(self.properties.lastSaveFileDir, os.R_OK|os.X_OK)):
-            fileSelect.set_filename(self.properties.lastSaveFileDir)
+        if (os.path.isdir(self.lastSaveFileDir) and
+                os.access(self.lastSaveFileDir, os.R_OK|os.X_OK)):
+            fileSelect.set_filename(self.lastSaveFileDir)
 
         filename = None
         response = fileSelect.run()
@@ -256,7 +256,7 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         if filename:
             ### FIXME: Check if file exists
-            self.properties.lastSaveFileDir = os.path.dirname(filename)+'/'
+            self.lastSaveFileDir = os.path.dirname(filename)+'/'
             try:
                 newList = CheckList(filename)
             except IOError, msg:
@@ -319,9 +319,9 @@ class QAReviewer(gnomeglade.GnomeApp):
         """Save the current review to a file"""
        
         fileSelect = gtk.FileSelection(title='Select the file to save the review into.')
-        if (os.path.isdir(self.properties.lastSaveFileDir) and
-                os.access(self.properties.lastSaveFileDir, os.R_OK|os.X_OK)):
-            fileSelect.set_filename(self.properties.lastSaveFileDir)
+        if (os.path.isdir(self.lastSaveFileDir) and
+                os.access(self.lastSaveFileDir, os.R_OK|os.X_OK)):
+            fileSelect.set_filename(self.lastSaveFileDir)
 
         filename = None
         response = fileSelect.run()
@@ -335,7 +335,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         if filename:
             ### FIXME: Check if file exists
             # If so, prompt to overwrite
-            self.properties.lastSaveFileDir = os.path.dirname(filename)+'/'
+            self.lastSaveFileDir = os.path.dirname(filename)+'/'
             try:
                 self.checklist.publish(filename)
             except IOError, msg:
@@ -413,9 +413,9 @@ class QAReviewer(gnomeglade.GnomeApp):
         """Open a new review based on the user selected SRPM"""
 
         fileSelect = gtk.FileSelection(title='Select an SRPM to load')
-        if (os.path.isdir(self.properties.lastSRPMDir) and
-                os.access(self.properties.lastSRPMDir, os.R_OK|os.X_OK)):
-            fileSelect.set_filename(self.properties.lastSRPMDir)
+        if (os.path.isdir(self.lastSRPMDir) and
+                os.access(self.lastSRPMDir, os.R_OK|os.X_OK)):
+            fileSelect.set_filename(self.lastSRPMDir)
 
         fileSelect.hide_fileop_buttons()
         filename = None
@@ -428,7 +428,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             del fileSelect
 
         if filename:
-            self.properties.lastSRPMDir = os.path.dirname(filename)+'/'
+            self.lastSRPMDir = os.path.dirname(filename)+'/'
 
             # load the checklist data (Associates itself with checkView)
             self.SRPM_into_properties(filename)
@@ -500,10 +500,9 @@ Relative Priority: Low.  There's too much programming to do for me to spend too 
                 self.clipboard.set_text(selectionText, -1)
 
     def on_menu_paste_activate(self, *extra):
-        '''Copy from tne clipboard into the selection.'''
+        '''Copy from the clipboard into the selection.'''
         entry = self.ReviewerWindow.focus_widget
         if isinstance(entry, gtk.Editable):
-            print entry
             entry.paste_clipboard()
 
     # 

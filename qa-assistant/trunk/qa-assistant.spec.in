@@ -1,6 +1,6 @@
 %define pyver %(%{__python} -c "import sys; print sys.version[:3]")
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
-%-%{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
+%{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
 Name:           qa-assistant
 Version:        @VERSION@
@@ -137,12 +137,11 @@ fi
 %{_datadir}/xml/%{name}
 
 %changelog
+* Sat Oct 16 2004 Toshio Kuratomi <toshio@tiki-lounge.com> - 0:0.4.1-0.fdr.1
+- Update to version 0.4.1
+
 * Sun Aug 8 2004 Toshio Kuratomi <toshio{here}tiki-lounge.com> - 0:0.4-0.fdr.3
 - Substitute macros for file paths in the install/uninstall scriptlets
 
-* Sun Apr 25 2004 Toshio Kuratomi <toshio@tiki-lonuge.com> - 0:0.4-0.fdr.1
-- Fix the desktop file install
-- Add some Requires lines because the python modules don't cascade.
-
-* Tue Apr 20 2004 Toshio Kuratomi <toshio@tiki-lounge.com> - 0:0.3-0.fdr.1
-- Initial release.
+* Tue Apr 20 2004 Toshio Kuratomi <toshio[in]tiki-lounge.com> - 0:0.4-0.fdr.2
+- Initial Fedora Release.

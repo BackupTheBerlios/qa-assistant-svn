@@ -49,6 +49,7 @@ Requirements
   python 2.2 is present but needs testing.)
 * python bindings for libxml2
 * pygtk version 2.2.0 or higher.
+* pygnome-gconf 2.0.0 or higher.
 * pygnome version 2.0.0 or higher.
 * python-rpm
 * Unix system to run on

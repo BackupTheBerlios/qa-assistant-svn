@@ -23,7 +23,7 @@ visible but not end-user visible:
 * Support for automated tests embedded within the XML files.
 * Made the checklist code more generic.  We are no longer so strictly tied to
   Quality Assurance of SRPM files.
-* Cut and paste has been added.
+* Now using gconf for saving preferences.
 
 Version 0.4.1
 =============
@@ -32,6 +32,7 @@ This is a bugfix release.
 * Fix a bug in loading saved checklists that caused the custom category to
   be displayed as an item.
 * Fix for distuninstallcheck which was picking up on the XML catalogs.
+* Cut and paste has been added.
 
 Version 0.4
 ===========

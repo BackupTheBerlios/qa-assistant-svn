@@ -16,27 +16,34 @@ Person
 * Signing identity [s]
 
 Display
-* Automatically display failed reviews [s]
-* Text colours [s]
+* Automatically display failed reviews [s] [c]
+* Text colours [s] [c]
 * Tooltip DESCRIPTION enable/disable [s]
 * Tooltip timeout [s]
 
 Files
 * Directory to unrpm into [s]
 
+Status Key:
+  [s] In schema
+  [c] Used in Code
+  [d] Settable via preferences dialog
+
 Coding wise we need three things:
 
 1) We need to write the gconf schema file describing the keys.
 
-2) We need to have a dialog box that has entries for all the properties.
-   This can be a glade dialog as the box should be the same for all checklists.
-   The dialog needs to take input about all the preferences listed here.
-   [preferences.py]
-
-3) When the submit button is pressed, put the information into the gconf
-   database and change the effect of the values on the program.
-
-   * Colors: When initially creating the checklist, we need to create
+  * Need to take a look at other schemas and decide how to structure the
+    keys.  Right now it's a flat structure.  We need to think about a hierarchy
+    that makes sense.
+  
+2) Write code to make use of the values.
+  * Where should the GConfClient reside?  If each place that uses it has a
+    copy, it's wasteful but modular.  OTOH, gconf.client_get_default() doesn't
+    seem to create a new client, just get a reference to a main gconf client.
+    The app keeps a copy of it, then it needs to pass the client to the other
+    modules somehow. [Going with each module that uses it]
+  * Colors: When initially creating the checklist, we need to create
      properties for the output color states.
      - When the color changes, GConfClient is notified.  When that happens,
        call a function to change the values of the checklist OUTPUT to the new
@@ -46,7 +53,14 @@ Coding wise we need three things:
        DISPLAY, rather than PANGOIZE on entry into the checklist.]  So values
        in OUTPUTLIST are unpangoized.  values in OUTPUT are pangoized.  Values
        in OUTPUT that are changed are entered into OUTPUTLIST and then
-       pangoized.]
+       pangoized.] [check]
+
+3) We need to have a dialog box that has entries for all the properties.
+   This can be a glade dialog as the box should be the same for all checklists.
+   The dialog needs to take input about all the preferences listed here.
+   When the submit button is pressed, put the information into the gconf
+   database and change the effect of the values on the program.
+   [preferences.py]
 
 http://developer.gnome.org/doc/API/2.0/gconf/
 

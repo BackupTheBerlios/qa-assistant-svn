@@ -63,7 +63,7 @@ class TreeTips(gtk.Widget):
             try:
                 treeview.connect('leave-notify-event', self.__tree_leave_notify)
                 treeview.connect('motion-notify-event', self.__tree_motion_notify)
-            except AttributeError, TypeError:
+            except (AttributeError, TypeError):
                 raise TypeError, ('The value of view must be an object that'
                         'implements leave-notify-event and motion-notify-event '
                         'gsignals such as gtk.TreeStore.')
@@ -127,7 +127,7 @@ class TreeTips(gtk.Widget):
             try:
                 value.connect('leave-notify-event', self.__tree_leave_notify)
                 value.connect('motion-notify-event', self.__tree_motion_notify)
-            except AttributeError, TypeError:
+            except (AttributeError, TypeError):
                 raise TypeError, ('The value of view must be an object that'
                         'implements leave-notify-event and motion-notify-event '
                         'gsignals')

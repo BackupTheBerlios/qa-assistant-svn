@@ -97,14 +97,14 @@ class CheckView(gtk.TreeView):
         message about the Pass or Failure state of the reviewed item.  This
         callback takes care of setting the state in the TreeStore.
         ''' 
-        checklist = self.get_model()
-        entryIter = checklist.get_iter(path)
-        value = checklist.get_value(entryIter, checklist.DISPLAY)
+        checkModel = self.get_model()
+        entryIter = checkModel.get_iter(path)
+        value = checkModel.get_value(entryIter, checklist.DISPLAY)
 
         if value:
-            checklist.set(entryIter, checklist.DISPLAY, False)
+            checkModel.set(entryIter, checklist.DISPLAY, False)
         else:
-            checklist.set(entryIter, checklist.DISPLAY, True)
+            checkModel.set(entryIter, checklist.DISPLAY, True)
             
     def output_edited(self, cell, row, newValue):
         '''Change the text of the output string in the checklist.
@@ -117,17 +117,17 @@ class CheckView(gtk.TreeView):
         Callback to handle changes to the row's output string.  We update
         the row in the checklist to have the new value.
         '''
-        cl = self.get_model()
-        rowIter = cl.get_iter_from_string(row)
-        path = cl.get_path(rowIter)  ### FIXME: Do we really need this?
-        name = cl.get_value(rowIter, checklist.RESOLUTION)
-        newValue = cl.pangoize_output(name, newValue)
+        checkModel = self.get_model()
+        rowIter = checkModel.get_iter_from_string(row)
+        res = checkModel.get_value(rowIter, checklist.RESOLUTION)
+        outDict = checkModel.get_value(rowIter, checklist.OUTPUTLIST)
+        outDict[res] = newValue
 
-        outDict = cl.get_value(rowIter, checklist.OUTPUTLIST)
-        outDict[name] = newValue
-        cl.set(rowIter, checklist.OUTPUT, newValue)
+        checkModel.set(rowIter, checklist.OUTPUT, newValue)
+
         ### FIXME: Is the following necessary?
-        cl.row_changed(path, rowIter)
+        path = checkModel.get_path(rowIter)
+        checkModel.row_changed(path, rowIter)
 
     def __translate_option_mode(self, column, cell, model, rowIter):
         '''Translate from header/item value to mode type.

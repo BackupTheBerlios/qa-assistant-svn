@@ -16,10 +16,10 @@ import re
 import libxml2
 import gtk
 import gobject
+import gconf
 
 import error
 
-    
 # TreeStore entries displayed on the screen
 ISITEM=0     # Entry is an item as opposed to category
 DISPLAY=1    # Write the output to the review
@@ -44,9 +44,6 @@ class CheckList (gtk.TreeStore):
     entries -- Mapping of names to iters of checklist entries
     customItemsIter -- gtk.TreeIter pointing to the category we are adding
                        custom items to
-    addPaths -- Dictionay holding paths we're in the process of adding to the
-                tree until we have a key value so we can add it to the
-                `entries` lookup hash
 
     Private Attributes:
     __unspan -- Regex to remove <span> pango tags from a string.  Saved so the
@@ -84,6 +81,9 @@ class CheckList (gtk.TreeStore):
             + formatVersion + '//EN'
     canonicalURL = 'http://qa-assistant.sf.net/dtds/checklist/' \
             + formatVersion + '/checklist.dtd'
+
+    # Prefix for the gconf keys
+    __GCONFPREFIX = '/apps/qa-assistant'
 
     class __Entry:
         '''Private class.  Holds entry information until ready to output.'''
@@ -132,13 +132,25 @@ class CheckList (gtk.TreeStore):
 
         Creates a new CheckList.
         '''
-        self.filename = path
-        self.resolution = 'Needs-Reviewing'
-        self.functions = []
-        self.properties = {}
-        self.customItemsIter = None
-        self.addPaths = {}
+        self.filename = path # Filename of the checklist we're implementing
+        self.resolution = 'Needs-Reviewing' # Resolution of the checklist
+        self.functions = [] # List of functions available on the checklist
+        self.properties = {} # List of properties available on the checklist
+        self.customItemsIter = None # Iter to the custom items category
+        self.colors = {}
         self.__unspan = re.compile(r'([^<]*)(<span[^>]*>)?([^<]*)(</span>)?(.*)')
+        self.colorRE = re.compile('^#[A-Fa-f0-9]{6}$')
+        self.gconfClient = gconf.client_get_default()
+
+        self.gconfClient.add_dir(self.__GCONFPREFIX, gconf.CLIENT_PRELOAD_NONE)
+        self.__init_colors('/pass-color')
+        self.__init_colors('/fail-color')
+        self.__init_colors('/minor-color')
+        self.__init_colors('/notes-color')
+        key = self.__GCONFPREFIX + '/no-auto-display'
+        self.noAutoDisplay = self.gconfClient.get_bool(key)
+        self.gconfClient.notify_add(key, self.__change_auto_display)
+        
         libxml2.registerErrorHandler(self.__no_display_parse_error, None)
         ctxt = libxml2.newParserCtxt()
         try:
@@ -228,13 +240,13 @@ class CheckList (gtk.TreeStore):
         self.entries = {}
         for category in categories:
             newCat = self.append(None)
-            self.set(newCat,
+            gtk.TreeStore.set(self, newCat,
                     ISITEM, False,
                     RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
                     RESOLUTION, 'Needs-Reviewing',
-                    OUTPUT, None,
-                    OUTPUTLIST, {'Needs-Reviewing':None,
-                                 'Pass':None, 'Fail':None},
+                    OUTPUT, '',
+                    OUTPUTLIST, {'Needs-Reviewing': '',
+                                 'Pass': '', 'Fail': ''},
                     SUMMARY, category.prop('name'),
                     TEST, None)
             self.entries[category.prop('name').lower()] = newCat
@@ -245,11 +257,11 @@ class CheckList (gtk.TreeStore):
                 if node.name == 'description':
                     # Set DESCRIPTION of the heading
                     desc = string.join(string.split(node.content))
-                    self.set(newCat, DESC, desc)
+                    gtk.TreeStore.set(self, newCat, DESC, desc)
                 elif node.name == 'entry':
                     entry = self.__xml_to_entry(node)
                     entryIter=self.append(newCat)
-                    self.set(entryIter,
+                    gtk.TreeStore.set(self, entryIter,
                             ISITEM, True,
                             DISPLAY, entry.display,
                             SUMMARY, entry.name,
@@ -262,17 +274,19 @@ class CheckList (gtk.TreeStore):
                     resolutionList=['Needs-Reviewing']
                     for i in range(len(entry.states)):
                         name = entry.states[i]['name']
-                        output = self.pangoize_output(name,
-                                entry.states[i]['output'])
-                        outputList[name] = output
+                        # Order is important: We pangoize as things enter
+                        # OUTPUT, not OUTPUTLIST.
+                        outputList[name] = entry.states[i]['output']
                         if name != 'Needs-Reviewing':
                             resolutionList.append(entry.states[i]['name'])
-                        
-                    self.set(entryIter,
+                    
+                    res = entry.state
+                    gtk.TreeStore.set(self, entryIter,
                             RESLIST, resolutionList,
                             OUTPUTLIST, outputList,
-                            RESOLUTION, entry.state,
-                            OUTPUT, outputList[entry.state])
+                            RESOLUTION, res,
+                            OUTPUT, self.pangoize_output(res,
+                                outputList[res]))
                 else:
                     # DTD validation should make this ignorable.
                     pass
@@ -315,7 +329,7 @@ class CheckList (gtk.TreeStore):
     def do_resolution_changed(self, newValue):
         ### FIXME: We need to actually process resolution changed requests
         # here.
-        print 'The new resolution is %s' % newValue
+        # Hmmm... But maybe we don't.  What is there left to be done?
         pass
 
     def add_entry(self, summary, item=None, display=None,
@@ -377,9 +391,9 @@ class CheckList (gtk.TreeStore):
                         ISITEM, False,
                         RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
                         RESOLUTION, 'Needs-Reviewing',
-                        OUTPUT, None,
-                        OUTPUTLIST, {'Needs-Reviewing':None,
-                                     'Pass':None, 'Fail':None},
+                        OUTPUT, '',
+                        OUTPUTLIST, {'Needs-Reviewing': '',
+                                     'Pass': '', 'Fail': ''},
                         DESC, "Review items that you have comments on even " \
                               "though they aren't on the standard checklist.",
                         TEST, None)
@@ -494,18 +508,14 @@ class CheckList (gtk.TreeStore):
         output = string.replace(output, '<', '&lt;')
         output = string.replace(output, '>', '&gt;')
 
-        ### FIXME: Get the *Colors from gconf
-        failColor = 'red'
-        minorColor = 'purple'
-        passColor = 'dark green'
         if resolution == 'Fail':
-            color = failColor
-        elif resolution == 'Non-Blocker' or resolution == 'Needs-Reviewing':
-            color = minorColor
+            color = self.colors['/fail-color']
+        elif resolution == 'Non-Blocker':
+            color = self.colors['/minor-color']
         elif resolution == 'Pass':
-            color = passColor
+            color = self.colors['/pass-color']
         else:
-            color = None
+            color = self.colors['/notes-color']
         if color:
             output = ('<span foreground="' + color + '">' +
                     output + '</span>')
@@ -515,25 +525,116 @@ class CheckList (gtk.TreeStore):
         '''Override the base set method to specify special actions if the
         column is for RESOLUTION.
         '''
-        # Perform a set to the new data
-        gtk.TreeStore.set(self, row, *columnValues)
-
+        newValues = []
         for listIndex in range(0, len(columnValues), 2):
             if columnValues[listIndex] == RESOLUTION:
-                column = columnValues[listIndex]
-                newValue = columnValues[listIndex+1]
+                res = columnValues[listIndex+1]
                 # Change the OUTPUT as well
                 outputlist = self.get_value(row, OUTPUTLIST)
-                out = outputlist[newValue]
-                self.set(row, OUTPUT, out)
+                gtk.TreeStore.set(self, row,
+                        OUTPUT, self.pangoize_output(res, outputlist[res]),
+                        RESOLUTION, res)
 
-                ### FIXME: Check GConf2 preferences for auto-display on fail
                 # Auto display to review if it's a fail
-                if newValue == 'Fail' or newValue == 'Non-Blocker':
+                if not self.noAutoDisplay and (res == 'Fail' or
+                        res == 'Non-Blocker'):
                     gtk.TreeStore.set(self, row, DISPLAY, True)
 
-                self.__check_resolution(row, newValue)
+                self.__check_resolution(row, res)
+            elif columnValues[listIndex] == OUTPUT:
+                out = columnValues[listIndex+1]
+                out = self.pangoize_output(
+                        self.get_value(row, RESOLUTION), out)
+                newValues.extend((columnValues[listIndex], out))
+            else:
+                newValues.extend((columnValues[listIndex],
+                    columnValues[listIndex+1]))
+ 
+        # Set the new data
+        gtk.TreeStore.set(self, row, *newValues)
+
+    #
+    # Helpers to manage display of the checklist
+    #
+    
+    def __change_auto_display(self, client, connectID, entry, extra):
+        '''Changes whether we auto-display the review when it is negative.
+
+        :client: gconf client the change occurred on.
+        :connectID: id for the gconf connection.
+        :entry: gconf entry that has been changed.
+        :extra: user data.  None taken.
+        '''
+        if entry.value and entry.value.type == gconf.VALUE_BOOL:
+            self.noAutoDisplay = entry.value.get_bool()
+        else:
+            self.noAutoDisplay = False
         
+    def __init_colors(self, colorKey):
+        '''Initialize the colors from GConf.
+
+        Arguments:
+        :colorKey: gconf key for the color minus the application prefix.
+
+        Initializes the colors for displaying the checklist from gconf into
+        our private variables.
+        '''
+        key = self.__GCONFPREFIX + colorKey
+        self.gconfClient.notify_add(key, self.__color_changed, colorKey)
+        color = self.gconfClient.get_string(key)
+        if color and self.colorRE.match(color):
+            self.colors[colorKey] = color
+        else:
+            self.colors[colorKey] = '#000000'
+
+    def __color_changed(self, client, connectID, entry, colorKey):
+        '''Changes a color when it is changed in GConf.
+
+        :client: gconf client the change occurred on.
+        :connectID: id for the gconf connection.
+        :entry: gconf entry that has been changed.
+        :colorKey: which color we're saving into.
+        '''
+        self.colors[colorKey] = '#000000'
+        if entry.value and entry.value.type == gconf.VALUE_STRING:
+            color = entry.value.get_string()
+            if self.colorRE.match(color):
+                self.colors[colorKey] = color
+        if colorKey == '/fail-color':
+            resChanged = 'Fail'
+        elif colorKey == '/pass-color':
+            resChanged = 'Pass'
+        elif colorKey == '/minor-color':
+            resChanged = 'Non-Blocker'
+        else:
+            resChanged = 'Needs-Reviewing'
+        self.foreach(self.__change_color, resChanged)
+
+    def __change_color(self, model, path, treeIter, resChanged):
+        '''Changes the color of an output string.
+
+        :model: Tree model we're operating on.
+        :path: Path to the row we're operating on
+        :treeIter: Iter pointing to the row we're operating on.
+        :resChanged: New resolution.
+
+        This function is meant to be called from a gtk.TreeModel.foreach.
+        '''
+        res = model.get_value(treeIter, RESOLUTION)
+        if res == resChanged:
+            outList = model.get_value(treeIter, OUTPUTLIST)
+            out = outList[res]
+            if out:
+                out = self.pangoize_output(res, out)
+                gtk.TreeStore.set(model, treeIter, OUTPUT, out)
+            return False
+        elif resChanged == 'Needs-Reviewing' and res == 'Not-Applicable':
+            outList = model.get_value(treeIter, OUTPUTLIST)
+            out = outList[res]
+            if out:
+                out = self.pangoize_output(res, out)
+                gtk.TreeStore.set(model, treeIter, OUTPUT, out)
+
     def __check_resolution(self, changedRow, newValue):
         '''Checks whether to change a category's resolution.
         
@@ -716,8 +817,6 @@ sys.exit(4)
             states = entry.newChild(None, 'states', None)
             for res in resolutions:
                 content = outputs[res]
-                if content:
-                    content = self.unpangoize_output(content)
                 state = states.newTextChild(None, 'state', content)
                 state.setProp('name', res)
                 
