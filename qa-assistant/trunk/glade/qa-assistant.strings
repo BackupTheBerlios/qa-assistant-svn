@@ -5,10 +5,7 @@
  */
 
 gchar *s = N_("QA Assistant");
-gchar *s = N_("Start a review from an SRPM");
-gchar *s = N_("From _SRPM");
-gchar *s = N_("Start a review from a Bugzilla Entry");
-gchar *s = N_("From Bug_zilla");
+gchar *s = N_("_New");
 gchar *s = N_("Actions associated with this checklist");
 gchar *s = N_("QA _Actions");
 gchar *s = N_("_Toggle Preview");
@@ -16,8 +13,6 @@ gchar *s = N_("_Contents");
 gchar *s = N_("Create a new QA report");
 gchar *s = N_("Open an existing QA report");
 gchar *s = N_("Save your QA report");
-gchar *s = N_("Please select 'QA Actions => From SRPM'\n"
-              "or 'QA Actions => From Bugzilla' to get started");
 gchar *s = N_("© 2004 Toshio Kuratomi");
 gchar *s = N_("A tool to help write QA reviews of RPM Packaged Contributed Software");
 gchar *s = N_("Not Yet Implemented");
@@ -30,7 +25,4 @@ gchar *s = N_("*");
 gchar *s = N_("Report Number");
 gchar *s = N_("Enter a buzilla report number to ");
 gchar *s = N_("*");
-gchar *s = N_("QA Assistant Druid");
-gchar *s = N_("Start a New QA QA Review");
-gchar *s = N_("QA Assistant uses the consept of filling out a checklist to approach th e creation of a QA Report.  This Druid will walk you through the process of starting a new QA Review using QA Assistant's checklists.");
 gchar *s = N_("QA Assistant Preferences");

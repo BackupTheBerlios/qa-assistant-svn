@@ -134,3 +134,31 @@ Relative Priority: Publish will be the primary submission for now.  This is an e
         # should be caught by a signal.connect in the Review Widget.
         # Moving it into the checklist
         #self.reviewView.update_hash()
+
+    def __check_readiness(self):
+        """Checks whether an SRPM is loaded or not.
+
+        This should be called everytime property.SRPM changes.
+        """
+        
+        if self.properties.SRPM:
+            SRPMName = os.path.basename(self.properties.SRPM.filename)
+            self.mainWinAppBar.pop()
+            self.mainWinAppBar.push(SRPMName)
+            self.ReviewerWindow.set_title(HUMANPROGRAMNAME + ' - ' +
+                    SRPMName)
+            self.startLabel.hide()
+            self.listPane.show()
+            self.grabBar.show()
+            if self.grabArrow.get_property('arrow-type') == gtk.ARROW_RIGHT:
+                self.reviewScroll.show()
+        else:
+            if self.grabArrow.get_property('arrow-type') == gtk.ARROW_RIGHT:
+                self.reviewScroll.hide()
+            self.grabBar.hide()
+            self.listPane.hide()
+            self.startLabel.show()
+            self.ReviewerWindow.set_title(HUMANPROGRAMNAME)
+            self.mainWinAppBar.pop()
+            self.mainWinAppBar.push("No SRPM selected")
+

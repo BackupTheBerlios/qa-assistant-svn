@@ -137,8 +137,8 @@ class TreeTips(gtk.Widget):
             raise AttributeError, 'unknown or read only property %s' % prop.name
 
     def __paint_window(self, window, event):
-        self.tip_window.style.paint_flat_box(self.tip_window.window,
-                gtk.STATE_NORMAL, gtk.SHADOW_OUT, None, self.tip_window,
+        window.style.paint_flat_box(window.window, gtk.STATE_NORMAL,
+                gtk.SHADOW_OUT, None, window,
                 'tooltip', 0, 0, -1, -1)
         
     def __tree_leave_notify(self, tree, event):

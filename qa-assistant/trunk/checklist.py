@@ -156,7 +156,7 @@ class CheckList (gtk.TreeStore):
         except libxml2.treeError:
             raise error.InvalidChecklist('%s was not an XML file' % (path))
 
-        if ctxt.isValid() == False:
+        if not ctxt.isValid():
             raise error.InvalidChecklist('File does not validate against '
                     'the checklist DTD')
 
@@ -228,7 +228,7 @@ class CheckList (gtk.TreeStore):
                             functionType = requireChild.prop('type')
                         requireChild = requireChild.next
                 elif propChild.name == 'value':
-                    value = node.content
+                    value = propChild.content
                 propChild = propChild.next
             # Set the property
             self.properties[p.prop('name')] = self.__Property(p.prop('type'),
@@ -374,9 +374,7 @@ class CheckList (gtk.TreeStore):
         output = output or ''
         desc = desc or None
         resList = resList or ['Needs-Reviewing', 'Pass', 'Fail', 'Non-Blocker', 'Not-Applicable']
-        if outputList:
-            outputList = outputList
-        else:
+        if not outputList:
             for res in resList:
                 outputList[res] = ''
             outputList[resolution] = output
@@ -441,7 +439,7 @@ class CheckList (gtk.TreeStore):
         root.setProp('revision', str(self.revision))
        
         # Output summary node
-        summary = root.newChild(None, 'summary', self.summary)
+        root.newChild(None, 'summary', self.summary)
 
         # Output base checklist information
         node = root.newTextChild(None, 'base', self.baseFilename)
@@ -463,7 +461,7 @@ class CheckList (gtk.TreeStore):
                 function = require.newTextChild(None, 'function', prop.function)
                 function.setProp('type', prop.functionType)
             if prop.value:
-                value = node.newTextChild(None, 'value', prop.value)
+                node.newTextChild(None, 'value', prop.value)
 
         # Output functions
         functions = root.newChild(None, 'functions', None)
@@ -475,7 +473,7 @@ class CheckList (gtk.TreeStore):
         self.foreach(self.__create_entry, root)
 
         # Write the file
-        doc.saveFormatFileEnc(filename, 'UTF-8', True)
+        doc.saveFormatFileEnc(self.filename, 'UTF-8', True)
         doc.freeDoc()
 
     def unpangoize_output(self, output):
@@ -633,13 +631,13 @@ class CheckList (gtk.TreeStore):
             if out:
                 out = self.pangoize_output(res, out)
                 gtk.TreeStore.set(model, treeIter, OUTPUT, out)
-            return False
         elif resChanged == 'Needs-Reviewing' and res == 'Not-Applicable':
             outList = model.get_value(treeIter, OUTPUTLIST)
             out = outList[res]
             if out:
                 out = self.pangoize_output(res, out)
                 gtk.TreeStore.set(model, treeIter, OUTPUT, out)
+        return False
 
     def __check_resolution(self, changedRow, newValue):
         '''Checks whether to change a category's resolution.
@@ -844,7 +842,7 @@ sys.exit(4)
 
         # Common to both categories and entries:
         entry.setProp('name', tree.get_value(entryIter, SUMMARY))
-        descNode = entry.newTextChild(None, 'description',
+        entry.newTextChild(None, 'description',
                 tree.get_value(entryIter, DESC))
 
 gobject.signal_new('resolution-changed', CheckList,

@@ -79,7 +79,7 @@ class Base(object):
         """
         for item in widgetnames:
             setattr(self,item, [])
-            list = getattr(self,item)
+            widgetList = getattr(self,item)
             i = 0
             while 1:
                 key = "%s%i"%(item,i)
@@ -87,7 +87,7 @@ class Base(object):
                     val = getattr(self, key)
                 except AttributeError:
                     break
-                list.append(val)
+                widgetList.append(val)
                 i += 1
 
 
@@ -222,12 +222,12 @@ class GnomeApp(GtkApp):
             raise Exception("unknown file domain %d" %(fileDomain))
 
         if (attrName != None):
-            dir = self.program.get_property(attrName)
-            if (dir == None):
+            directory = self.program.get_property(attrName)
+            if (directory == None):
                 ### FIXME: Need a less generic exception.
                 raise Exception("Directory properties not set correctly.  Cannot locate application specific files.")
 
-            filename = os.path.join(dir, attrRel, name)
+            filename = os.path.join(directory, attrRel, name)
             if (os.access(filename, os.F_OK | os.R_OK)):
                 fileList.append(filename)
 

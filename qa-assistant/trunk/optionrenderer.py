@@ -9,8 +9,8 @@
 """
 __revision__ = "$Rev$"
 
-import string
-import gtk, gobject
+import gtk
+import gobject
 
 class OptionCellRenderer(gtk.GenericCellRenderer):
     __gproperties__ = {
@@ -37,9 +37,9 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
         self.connect('clicked', self.on_clicked)
         if not hasattr(self, 'optionlist'):
             pylist = ['This', 'is', 'a test']
-            setattr(self, 'optionlist', pylist)
+            self.optionlist = pylist
         if not hasattr(self, 'selectedoption'):
-            setattr(self, 'selectedoption', pylist[0])
+            self.selectedoption = pylist[0]
 
     #def on_changed_property(self, widget, value):
         #setattr(self, 'selectedoption', getattr(self, 'optionlist')[0])
@@ -110,7 +110,7 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
         menu=gtk.Menu()
         item = None
         itemList = []
-        for entry in getattr(self, 'optionlist'):
+        for entry in self.optionlist:
             item = gtk.RadioMenuItem(item, entry)
             if entry == currentOption:
                 item.set_active(True)

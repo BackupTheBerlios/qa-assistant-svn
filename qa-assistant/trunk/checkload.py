@@ -75,17 +75,20 @@ class NewDruid(gtk.Window):
         self.build_end()
 
         if mode == LOAD:
+            self.set_title('QA Assistant - Load a Saved QA Review')
             # Disable going back from loaderPage b/c it's the first page
             self.druidWidget.set_buttons_sensitive(False, True, True, True)
             self.propertiesPage.connect('back', self.disable_back,
                     self.loaderPage)
         elif mode == NEW:
+            self.set_title('QA Assistant - Start a new QA Review')
             # Disable going back from selectorPage b/c it's the first page
             self.druidWidget.set_buttons_sensitive(False, True, True, True)
             self.propertiesPage.connect('back', self.disable_back,
                     self.selectorPage)
         else:
-            # coming back from propertiesPage has to determine whether it came
+            self.set_title('QA Assistant - Starting a QA Review')
+            # Coming back from propertiesPage has to determine whether it came
             # from selectorPage or loadPage.
             self.propertiesPage.connect('back', self.properties_back)
 
@@ -240,6 +243,12 @@ class NewDruid(gtk.Window):
         '''
         propertiesPage = gnome.ui.DruidPageStandard()
         self.propertiesPage =  propertiesPage
+        propertiesPage.set_title('Set Checklist Properties')
+        propertiesPage.set_logo(self.logo)
+        
+        propertiesPage.append_item('Eventually setting of required checklist'
+                ' properties will go here.  Currently, properties are not'
+                ' handled at all within the program.', gtk.Label(), '')
       
         self.druidWidget.add(propertiesPage)
         # The main part of the page is built at runtime because we need to
@@ -342,9 +351,9 @@ class NewDruid(gtk.Window):
         :druid: Druid widget.
         '''
         (model, selectedRow) = self.selectorSelection.get_selected()
-        ### FIXME: Be sure that selectedRow is a valid iter.... otherwise
-        # we have the case where the user did not select a file
         try:
+            if not selectedRow:
+                raise error.InvalidChecklist, 'No checklist file was selected.'
             self.newList = CheckList(model.get_value(selectedRow,
                 self.__FILENAME))
         except error.InvalidChecklist, ex_instance:
@@ -353,13 +362,12 @@ class NewDruid(gtk.Window):
                     gtk.MESSAGE_WARNING,
                     gtk.BUTTONS_CLOSE,
                     'We were unable to load the specified file.'
-                    ' The error given was:\n' + ex_instance.msg +
+                    ' The following error given was:\n' + ex_instance.msg +
                     '\n\nPlease select another file.')
             errorDialog.set_title('Unable to load file')
             errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
             response = errorDialog.run()
             errorDialog.destroy()
-            #self.browseEntry.set_text('')
             druid.set_page(page)
             return True
 

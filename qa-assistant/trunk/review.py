@@ -8,7 +8,7 @@
 """
 __revision__ = "$Rev$"
 
-import gtk, gobject
+import gtk
 import checklist
 
 try:
@@ -139,8 +139,8 @@ class Review(gtk.VBox):
         self.displayList = {} # res/entry order -> gtk.Label()
         lastEntry = 0
         summaries = treeStore.entries.keys()
-        for sum in summaries:
-            treeIter = treeStore.entries[sum]
+        for summary in summaries:
+            treeIter = treeStore.entries[summary]
             if treeStore.get_value(treeIter, checklist.DISPLAY):
                 key  = (treeStore.get_value(treeIter, checklist.RESOLUTION),
                         lastEntry)
@@ -151,7 +151,7 @@ class Review(gtk.VBox):
                 value.set_selectable(True)
                 value.set_property('xalign', 0.0)
                 self.displayList[key] = value
-                self.entries[sum] = key
+                self.entries[summary] = key
                 lastEntry += 1
 
         self.lastEntry = lastEntry

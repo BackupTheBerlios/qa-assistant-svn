@@ -76,10 +76,6 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         self.reviewScroll.hide()
 
-        ### FIXME: Get rid of startlabel altogether when we have Druid support.
-        self.startLabel.set_text(
-                'Please select File::New or File::Load to begin.')
-        
         # Create our Clipboard
         self.clipboard = gtk.Clipboard(gtk.gdk.display_get_default(),
                 'CLIPBOARD')
@@ -191,33 +187,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.checkView.show()
 
 
-    def __check_readiness(self):
-        """Checks whether an SRPM is loaded or not.
-
-        This should be called everytime property.SRPM changes.
-        """
-        
-        if self.properties.SRPM:
-            SRPMName = os.path.basename(self.properties.SRPM.filename)
-            self.mainWinAppBar.pop()
-            self.mainWinAppBar.push(SRPMName)
-            self.ReviewerWindow.set_title(HUMANPROGRAMNAME + ' - ' +
-                    SRPMName)
-            self.startLabel.hide()
-            self.listPane.show()
-            self.grabBar.show()
-            if self.grabArrow.get_property('arrow-type') == gtk.ARROW_RIGHT:
-                self.reviewScroll.show()
-        else:
-            if self.grabArrow.get_property('arrow-type') == gtk.ARROW_RIGHT:
-                self.reviewScroll.hide()
-            self.grabBar.hide()
-            self.listPane.hide()
-            self.startLabel.show()
-            self.ReviewerWindow.set_title(HUMANPROGRAMNAME)
-            self.mainWinAppBar.pop()
-            self.mainWinAppBar.push("No SRPM selected")
-
     #
     # Menu/Toolbar callbacks
     #
@@ -236,14 +205,19 @@ class QAReviewer(gnomeglade.GnomeApp):
         if self.checklist.filename:
             try:
                 self.checklist.publish()
-            except IOError, msg:
-                print "We were unable to save for some reason."
-                ### FIXME: MSG Dialog that we were unable to save this file
-
-                pass
-
+            except IOError, ex:
+                errorDialog = gtk.MessageDialog(self.ReviewerWindow,
+                        gtk.DIALOG_DESTROY_WITH_PARENT,
+                        gtk.MESSAGE_WARNING,
+                        gtk.BUTTONS_CLOSE,
+                        'We were unable to save the review to the file you'
+                        ' specified.  The error was:\n' + ex.msg +
+                        '\n\nPlease select again.')
+                errorDialog.set_title('Unable to save review')
+                errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
+                response = errorDialog.run()
+                errorDialog.destroy()
         else:
-
             self.on_menu_save_as_activate(extra)
         
     def on_menu_save_as_activate(self, *extra):
@@ -269,10 +243,18 @@ class QAReviewer(gnomeglade.GnomeApp):
             self.lastSaveFileDir = os.path.dirname(filename)+'/'
             try:
                 self.checklist.publish(filename)
-            except IOError, msg:
-                ### FIXME: MSG Dialog that we were unable to save the file
-                ### FIXME: Check for checklist exceptions
-                pass
+            except IOError, ex:
+                errorDialog = gtk.MessageDialog(self.ReviewerWindow,
+                        gtk.DIALOG_DESTROY_WITH_PARENT,
+                        gtk.MESSAGE_WARNING,
+                        gtk.BUTTONS_CLOSE,
+                        'We were unable to save the review to the file you'
+                        ' specified.  The error was:\n' + ex.msg +
+                        '\n\nPlease select again.')
+                errorDialog.set_title('Unable to save review')
+                errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
+                response = errorDialog.run()
+                errorDialog.destroy()
                 
     def on_menu_quit_activate(self, *extra):
         """End the program.

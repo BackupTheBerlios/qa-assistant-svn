@@ -103,7 +103,7 @@ class CheckView(gtk.TreeView):
         self.get_model().set(changedRow, checklist.RESOLUTION, newValue)
        
     def display_toggle(self, cell, path, *data):
-        '''Toggles outputting a message for the review.
+        '''Toggles outputing a message for the review.
 
         Arguments:
         cell -- displayed cell we were called on

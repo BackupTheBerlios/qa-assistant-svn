@@ -1,3 +1,72 @@
+2004-11-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r134    
+    * checklist.py:
+      - Change long lines of strings to not use the '\' character as strings
+        can simply merge after they've spanned a line.
+      - Add read and write for summary information.
+    * qareviewer.py:
+      - Make sure all instantiations of the druid also show() it.
+      - Write a new on_menu_new_activate() handler to use the druid to load a
+        new checklist.  Willl have to work on glade files as well.
+      - Simplify on_menu_open_activate() down to a call to the druid as the
+        rest of the logic is now part of the druid.
+      - Point on_toolbar_new_activate() at the menu equivalent instead of
+        popping up a new1_menu.  need to remove that menu from glade as well.
+    * error.py: Use a call to Exception's __init__() to create the self.args
+      tuple.
+    * checkload.py:
+      - Remove gnomeglade import as its not needed.
+      - Private constants for the selector's treeview.
+      - Recode the saving of checklist Filenames in the selector to use full
+        path information.
+      - Move the end page creation into its own build_end() function.
+      - There's now a loader_next() method; set propBackPage there instead of
+        __init__().
+      - Get a reference to the selector's gtk.TreeSelection so we can find out
+        which CheckList file was picked.
+      - New function: finish() that saves the loaded checklist into the app.
+    
+2004-11-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r133    
+    * checklist.py: Comment out do_resolution_changed().  We don't seem to have
+      any use for it yet.
+    * qareviewer.py:
+      - Remove properties as we're nearly done converting to GConf.
+      - Save a reference to the logo pixbuf.
+      - Remove all commandline parsing for now.
+      - Move startlabel initialization into __init__()
+      - Copious notes on implementing the druid.
+      - Call to start the druid on program start.
+      - Remove SRPM_into_properties as this whole thing is getting revamped.
+    * PREFERENCES:
+      - Add Druid info.
+      - Add function info.
+      - Note other things that get set with checklist specific information.
+    * configure.ac: Change the version to 0.4.90.1 -- a development release.
+    * data/checklist.dtd: Add summary tag which briefly describes the purpose
+      of the checklist.
+    * data/fedoraus.xml: Add summary tag.
+    * NEWS: Changed to version 0.4.90.1.  Big note that it's a development
+      release.
+    * error.py: Gave my base Error class an __init__ to place the msg into a
+      standard attribute.
+    * srpmqa.py: Add SRPM_into_properties here.  It is just copied verbatim
+      from qareviewer.py and doesn't do anything useful.  But it may have
+      useful code that we want to hang onto.
+    * README: Note that 0.5 final will require pygtk-2.4.0 rather than 2.2.0
+    * checkload.py: New file that instantiates a Druid to get information
+      from the user for loading new and saved checklists.
+    
+2004-10-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r132    
+    * PREFERENCES: Add a section on Functions.  Functions and properties remain
+      to be architected and then implemented.
+    * tests/test.py: Needed to add the parent directory to the python path to
+      allow makedistcheck to detect the built python files in the builddir
+      rather than the ones in the srcdir.
+    * ChangeLog: Update to (r131)
+    * gnomeglade.py: Update from using the deprecate gtk.mainloop() to
+      gtk.main()
+    * README: Add ReStructuredText markup to list webpages for QA Assistant's
+      requirements.
+    
 2004-10-23 Toshio Kuratomi <toshio@tiki-lounge.com> - r131    
     * qa-assistant.schemas: Rename key: show-checklist-descriptions ->
       disable-checklist-descriptions because gconf returns false when a value

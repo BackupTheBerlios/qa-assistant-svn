@@ -51,6 +51,10 @@ Extra GNOME Functionality:
 ==========================
 * Create preferences infrastructure : check PREFERENCES for ideas.
 * Druid on New
+* Update to pygtk-2.4.
+  - Embed the 2.4 file selector widget in the druid..
+  - Switch to the 2.4 ComboBox Renderer instead of optionrenderer.
+  - Change gobjects to use the new chained calls.
 
 Programming:
 ============
