@@ -47,5 +47,6 @@ AC_SUBST(PYGNOME_LIBS)
 
 AC_OUTPUT([
 Makefile
+tests/Makefile
 qa-assistant.spec
 ])

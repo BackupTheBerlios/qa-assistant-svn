@@ -5,6 +5,7 @@
 # making and distribution of the whole program.
 # $Id$
 
+SUBDIRS = tests
 bin_SCRIPTS = qa-assistant qa-convert
 
 qa-convert: qa-assistant
