@@ -1,3 +1,30 @@
+2004-04-11 Toshio Kuratomi <toshio@tiki-lounge.com> - r43    
+    * qareviewer.py: Add callback to open New Menu from toolbar button
+    * SRPM.py: Bugfix case where a directory with no hashable files is in the
+      way of expanding a new SRPM
+    * glade/qa-assistant.strings, glade/qa-assistant.glade:
+      - Reverse the order of New from SRPM and New from Bugzilla
+      - Add callbacks for toolbar New, Open, and Save
+    * NEWS: Note that the toolbar now has working "New" button
+    
+2004-04-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r42    
+    * properties.py: Fixup SRPM Exception passing
+    * qareviewer.py: Document what we want to do eventually with Security
+      Exceptions from reading in SRPMs.  The infrastructure should all be there
+      now.  Just needs detail work.
+    * SRPM.py:
+      - Fix up Exception handling.  May need more work but I need more code
+        that utilizes the exceptions to see what to do.
+      - Detect errors when trying to read a file that isn't an rpm
+      - Fix __hash_directories crash
+    * data/qa-assistant.glade: Set the startLabel to sensitive so things
+      display in a normal state instead of greyed out.
+    * AUTHORS: New file crediting Stephen Kennedy for gnomeglade.py and
+      Ville Skyttä for rpm2cpio implementation
+    * ChangeLog: Sync to r41
+    * TODO: Check off two items
+    * NEWS: Complete the version 0.2 list of features
+    
 2004-04-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r41    
     * properties.py: 
       - Move SRPM loading into Properties class

@@ -24,21 +24,28 @@ a new display widget that can display and allow editing of the XML format of
 the Review, and general speedups.
 
 Requirements:
-* python 2.2 (2.3 not tested but in planning.)
+* python 2.2 (2.3 not tested.  Code to use python-2.3's features is in
+  the works.)
 * python bindings for libxml2
 * pygnome2 and pygtk2
 * python-rpm
 * Unix system to run on
 
 Features:
-* Graphical GNOME Checklist
+* Graphical GNOME Checklist Application
 * Uses an XML definition of it's checklist for extensibility
 * Current checklist targets Fedora.us/Fedora Extras Quality Assurance Process
   for verifying SRPM Packages
-* Automated tasks associated with SRPM QA
+* A few automated tasks associated with SRPM QA
 
-Source code for version 0.1 available from:
-http://www.tiki-lounge.com/~toshio/software/qa-assistant/qa-assistant-0.1.tar.gz
+Source code for version 0.2 available from:
+http://www.tiki-lounge.com/~toshio/software/qa-assistant/qa-assistant-0.2.tar.gz
+
+subversion repository is available at:
+http://springer.homelinux.com:8080/svn/fedora/qa-assistant/trunk
+Command line:
+svn co http://springer.homelinux.com:8080/svn/fedora/qa-assistant/trunk qa-assistant
+
 Do not attempt to install this version.  Run it directly from the untarred
 directory.
 ./qa-assistant <SRPM>
