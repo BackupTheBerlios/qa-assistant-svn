@@ -10,6 +10,7 @@ __revision__ = "$Rev$"
 
 import gtk
 import gconf
+import gobject
 try:
     import textwrap
 except ImportError:

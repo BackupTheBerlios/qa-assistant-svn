@@ -10,6 +10,7 @@ __revision__ = '$Rev$'
 
 import gtk
 import gconf
+import gobject
 
 from qaconst import *
 from optionrenderer import OptionCellRenderer

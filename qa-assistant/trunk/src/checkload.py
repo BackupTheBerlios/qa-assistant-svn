@@ -426,7 +426,8 @@ class NewDruid(gtk.Window):
     #
     # Other callbacks
     #
-    
+   
+    ### FIXME: This can be replaced with thepygtk-2.4 FileSelector
     def popup_file_selector(self, button):
         '''Open a saved review
         

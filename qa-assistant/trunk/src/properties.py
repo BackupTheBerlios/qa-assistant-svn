@@ -79,7 +79,7 @@ class Properties(dict):
                         'This checklist has no %s Property' % (key))
             attrib.value = value
 
-    def keys(self, sorted=True):
+    def keys(self):
         '''Return a sorted list of keys.
 
         We keep the list of keys in the order that they were entered into the

@@ -220,7 +220,7 @@ class CheckList (gtk.TreeStore):
                             propEntry.functionType = requireChild.prop('type')
                         requireChild = requireChild.next
                 elif propChild.name == 'value':
-                    value = propChild.content
+                    propEntry.value = propChild.content
                 propChild = propChild.next
             # Set the property
             self.properties[p.prop('name')] = propEntry

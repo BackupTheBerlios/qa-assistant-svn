@@ -16,6 +16,7 @@ import sys
 import os
 import libxml2
 import gtk
+import gtk.glade
 import gnome
 
 from qaconst import *
@@ -360,7 +361,8 @@ class QAReviewer(gnomeglade.GnomeApp):
     def on_toolbar_new_activate(self, button, *extra):
         """Popup the menu to select a new review from bugzilla or SRPM"""
         self.on_menu_new_activate()
-        
+       
+    ### FIXME: This is totally broken
     def on_menu_new_srpm_activate(self, *extra):
         """Open a new review based on the user selected SRPM"""
 

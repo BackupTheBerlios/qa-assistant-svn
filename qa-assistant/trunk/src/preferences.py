@@ -8,8 +8,6 @@
 '''
 __revision__ = "$Rev$"
 
-import os
-
 import gtk
 import gconf
 import gobject
