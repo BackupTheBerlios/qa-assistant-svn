@@ -1,0 +1,263 @@
+#! /usr/bin/python -tt
+#
+# File: fedora-qatemplate
+# Author: Toshio Kuratomi <toshio@tiki-lounge.com>
+# Date: 6 Feb, 2004
+# Copyright: Toshio Kuratomi
+# License: GPL
+# Description: Program to automate some of the common, best practices of
+# the Fedora QA Proceedure.
+# Id: $Id$
+"""Generates a Fedora Style QA  template for a package.
+Usage: fedora-qatemplate [OPTIONS] <SRC.RPM>
+    -h
+    --help              This usage message
+    --version           Outputs version and exits
+    --sha1              Use the SHA1 hash to capture file signature
+    --md5               Use the MD5 hash to capture file signature
+    --output=FILE       Sends output to file instead of stdout
+    --discard           Discard the files extracted from the SRC.RPM
+
+    Not yet implemented:
+    --nochecksig        Do not attempt to check the package's signature
+    (Signature checking is not yet implemented)
+    --checklist         Create a template with a checklist of items to check
+                        useful for users new to the QA process
+    
+Invoke fedora-qatemplate with the name of a SRC.RPM to generate a template to
+write a QA report form.  With no options it takes a SRC.RPM and generates a
+template that has MD5 hashes of the src.rpm and the files it contains and
+outputs this to standard out.  Unless the --discard option is given, the
+program extracts the files from the source rpm into a subdirectory of the
+current working directory.
+"""
+
+__programName__ = "fedora-qatemplate"
+__version__ = "0.1"
+__revision__ = "$Revision$"
+
+# 8K block size for now.
+BLOCKSIZE=8192
+
+import sys, os, tempfile, stat
+import sha, md5
+import getopt
+# Requires python-optik w/ python2.2 or python2.3.
+#from optparse import OptionParser
+
+class InvalidCommandError(Exception):
+    """Specifies an unknown option or command.
+   
+    Attributes:
+        command -- the unknown command.
+
+    When an unknown option is given to the program, raise the
+    InvalidCommandError.
+    """
+
+    def __init__(self, command):
+        self.command = command
+    def __str__(self):
+        return self.command
+
+def parse_command_line(args):
+    """Transform command line arguments into symbols we can act upon.
+
+    Keyword -- arguments:
+        args -- Typically, sys.argc.  A tuple of program arguments.
+
+    Take a tuple and parse it for commands and options to the program.
+
+        Returns --  a hash containing the commands from the command line.
+    
+    Keyword -- exceptions:
+        ConflictingCommandsError -- There were commands to generate a new
+            template mixed with commands to submit a finished template.
+        InvalidComandsError -- The command line arguments don't make sense.
+    """
+    
+    try:
+        options, xtraArgs = getopt.getopt(args[1:],
+        'h', ['help', 'version', 'output=', 'sha1', 'md5',
+                'discard', 'checksig', 'checklist'])
+    except getopt.GetoptError, (msg, opt):
+        print opt
+        raise InvalidCommandError(opt)
+
+    argumentMap = {'-h':'help', '--help':'help',
+                    '--version':'version',
+                    '-o':'output', '--output':'output',
+                    '--sha1':'sha1',
+                    '--md5':'md5',
+                    '--discard':'keep',
+                    '--nochecksig':'checksig',
+                    '--checklist':'checklist'}
+    flags={}
+    # Set the input file
+    if len(xtraArgs) == 1:
+        flags["input"]=xtraArgs[0]
+
+    for arg in options:
+        flags[argumentMap[arg[0]]] = arg[1]
+
+    # Set defaults
+    if not flags.has_key('keep'):
+        flags['keep']=True
+    if not flags.has_key('checksig'):
+        flags['checksig']=True
+    if not (flags.has_key('sha1') or flags.has_key('md5')):
+        flags['md5']=True
+    return flags
+
+def hash_file(input, infname, output, hasher):
+    """Cryptographically hash a file and output the info to another file.
+    
+    Keyword -- arguments:
+        input -- An input filehandle
+        infname -- The basename of the input file
+        output -- The output filehandle to write the hash to
+        hasher -- Hash object to use to hash the file
+    """
+
+    chunk=input.read(BLOCKSIZE)
+    while (chunk):
+        hasher.update(chunk)
+        chunk=input.read(BLOCKSIZE)
+    output.write(hasher.hexdigest()+'  '+os.path.basename(infname)+"\n")
+
+def hash_directory(dir, output, hasher):
+    """Cryptographically hash all the files inside a directory.
+    
+    Keyword -- arguments:
+        dir -- Name of the directory to extract files from
+        output -- Output filehandle to write the hash to
+        hasher -- Hash object to use to hash the file
+    """
+    for filename in os.listdir(dir):
+        hash=hasher.copy()
+        srcFile=file(dir+"/"+filename, 'r')
+        hash_file(srcFile, filename, output, hash)
+        del(hash)
+        
+if __name__ == "__main__":
+    try:
+        actions=parse_command_line(sys.argv)
+    except InvalidCommandError, (opt):
+        sys.stderr.write("-"+str(opt)+" is an unrecognized option.  Please run '"+__programName__+" --help'\n")
+        sys.stderr.write("to learn what options I can use.")
+        sys.exit(2)
+
+    # Print help or version information and exit
+    if actions.has_key("help"):
+        print __programName__, "version", __version__
+        print __doc__
+        sys.exit(0)
+    if actions.has_key("version"):
+        print __programName__, "version", __version__
+        sys.exit(0)
+
+    # Set up the file handle for reading
+    if actions.has_key("input"):
+        try:
+            inputFile=file(actions["input"], 'r')
+        except:
+            sys.stderr.write("Unable to read from file "+actions["input"]+"\n")
+            sys.exit(3)
+    else:
+        sys.stderr.write("You must specify a src.rpm to read data from.\n")
+        sys.exit(3)
+
+    # set up file handle for output
+    if actions.has_key("output"):
+        try:
+            outputFile=file(actions["output"], 'w')
+        except:
+            print stderr, "Unable to write to file",actions["output"]
+            sys.exit(4)
+    else:
+        outputFile=sys.stdout
+    
+    # Output the checklist
+    if actions.has_key("checklist"):
+        # Write the fedora QA checklist to the outputfile in some reasonable 
+        # form.  Need to figure out how to put this in so new users can use
+        # it for guidance without creating a mess in the QA Bugzilla.
+        pass
+        
+    # Output the signature checking information
+    if actions["checksig"] == True:
+        # For proper signature on src rpm via fedora-rpmchecksig and rpm -K
+        # If badsig/nosig/badrpm print to screen and exit
+        # If missing_keys, output to file and continue
+        # If good sig, output to file and continue
+        pass
+
+    ### FIXME: Remove the system calls as much as possible
+    ### Possibilities:
+    ###  * reimplement fedora-unrpm here with an option to --unrpm only
+    ###  * looks as though rpm2cpio uses some private interfaces to rpmlib
+    ###    so implementing it within the script may not be practical
+    ###    (or desirable)
+    ###  * Should be able to extract the package name-ver-rel with rpmlib
+    ###    operating on the package headers.
+    rpmCmd=os.popen('rpm -qp --qf "%{NAME}-%{VERSION}-%{RELEASE}" '
+                    +actions["input"], 'r')
+    unpackdir=rpmCmd.readline()
+    rpmCmd.close()
+    if actions["keep"] == True:
+        # Output the directory here
+        os.system("fedora-unrpm "+actions["input"]+"&>/dev/null")
+        tempDirectory=None
+    else:
+        # Output to a temporary directory
+        pyver=sys.version_info
+        if pyver[0] <= 2 and pyver[1] <=2:
+            tempDirectory=tempfile.mktemp()
+            os.mkdir(tempDirectory)
+            os.chmod(tempDirectory, stat.S_IRWXU)
+            if os.listdir(tempDirectory):
+                sys.stderr.write("SECURITY: Somebody changed the directory we were going to write into!!")
+                sys.exit(100)
+        else:
+            # Be more secure with python 2.3 [untested]
+            tempDirectory=mkdtemp()
+        inFileName=os.path.abspath(actions["input"])
+        os.chdir(tempDirectory)
+        os.system("fedora-unrpm "+inFileName+"&>/dev/null")
+        unpackdir=tempDirectory+"/"+unpackdir
+
+    if actions.has_key("sha1"):
+        outputFile.writelines("\nSHA1SUMs:\n")
+        hasher=sha.new()
+        hash_file(inputFile, actions['input'], outputFile, hasher)
+        del(hasher)
+        hasher=sha.new()
+        hash_directory(unpackdir, outputFile, hasher)
+        del(hasher)
+
+    if actions.has_key("md5"):
+        inputFile.seek(0)
+        outputFile.writelines("\nMD5SUMs:\n")
+        hasher=md5.new()
+        hash_file(inputFile, actions['input'], outputFile, hasher)
+        del(hasher)
+        ### Thought:  the rpm stores the md5s.  Can we trust that?
+        ### No.  With a hacked version of rpm, we could store invalid md5s
+        ### in the rpm.  Will rpm2cpio catch this and complain?
+        ### My use case: fedora-rpmchecksig foo.src.rpm
+        ###
+        hasher=md5.new()
+        hash_directory(unpackdir, outputFile, hasher)
+        del(hasher)
+
+    outputFile.close()
+    inputFile.close()
+
+    # Clean up the temporary directory
+    if tempDirectory:
+        for file in os.listdir(unpackdir):
+            os.unlink(unpackdir+'/'+file)
+        os.rmdir(unpackdir)
+        os.rmdir(tempDirectory)
+
+    sys.exit(0)
