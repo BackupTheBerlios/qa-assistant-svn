@@ -136,17 +136,15 @@ class CheckList:
         Returns: an entry data structure.
         """
         entry=self.__Entry()
-        # Set defaults
-        entry.display = False
 
         entry.name = node.prop('name')
+        if node.prop('display') == 'true':
+            entry.display = True
+        else:
+            entry.display = False
+
         fields = node.children
         while fields:
-            if fields.name == 'display':
-                if string.lower(fields.prop('default')) == 'true':
-                    entry.display = True
-                else:
-                    entry.display = False
             if fields.name == 'states':
                 state = fields.children
                 n = 0

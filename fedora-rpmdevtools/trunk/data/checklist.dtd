@@ -10,14 +10,11 @@
       name CDATA #REQUIRED
     >
     <!ELEMENT description (#PCDATA)>
-    <!ELEMENT entry (display?, states, description)>
+    <!ELEMENT entry (states, description)>
       <!ATTLIST entry
         name CDATA #REQUIRED
+	display (true|false) "false"
       >
-      <!ELEMENT display EMPTY>
-        <!ATTLIST display
-          default (true|false) "false"
-        >
       <!ELEMENT states (state+)>
         <!ELEMENT state (#PCDATA)>
           <!ATTLIST state

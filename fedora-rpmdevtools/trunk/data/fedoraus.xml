@@ -6,8 +6,7 @@
       through here, it could lead to malicious code executing on, not just
       your machine, but those of people running the package you
       approved.</description>
-    <entry name='Canonical Source'>
-      <display default='true'/>
+    <entry name='Canonical Source' display='true'>
       <states>
         <state name='Pass'>Source URL is canonical</state>
         <state name='Fail'>Specified Source URL is not canonical</state>
@@ -18,8 +17,7 @@
         source tarball from an unknown entity.  Using google to search for
         canonical home pages is one good way to verify this.</description>
     </entry>
-    <entry name='MD5Sum verified'>
-      <display default='true'/>
+    <entry name='MD5Sum verified' display='true'>
       <states>
         <state name='Pass'>Upstream MD5Sum verified</state>
         <state name='Fail'>Upstream MD5Sum does not match!</state>
@@ -36,7 +34,6 @@
         being introduced to the package.</description>
     </entry>
     <entry name="Install time scriptlet safety">
-      <display default='false' />
       <states>
         <state name='Pass'>Install time scriptlets do not have obvious malicious code.</state>
         <state name='Fail'>Install time scriplet does unsafe things. [REVIEWER please add details]</state>
@@ -53,7 +50,6 @@
       </description>
     </entry>
     <entry name='Upstream GPG Checked'>
-      <display default='false'/>
       <states>
         <state name='Pass'>Good upstream GPG Signature</state>
         <state name='Fail'>Upstream GPG Signatures do not match</state>
@@ -75,7 +71,6 @@
       check first, there's no telling what programs the package author may
       be trying to execute.</description>
     <entry name="Package Naming">
-      <display default="false" />
       <states>
         <state name='Pass'>Package name conforms to the Fedora Naming Guidelines</state>
         <state name='Fail'>Package needs to be renamed to meet the Fedora Naming Guidelines</state>
@@ -88,7 +83,6 @@
         for the gory details.</description>
     </entry>
     <entry name="Install time scriptlet bugs">
-      <display default='false'/>
       <states>
         <state name='Pass'>No bugs found in install time scriptlets</state>
         <state name='Fail'>Install time scriptlet bug! [REVIEWER: Please add details]</state>
@@ -110,7 +104,6 @@
       </description>
     </entry>
     <entry name='Epoch'>
-      <display default='false'/>
       <states>
         <state name='Pass'>Explicit dependencies properly use epoch with version</state>
         <state name='Fail'>An explicit dependency is used without proper epoch/version</state>
@@ -127,7 +120,6 @@
         BuildRequires: foobar &gt;= 0:1.0</description>
     </entry>
     <entry name="BuildRoot">
-      <display default='false'/>
       <states>
         <state name='Pass'>Buildroot has all required elements</state>
         <state name='Fail'>Buildroot lacks certain elements</state>
@@ -144,7 +136,6 @@
     <description>After looking over the spec file, you have to attempt to
       get the package to build, install, and run.</description>
     <entry name="Mandatory BuildRequires">
-      <display default='false' />
       <states>
         <state name='Pass'>All necessary BuildRequires listed.</state>
         <state name='Fail'>Package needs additional BuildRequires: [REVIEWER: Please list]</state>
@@ -169,7 +160,6 @@
         on using mach for more information about this.</description>
     </entry>
     <entry name="Features and BuildRequires">
-      <display default='false' />
       <states>
         <state name='Pass'>All desired features are enabled</state>
         <state name='Fail'>Desirable features need extra BuildRequires: [REVIEWER: Please list]</state>
