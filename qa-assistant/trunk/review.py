@@ -130,6 +130,7 @@ class Review(gtk.VBox):
         self.add(self.noteComments)
 
         self.tree.connect('row-changed', self.__update_data)
+        self.tree.connect('row-inserted', self.__add_data)
         ### FIXME: Need to connect to a signal when the SRPM changes.
         # self.properties.connect('hash-change', self.__update_hash)
 
@@ -188,7 +189,7 @@ class Review(gtk.VBox):
         self.__update_hash(self.properties)
 
     def __update_hash(self, properties):
-        """Updates the hashes label withthe current hashes in the properties"""
+        """Updates the hashes label with the current hashes in the properties"""
         if self.properties.SRPM:
             srpmhash, sourcehashes = self.properties.SRPM.hashes()
             (file, hash) = srpmhash.popitem()
@@ -216,6 +217,14 @@ class Review(gtk.VBox):
             listIter = self.list.iter_next(listIter)
 
         self.__resolution_check()
+
+    def __add_data(self, treeStore, path, iter):
+        """Update the internal list whenever the tree adds a new entry."""
+
+        self.list.append((self.tree.get_value(iter, checklist.SUMMARY),
+                          self.tree.get_value(iter, checklist.DISPLAY),
+                          self.tree.get_value(iter, checklist.RESOLUTION),
+                          self.tree.get_value(iter, checklist.OUTPUT)))
 
     def __generate_data(self):
         """Create the internal list from the present state of tree.

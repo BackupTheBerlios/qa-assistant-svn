@@ -8,6 +8,22 @@
 """
 __revision__ = "$Rev$"
 
+### FIXME: Work some of these into the SRPM QA Process
+# This is what the fedora startqa script does.
+#Give bugzilla #
+#finds URL to SRPM
+#Finds md5sum URL
+#Checks for local SRPM
+#checks md5sum
+#downloads source from spec URL
+#offers you to view spec
+#offers to build the rpm in mach
+#read rpmlint's advice
+#check files in binary package
+#shows you report
+#
+#(Only appears to output a report on PUBLISH, not on NEEDSWORK)
+
 import os
 
 import gtk

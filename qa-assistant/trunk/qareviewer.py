@@ -78,7 +78,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.checkView.append_column(column)
 
         renderer = OptionCellRenderer()
-        column = gtk.TreeViewColumn('pass/fail', renderer,
+        column = gtk.TreeViewColumn('Resolution', renderer,
                                     optionlist=checklist.RESLIST,
                                     selectedoption=checklist.RESOLUTION,
                                     mode=checklist.ISITEM)
@@ -87,7 +87,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.checkView.append_column(column)
        
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Description', renderer,
+        column = gtk.TreeViewColumn('Summary', renderer,
                                     text=checklist.SUMMARY)
         self.checkView.append_column(column)
         
@@ -281,16 +281,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         iter = model.get_iter_from_string(row)
         path = self.checklist.tree.get_path(iter)
         name = self.checklist.tree.get_value(iter, checklist.RESOLUTION)
-        if name == 'Fail':
-            color = self.properties.failColor
-        elif name == 'Non-Blocker' or name == 'Needs-Reviewing':
-            color = self.properties.minorColor
-        elif name == 'Pass':
-            color = self.properties.passColor
-        else:
-            color = None
-        if color:
-            newValue='<span foreground="' + color + '">' + newValue + '</span>'
+        newValue = self.checklist.colorize_output(name, newValue)
 
         outDict = self.checklist.tree.get_value(iter, checklist.OUTPUTLIST)
         outDict[name] = newValue
@@ -318,7 +309,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         category = self.checklist.tree.iter_parent(iter)
         catRes = self.checklist.tree.get_value(category, checklist.RESOLUTION)
 
-        ### FIXME: Should this go in its own function somewhere else?
         if newValue == 'Fail' or newValue == 'Non-Blocker':
             ### FIXME: Check preferences for auto-display on fail
             # Auto display to review if it's a fail
@@ -392,9 +382,10 @@ class QAReviewer(gnomeglade.GnomeApp):
                     gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
                     'You have not checked all items in the checklist so the review is incomplete.  Are you sure you want to submit a review based on the current work?')
             msgDialog.set_title('Incomplete review: submit anyway?')
+            msgDialog.set_default_response(gtk.RESPONSE_NO)
             response = msgDialog.run()
             msgDialog.destroy()
-            if response == gtk.RESPONSE_NO:
+            if response == gtk.RESPONSE_NO or response == gtk.RESPONSE_NONE:
                 return
         
         # File select dialog for use in file selecting callbacks.
@@ -619,6 +610,7 @@ Relative Priority: _Low_.  Developers are going to use this, not end-users so a 
 
         NYI = gtk.glade.XML(gladeFile, 'NYIDialog')
         NYIDialog = NYI.get_widget('NYIDialog')
+        NYIDialog.set_default_response(gtk.RESPONSE_CLOSE)
         NYIDialog.connect('response', lambda dialog, response: dialog.destroy())
         if msg:
             NYIMsg = NYI.get_widget('NYIMsg')

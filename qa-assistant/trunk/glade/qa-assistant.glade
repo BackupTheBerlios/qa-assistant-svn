@@ -217,7 +217,7 @@
 		<widget class="GtkMenuItem" id="QAMenuItem">
 		  <property name="visible">True</property>
 		  <property name="tooltip" translatable="yes">Actions associated with this checklist</property>
-		  <property name="label" translatable="yes">QA A_ctions</property>
+      <property name="label" translatable="yes">QA _Actions</property>
 		  <property name="use_underline">True</property>
 		  <signal name="activate" handler="on_qamenuitem_activate" last_modification_time="Sun, 18 Apr 2004 21:50:18 GMT"/>
 		</widget>

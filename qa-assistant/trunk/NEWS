@@ -4,6 +4,9 @@ QA Assistant -- A checklist reviewer to aid Quality Assurance
 0.4
 ===
 
+* You can now add your own checklist items to a review.  Use the
+  "QA Actions::Add checklist item" menu item when you want to add a comment
+  that the standard checklist does not support.
 * Some minor bugfixes to the python build process.
 
 0.3

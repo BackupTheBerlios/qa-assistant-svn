@@ -12,12 +12,14 @@ import os
 
 import gtk
 
+import checklist
+
 class GenericQA(gtk.Menu):
 
     def __init__(self, app):
         gtk.Menu.__init__(self)
         self.app = app
-        addItem = gtk.MenuItem('Add Checklist _Item')
+        addItem = gtk.MenuItem('Add Check_list Item')
         addItem.connect('activate', self.add_item_to_checklist_callback)
         self.append(addItem)
         
@@ -58,16 +60,115 @@ class GenericQA(gtk.Menu):
             del fileSelect
 
     def add_item_to_checklist_callback(self, callingMenu):
-        """ """
-        # Create a checklist item that has DISPLAY [yes]
-        # RESOLUTION (Needs-Reviewing)
-        # OUTPUT (None)
-        # OUTPUTLIST (all)
-        # RESOLUTIONLIST (all)
-        # If no category "My Items", create
-        # Append new item to My Items.
-        msg = """This item will allow you to add your own checklist item to the current review.  Since the checklist authors could have missed an entry that you know to be wrong with the program, this is desirable.  For instance: "Program does not call my dog:  gdogcaller fails to make my dog come when I run it which is what I assume such a program to do."
+        """Adds a checklist entry to the checklist.
         
-I consider this a must have feature.  QA Assistant cannot be considered complete without this.  However, it is still possible to perform without this and it entails some non-trivial coding so it is a low priority necessity."""
-        self.app.not_yet_implemented(msg)
-        pass
+        Sometimes there's something wrong with a product undergoing QA that
+        isn't on the checklist.  Using this action allows you to add an entry
+        to the checklist you are currently filling out.
+        """
+
+        # Dialog to prompt the user for the information
+        newItemDialog = gtk.Dialog('New checklist item',
+                self.app.ReviewerWindow, 0, ('Add item', gtk.RESPONSE_OK, 
+                    gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+        newItemDialog.set_default_response(gtk.RESPONSE_OK)
+        table = gtk.Table(3, 2, False)
+        table.attach(gtk.Label('Summary:'), 0,1, 0,1)
+        table.attach(gtk.Label('Initial Resolution:'), 0,1, 1,2)
+        table.attach(gtk.Label('Output:'), 0,1, 2,3)
+        summaryEntry = gtk.Entry()
+        resMenu = gtk.Menu()
+        resMenu.append(gtk.MenuItem('Pass'))
+        resMenu.append(gtk.MenuItem('Fail'))
+        resMenu.append(gtk.MenuItem('Non-Blocker'))
+        resEntry = gtk.OptionMenu()
+        resEntry.set_menu(resMenu)
+        resEntry.set_history(1)
+        outputEntry = gtk.Entry()
+        table.attach(summaryEntry, 1,2, 0,1)
+        table.attach(resEntry, 1,2, 1,2)
+        table.attach(outputEntry, 1,2, 2,3)
+        
+        newItemDialog.vbox.add(table)
+        newItemDialog.show_all()
+
+        while 1:
+            response = newItemDialog.run()
+            if response == gtk.RESPONSE_OK:
+                # Check that the summary entry is okay.
+                summary = summaryEntry.get_text().strip()
+                if len(summary) <= 0:
+                    msgDialog = gtk.MessageDialog(self.app.ReviewerWindow,
+                            gtk.DIALOG_DESTROY_WITH_PARENT,
+                            gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                            'You must enter a value for the Summary')
+                    msgDialog.set_title('Invalid summary')
+                    msgDialog.set_default_response(gtk.RESPONSE_CLOSE)
+                    response = msgDialog.run()
+                    msgDialog.destroy()
+                    continue
+                if self.app.checklist.entries.has_key(summary):
+                    msgDialog = gtk.MessageDialog(self.app.ReviewerWindow,
+                            gtk.DIALOG_DESTROY_WITH_PARENT,
+                            gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                            'The Summary must not be the same as any other existing entry.  Please consider renaming the new checklist item or using the existing entry for this review.')
+                    msgDialog.set_title('Invalid summary')
+                    msgDialog.set_default_response(gtk.RESPONSE_CLOSE)
+                    response = msgDialog.run()
+                    msgDialog.destroy()
+                    continue
+
+                res = resEntry.get_history()
+                if res == 0:
+                    res = 'Pass'
+                elif res == 1:
+                    res = 'Fail'
+                elif res == 2:
+                    res = 'Non-Blocker'
+                output = outputEntry.get_text()
+                output = self.app.checklist.colorize_output(res, output)
+                break
+            else:
+                # User decided not to write a new entry
+                newItemDialog.destroy()
+                return
+
+        newItemDialog.destroy()
+        myItemsNode = None
+        iter = self.app.checklist.tree.get_iter_first()
+        while iter:
+            if self.app.checklist.tree.get_value(iter, checklist.SUMMARY) == 'Custom Checklist Items':
+                myItemsNode = iter
+                break
+            iter = self.app.checklist.tree.iter_next(iter)
+
+        if not myItemsNode:
+            # Create the 'Custom Checklist Items' category
+            myItemsNode = self.app.checklist.tree.append(None)
+            self.app.checklist.tree.set(myItemsNode,
+                    checklist.SUMMARY, 'Custom Checklist Items',
+                    checklist.ISITEM, False,
+                    checklist.RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
+                    checklist.RESOLUTION, 'Needs-Reviewing',
+                    checklist.OUTPUT, None,
+                    checklist.OUTPUTLIST, {'Needs-Reviewing':None,
+                                           'Pass':None, 'Fail':None},
+                    checklist.DESC, 'Review items that you have comments on even though they aren\'t on the standard checklist.')
+            
+        newItem = self.app.checklist.tree.append(myItemsNode)
+        resList = ['Needs-Reviewing', 'Pass', 'Fail', 'Non-Blocker', 'Not-Applicable']
+        outputList = {}
+        for name in resList:
+            outputList[name] = None
+        outputList[res] = output
+        self.app.checklist.tree.set(newItem,
+                checklist.DESC, None,
+                checklist.ISITEM, True,
+                checklist.DISPLAY, True,
+                checklist.SUMMARY, summary,
+                checklist.RESOLUTION, res,
+                checklist.OUTPUT, output,
+                checklist.RESLIST, resList,
+                checklist.OUTPUTLIST, outputList)
+        path = self.app.checklist.tree.get_path(newItem)
+        self.app.checklist.tree.row_inserted(path, newItem)

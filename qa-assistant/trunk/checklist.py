@@ -42,8 +42,9 @@ class CheckList:
         """Private class.  Holds entry information until ready to output."""
 
     def __init__(self, path, props):
-        
-        libxml2.registerErrorHandler(self.__noDisplayParseError, None)
+       
+        self.props = props
+        libxml2.registerErrorHandler(self.__no_display_parse_error, None)
         ctxt = libxml2.newParserCtxt()
         checkFile = ctxt.ctxtReadFile(path, None, libxml2.XML_PARSE_DTDVALID)
 
@@ -79,6 +80,7 @@ class CheckList:
 
         # Record each category as a toplevel in the tree
         categories = root.xpathEval2('/checklist/category')
+        self.entries = {}
         for category in categories:
             iter = self.tree.append(None)
             self.tree.set(iter,
@@ -89,6 +91,7 @@ class CheckList:
                           OUTPUTLIST, {'Needs-Reviewing':None, 
                                        'Pass':None, 'Fail':None},
                           SUMMARY, category.prop('name'))
+            self.entries[category.prop('name')] = iter
 
             # Entries are subheadings
             node = category.children
@@ -98,31 +101,22 @@ class CheckList:
                     desc = string.join(string.split(node.content))
                     self.tree.set(iter, DESC, desc)
                 elif node.name == 'entry':
-                    entry = self.__xmlToEntry(node)
+                    entry = self.__xml_to_entry(node)
                     entryIter=self.tree.append(iter)
                     self.tree.set(entryIter,
                                   ISITEM, True,
                                   DISPLAY, entry.display,
                                   SUMMARY, entry.name,
                                   DESC, entry.desc)
+                    self.entries[entry.name] = entryIter
+                    
                     # Construct the resolution from multiple states
                     resolutions={'Needs-Reviewing': None}
                     resolutionList=['Needs-Reviewing']
                     for i in range(len(entry.states)):
                         name = entry.states[i]['name']
-                        output = entry.states[i]['output']
-                        if name == 'Fail':
-                            color = props.failColor
-                        elif name == 'Non-Blocker' or name == 'Needs-Reviewing':
-                            color = props.minorColor
-                        elif name == 'Pass':
-                            color = props.passColor
-                        else:
-                            color = None
-                        if color:
-                            output = ('<span foreground="' + color + '">' +
-                                        output + '</span>')
-
+                        output = self.colorize_output(name,
+                                entry.states[i]['output'])
                         resolutions[name] = output
                         if name != 'Needs-Reviewing':
                             resolutionList.append(entry.states[i]['name'])
@@ -139,12 +133,41 @@ class CheckList:
                 node = node.next
 
         checkFile.freeDoc()
+        # More efficient to do the stuff in this signal handler manually
+        # during setup and only register it afterwards.
+        self.tree.connect('row-inserted', self.__add_to_entry_lookup)
 
-    def __noDisplayParseError(self, ctx, str):
+    def colorize_output(self, resolution, output):
+        """Colorize the output based on the resolution"""
+
+        if resolution == 'Fail':
+            color = self.props.failColor
+        elif resolution == 'Non-Blocker' or resolution == 'Needs-Reviewing':
+            color = self.props.minorColor
+        elif resolution == 'Pass':
+            color = self.props.passColor
+        else:
+            color = None
+        if color:
+            output = ('<span foreground="' + color + '">' +
+                    output + '</span>')
+        return output
+
+    def __add_to_entry_lookup(self, tree, path, iter):
+        """Add checklist item keys to the lookup hash.
+
+        CheckList maintains a lookup hash in self.entries so that users of the
+        CheckList object can search the CheckList by the Summary value.
+        """
+
+        name = tree.get_value(iter, SUMMARY)
+        self.entries[name] = iter
+
+    def __no_display_parse_error(self, ctx, str):
         """Disable Displaying parser errors."""
         pass
 
-    def __xmlToEntry(self, node):
+    def __xml_to_entry(self, node):
         """Converts an entry node from an XML DOM into a python data structure.
 
         Keyword -- arguments:

@@ -81,6 +81,8 @@ class TreeTips(gtk.Widget):
             self.path = pathReturn[0]
             iter = model.get_iter(self.path)
             text = model.get_value(iter, self.column)
+            if not text:
+                return False
             self.label.set_text(text)
             x, y = self.label.size_request()
             self.tipWindow.resize(x, y)
