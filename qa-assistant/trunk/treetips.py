@@ -37,7 +37,7 @@ class TreeTips(gtk.Widget):
         self.label.set_line_wrap(True)
         self.label.set_alignment(0.5, 0.5)
         self.tipWindow.add(self.label)
-        self.timeout = 0
+        self.timeoutID = 0
         self.tree = treeview
         self.column = column
         self.path = None
@@ -54,7 +54,7 @@ class TreeTips(gtk.Widget):
     def __tree_leave_notify(self, tree, event):
         """Hide tooltips when we leave the tree."""
 
-        self.timeout = 0
+        self.timeoutID = 0
         self.path = None
         self.tipWindow.hide()
 

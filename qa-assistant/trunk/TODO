@@ -64,6 +64,7 @@ Programming:
 
 - review.publish needs to do wordwrapping of lines.  Look into whether a
   textBuffer object has the necessary wordwrapping even without a textView.
+  (python's textwrap would do this for publish, not sure about viewing.)
 
 - Prompt before outputting a review when the review is in state
   'Needs Reviewing'

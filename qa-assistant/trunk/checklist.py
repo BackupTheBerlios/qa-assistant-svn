@@ -92,7 +92,8 @@ class CheckList:
             while node:
                 if node.name == 'description':
                     # Set DESCRIPTION of the heading
-                    self.tree.set(iter, DESC, node.content)
+                    desc = string.join(string.split(node.content))
+                    self.tree.set(iter, DESC, desc)
                 elif node.name == 'entry':
                     entry = self.__xmlToEntry(node)
                     entryIter=self.tree.append(iter)
@@ -152,20 +153,10 @@ class CheckList:
                 while state:
                     if state.name == 'state':
                         entry.states.append({'name' : state.prop('name')})
-                        entry.states[n]['output'] = state.content
+                        output = string.join(string.split(state.content))
+                        entry.states[n]['output'] = output
                         if entry.states[n]['output'].strip() == '':
                             entry.states[n]['output'] = entry.name + ': ' + state.prop('name')
-                        ### FIXME: After we decide the output tag is gone for
-                        # good, remove these lines.  We need to decide how to
-                        # take input for output lines that it would make sense
-                        # for first.
-                        #output = state.children
-                        #while output:
-                        #    if output.name == 'output':
-                        #        entry.states[n]['output']=output.content
-                        #    output=output.next
-                        #if not entry.states[n].has_key('output'):
-                        #    entry.states[n]['output'] = entry.name + ': ' + state.prop('name')
                         n+=1
                     else:
                         # DTD validation should catch things that aren't
@@ -173,7 +164,8 @@ class CheckList:
                         pass
                     state=state.next
             elif fields.name == 'description':
-                entry.desc = fields.content
+                desc = string.join(string.split(fields.content))
+                entry.desc = desc
             else:
                 # DTD validation should prevent anything uwated from
                 # ending up here.
