@@ -26,61 +26,14 @@ __revision__ = "$Rev$"
 
 # 8K block size for now.
 BLOCKSIZE=8192
-_checklistFileVersion_='0.1'
 
 import sys
 import libxml2
-import gtk, gobject
+import gtk
 
+import checklist
 import gnomeglade
 
-DISPLAY=0
-RESOLUTION=1
-SUMMARY=2
-OUTPUT=3
-
-class CheckListError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-    def __str__(self):
-        return repr(self.msg)
-
-class CheckList:
-
-    """Holds the data associated with the checklist"""
-
-    def __init__(self, path):
-        
-        checkFile = libxml2.parseFile(path)
-        root = checkFile.children
-        if root.name != 'checklist':
-            raise CheckListError("File is not a valid checklist policy file")
-        if root.prop('version') != _checklistFileVersion_:
-            raise CheckListError("Checklist file is not a known version")
-        
-        # Extract the type from the checklist tag
-        self.type = root.prop('name')
-        if not self.type:
-            raise CheckListError("Checklist file does not specify a type in the name attribute")
-        self.revision = root.prop('revision')
-        if not self.revision:
-            self.revision='0'
-
-        # Store the checklist into a GtkTreeModel
-        self.tree = gtk.TreeStore(gobject.TYPE_BOOLEAN,
-                                       gobject.TYPE_STRING,
-                                       gobject.TYPE_STRING,
-                                       gobject.TYPE_STRING)
-        # for each category record in checklist
-        ctxt=checkFile.xpathNewContext()
-        categories = root.xpathEval2('/checklist/category')
-        for category in categories:
-            iter = self.tree.append(None)
-            self.tree.set(iter, RESOLUTION, ' \npass\nfail',
-                    SUMMARY, category.prop('name'))
-            # Parse the entries into actual checklist items
-
-        checkFile.freeDoc()
 
 class QAReviewer(gnomeglade.GnomeApp):
     def __init__(self, arguments):
@@ -95,8 +48,8 @@ class QAReviewer(gnomeglade.GnomeApp):
                 'ReviewerWindow')
         # load the checklist data
         try:
-            self.checklist = CheckList('data/fedoraus.xml')
-        except (libxml2.parserError, CheckListError), msg:
+            self.checklist = checklist.CheckList('data/fedoraus.xml')
+        except (libxml2.parserError, checklist.Error), msg:
             sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
             sys.exit(1)
 
@@ -105,7 +58,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         ### FIXME: Other optional methods of TreeView configuration here.
         
         renderer = gtk.CellRendererToggle()
-        column = gtk.TreeViewColumn('Display?', renderer, active=DISPLAY)
+        column = gtk.TreeViewColumn('Display?', renderer, active=checklist.DISPLAY)
         column.set_clickable(True)
         checkView.append_column(column)
 
@@ -116,7 +69,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         # checkView.append_column(column)
         
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Description', renderer, text=SUMMARY)
+        column = gtk.TreeViewColumn('Description', renderer, text=checklist.SUMMARY)
         checkView.append_column(column)
         
         ### FIXME
