@@ -1,3 +1,108 @@
+2004-11-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r143    
+    * src/error.py: Note that we need to add exceptions for gpg errors.
+    * src/preferences.py:
+      - Watch the /apps/qa-assistant gconf dir for changes.
+      - Use default values from gconf schema when the preference is not set to
+        a correct value.
+      - Set Tooltip decriptions options insensitive when we disable them.
+      - Set gpg options insensitive when we disable GPG signing.
+      - Able to set the gpg options and file options now.  (Should cover
+        all the current preference options.)
+      - New function create_gpg_ids_list(): Create a list of gpg ids we can sign
+        with.  This is used to populate the GPG signing ID ComboBoxEntry.
+      - New function change_gpg_path(): updates the gpg_ids_list when the path
+        to gpg changes.  In case the new program uses a different keyring.
+      - New function toggle_desc_optionsi(): Toggles description/tooltip options
+        sensitivity depending on whether or not we have elected to use the
+        Description tooltips.
+      - New function toggle_gpg_options(): Toggles gpg option sensitivity
+        depending on whether or not we have enabled signing of reviews.
+      - New function set_use_gpg(): Sets and unsets use-gpg in GConf depending
+        on what the user has selected in the dialog.
+      - New function set_gpg_path(): Sets the path to the gpg program in gconf.
+      - New function set_gpg_identity(): Sets the user's chosen gpg identity in
+        gconf.
+      - New function set_state_dir(): Sets the user's chosen state-dir in gconf.
+    * src/checkview.py: Handle getting invalid values in gconf by getting the
+      default gconf values when the normal settings are invalid.
+    * src/checklist.py: Handle getting invalid values in gconf by getting the
+      default gconf values when the normal settings are invalid.
+    * src/qareviewer.py: Properly show the preferences dialog.
+    * src/gpg.py: New file withh functions to handle getting gpg to do things
+      for us.  Eventually we'll move to using gpgme instead.
+      - New functions list_secret_keys() and sign_buffer().
+    * BUGS: Note that we need to get icon/logo properties working for the Druid
+      and Preferences windows.
+    * glade/qa-assistant.strings, glade/qa-assistant.glade:
+      - Properly name some entries so we can refer to them from our code.
+      - Change the layout of the Misc tab to group Path to GPG selection with
+        the other gpg options.
+    
+2004-11-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r142    
+    * glade/qa-assistant.glade, glade/qa-assistant.strings: Add entry to give
+      the path to gpg.
+    * qa-assistant.schemas: Add an entry files/gpg-path to store the path to
+      gpg.
+    * BUGS: Remove note that display tooltip wait syncs too much as this is
+      now fixed.
+    * src/preferences.py: Connect to the description wait timeout spinbutton's
+      focus-out-event signal instead of value-changed.  The value-changed
+      method causes us to set the gconf preference several times per change.
+      focus-out only changes it once.
+      - Add the Rev and Id keyword expansions.
+    
+2004-11-26 Toshio Kuratomi <toshio@tiki-lounge.com> - r141    
+    * src/optionrenderer.py:
+      - Removed some old commented out code
+      - Set optionlist and selectedoption gproperties to empty list and string
+        on init respectively.
+      - alert_changes(): pass in the oldValue of the row rather than getting it
+        from the selectedoption property.  For some reason selectedoption is
+        'Needs-Reviewing' when we run through here, leading to too many sets
+        of the resolution in our checklist.
+      - display_options(): send the proper value of selectedoption to
+        alert_changes() from here.
+    * src/preferences.py: New preferences dialog instantiated from glade.
+      Callback code and initialization into a dialog widget here.
+      - Much of the setting of gconf values is done but a little bit remains.
+        The largest problem is that gpg support has to be added in.
+    * src/checkview.py:
+      - Make checklist an optional argument  to __init__().
+    * src/checklist.py:
+      - Fix noAutoDisplay; it needed parans to make the logic correct.
+      - Fix getting colors from gconf.  Before, we could fail if there wasn't
+        a string in the gconf value.
+      - Use default values from the gconf schema if the writable gconf values
+        are broken.
+    * src/qareviewer.py:
+      - Rearrange menu callbacks to match what we see in the menus.
+      - Enable the on_menu_preferences_activate() callback to popup our new
+        preferences dialog.
+    * src/checkload.py: Add a way to get at the properties page of the druid.
+      Probably going to change this to make a separate, embeddable properties
+      widget that is a view on the checklist model.  Then I can embed it in the
+      druid or embed it in a dialog window for the properties menu item.
+    * BUGS:
+      - Note I have to watch stale gconf keys in my local cache when testing
+        after development.
+      - Note to try to fix wait time on tooltip display preference syncing so
+        it doesn't happen so often.
+    * PREFERENCES:
+      - gconf schema completed.
+      - Coding and pref dialog aspect are nearly ready.
+      - Note in properties section why we can't implement properties as
+        gobject properties on the checklist.
+    * TODO:
+      - Notes on how the QA Functions menu might be taken care of.
+      - Note that paths.py.pyin might be used to make testing an uninstalled
+        installation work.
+    * glade/qa-assistant.strings, glade/qa-assistant.glade:
+      - New PreferencesDialog code.
+      - Removed BugzillaDialog code.
+    
+2004-11-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r139    
+    * ChangeLog: Update to (r138)
+    
 2004-11-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r138    
     * Split the svn:ignore list for the toplevel and src directory.
     
