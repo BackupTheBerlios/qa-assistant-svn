@@ -71,6 +71,8 @@ class Review(gtk.VBox):
         self.hashLabel.set_property('xalign', 0.0)
         self.add(self.hashLabel)
         self.hashes = gtk.Label()
+        self.hashes.set_property('justify', gtk.JUSTIFY_LEFT)
+        self.hashes.set_property('xalign', 0.0)
         self.__update_hash(self.properties)
         self.add(self.hashes)
 

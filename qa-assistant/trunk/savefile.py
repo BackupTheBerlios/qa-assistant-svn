@@ -27,7 +27,7 @@ class SaveFile:
         '''
 
     publicID = '-//BadgerWare//DTD QA Assistant Save File ' + _qaSaveFileVersion_ + '//EN'
-    canonicalURL = 'http://qa-assistant.sf.net/qasave/' + _qaSaveFileVersion_ + '/qasave.dtd'
+    canonicalURL = 'http://qa-assistant.sf.net/dtds/qasave/' + _qaSaveFileVersion_ + '/qasave.dtd'
     def __init__(self, checklist, properties, dtd, filename=None):
         ''' '''
         self.checklist = checklist

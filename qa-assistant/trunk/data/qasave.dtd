@@ -2,7 +2,7 @@
 <!--
  Identifiers:
  PUBLIC "-//BadgerWare//DTD QA Assistant Save File 0.1//EN"
- SYSTEM "http://qa-assistant.sf.net/qasave/0.1/qasave.dtd"
+ SYSTEM "http://qa-assistant.sf.net/dtds/qasave/0.1/qasave.dtd"
 -->
 <!-- All possible resolutions of a QA Checklist Item -->
 <!ENTITY % Resolutions '(Needs-Reviewing|Pass|Fail|Non-Blocker|Not-Applicable)'>

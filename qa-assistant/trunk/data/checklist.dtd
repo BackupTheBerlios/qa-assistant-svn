@@ -2,7 +2,7 @@
 <!--
  Identifiers:
  PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.2//EN"
- SYSTEM "http://qa-assistant.sf.net/checklist/0.2/checklist.dtd"
+ SYSTEM "http://qa-assistant.sf.net/dtds/checklist/0.2/checklist.dtd"
 -->
 <!ENTITY % Resolutions
   '(Needs-Reviewing|Pass|Fail|Non-Blocker|Not-Applicable)'

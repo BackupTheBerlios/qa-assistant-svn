@@ -1,5 +1,5 @@
 <?xml version='1.0' ?>
-<!DOCTYPE checklist SYSTEM "checklist.dtd">
+<!DOCTYPE checklist PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.2//EN" "http://qa-assistant.sf.net/dtds/checklist/0.2/checklist.dtd">
 <checklist version='0.2' name="fedoraus" revision="0.2" type="SRPM">
   <category name='Security of the build system'>
     <description>Although many of the checklist items relate to security, the
