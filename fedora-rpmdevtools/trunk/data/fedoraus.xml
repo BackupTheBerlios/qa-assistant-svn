@@ -5,10 +5,10 @@
     <entry name='Canonical Source'>
       <display default='true'/>
       <states>
-        <state name='pass'>
+        <state name='Pass'>
           <output>Source URL %s is canonical</output>
         </state>
-        <state name='fail'>
+        <state name='Fail'>
           <output>Source URL wrong; %s is the canonical URL</output>
         </state>
       </states>
@@ -20,10 +20,10 @@
     <entry name='MD5Sum verified'>
       <display default='true'/>
       <states>
-        <state name='pass'>
+        <state name='Pass'>
           <output>Upstream MD5Sum verified</output>
         </state>
-        <state name='fail'>
+        <state name='Fail'>
           <output>Upstream MD5Sum does not match!</output>
         </state>
       </states>
@@ -37,13 +37,13 @@
     <entry name='Upstream GPG Checked'>
       <display default='false'/>
       <states>
-        <state name='pass'>
+        <state name='Pass'>
           <output>Good upstream GPG Signature: %s</output>
         </state>
-        <state name='fail'>
+        <state name='Fail'>
           <output>Upstream GPG Signatures do not match: %s</output>
         </state>
-        <state name='n/a'>
+        <state name='N/A'>
           <output>No upstream GPG</output>
         </state>
       </states>
@@ -62,10 +62,10 @@
     <entry name="BuildRoot">
       <display default='false'/>
       <states>
-        <state name='pass'>
+        <state name='Pass'>
           <output>Buildroot has all required elements</output>
         </state>
-        <state name='fail'>
+        <state name='Fail'>
           <output>Buildroot lacks certain elements</output>
         </state>
       </states>

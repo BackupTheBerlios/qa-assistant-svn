@@ -25,3 +25,6 @@ to add to them but we want to keep track of what entry is associated with what
 entry id.
 
 In our xml file, we must give each entry a unique id.
+
+Possibility of creating a list view of the output sorted on the RESOLUTION
+rather than editorPane textareas.

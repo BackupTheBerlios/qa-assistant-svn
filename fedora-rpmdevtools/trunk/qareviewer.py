@@ -5,7 +5,10 @@
 # License: GPL
 # Description: Main QAReviewer application object
 # Id: $Id$
-"""
+"""QA Reviewer object.
+
+The main program object.  From here we set up the user interface, receive
+events, and send things off for future processing.
 """
 __version__ = "0.1"
 __revision__ = "$Revision$"
@@ -15,9 +18,7 @@ import gtk
 
 import checklist
 import gnomeglade
-
-class CellRendererEnum(gtk.CellRenderer):
-    """ Renders a multi-state as a combo box. """ 
+from optionrenderer import OptionCellRenderer
 
 class QAReviewer(gnomeglade.GnomeApp):
     def __init__(self, arguments):
@@ -44,27 +45,30 @@ class QAReviewer(gnomeglade.GnomeApp):
         
         renderer = gtk.CellRendererToggle()
         renderer.set_radio(False)
-        column = gtk.TreeViewColumn('Display', renderer, active=checklist.DISPLAY)
-        column.set_clickable(True)
+        column = gtk.TreeViewColumn('Display', renderer,
+                                    active=checklist.DISPLAY,
+                                    visible=checklist.ISITEM)
+        renderer.connect('toggled', self.display_toggle)
         self.checkView.append_column(column)
 
-        ### FIXME: Add a renderer for enumerations as passed via RESOLUTION
-        # We can render toggles with multiple buttons depending on the
-        # resolution
-        # renderer = CellRendererEnum()
-        # column = gtk.TreeViewColumn('pass/fail', renderer, initial=RESOLUTION)
-        # column.set_?clickable?(True)
-        # checkView.append_column(column)
+        renderer = OptionCellRenderer()
+        column = gtk.TreeViewColumn('pass/fail', renderer,
+                                    optionlist=checklist.RESLIST,
+                                    selectedoption=checklist.RESOLUTION,
+                                    mode=checklist.ISITEM)
+        column.set_cell_data_func(renderer, self.render_option_mode)
+        renderer.connect('changed', self.resolution_changed)
+        self.checkView.append_column(column)
+       
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('pass/fail', renderer, text=checklist.RESOLUTION)
-        column.set_clickable(True)
+        column = gtk.TreeViewColumn('Description', renderer,
+                                    text=checklist.SUMMARY)
         self.checkView.append_column(column)
         
         renderer = gtk.CellRendererText()
-        column = gtk.TreeViewColumn('Description', renderer, text=checklist.SUMMARY)
-        self.checkView.append_column(column)
-        
-        column = gtk.TreeViewColumn('Output', renderer, text=checklist.OUTPUT)
+        column = gtk.TreeViewColumn('Output', renderer,
+                                    text=checklist.OUTPUT,
+                                    visible=checklist.DISPLAY)
         self.outputColumn = column
         self.checkView.append_column(column)
 
@@ -81,8 +85,47 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         self.ReviewerWindow.show_all()
 
-        ### FIXME
-        # Use gtk.OptionMenu instead of gtk.ComboBox as glade2 defines
+    def render_option_mode(self, column, cell, model, iter):
+        item = cell.get_property('mode')
+        if item:
+            mode=gtk.CELL_RENDERER_MODE_ACTIVATABLE
+        else:
+            mode=gtk.CELL_RENDERER_MODE_INERT
+        cell.set_property('mode', mode)
+
+    def resolution_changed(self, renderer, newValue, iter):
+        self.checklist.tree.set(iter, checklist.RESOLUTION, newValue)
+        outputlist = self.checklist.tree.get_value(iter, checklist.OUTPUTLIST)
+        out = outputlist[newValue]
+        self.checklist.tree.set(iter, checklist.OUTPUT, out)
+
+        ## FIXME:
+        # Check if the change makes the overall review into a pass or fail
+        if newValue == 'Pass' or newValue == 'N/A' or newValue == 'Needs Reviewing':
+            pass
+            # Check if all the checklist items agree
+        elif newValue == 'Fail':
+            pass
+            # One failure is enough to fail the whole section.
+            # Check if the head state is already fail.  If not, change
+        ### FIXME: Change the editorPane
+
+    def display_toggle(self, cell, path, *data):
+        iter = self.checklist.tree.get_iter(path)
+        value = self.checklist.tree.get_value(iter, checklist.DISPLAY)
+        name = self.checklist.tree.get_value(iter, checklist.SUMMARY)
+
+        if value == True:
+            self.checklist.tree.set(iter, checklist.DISPLAY, False) 
+            ### FIXME: Hide the displayed output elements in the editorPane
+            # Find widget by name
+            # widget.destroy()
+            pass
+        else:
+            self.checklist.tree.set(iter, checklist.DISPLAY, True)
+            ### FIXME: Display the output elements in the editorPane
+            # create testarea widget with name
+            # fill textarea widget with checklist.OUTPUT
 
     def on_menu_quit_activate(self, *extra):
         """Delete a window.

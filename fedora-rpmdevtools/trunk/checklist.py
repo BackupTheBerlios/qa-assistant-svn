@@ -14,14 +14,16 @@ import gtk, gobject
 
 _checklistFileVersion_='0.1'
 
-### Work on this: need to have an entry for each field and subfield of an
-# entry.  Not all of these items will be displayed.  Some will be meta data
-# in the checklist tree and be spit out to the editor window/finished review.
-DISPLAY=0
-RESOLUTION=1
+# TreeStore entries displayed on the screen
+ISITEM=0
+DISPLAY=1
 SUMMARY=2
 DESC=3
-OUTPUT=4
+INPUT=4
+RESOLUTION=5
+OUTPUT=6
+RESLIST=7
+OUTPUTLIST=8
 
 class Error(Exception):
     def __init__(self, msg):
@@ -30,7 +32,12 @@ class Error(Exception):
         return repr(self.msg)
 
 class CheckList:
-    """Holds the data associated with the checklist"""
+    """Holds the data associated with the checklist.
+    
+    Data is held in a gtk TreeModel.  Saving the state of the checklist
+    should consist of saving the data in the TreeModel along with a reference
+    to the checklist we're operating upon.
+    """
 
     class __Entry:
         """Private class.  Holds entry information until ready to output."""
@@ -55,17 +62,27 @@ class CheckList:
 
         # Store the checklist into a GtkTreeModel
         self.tree = gtk.TreeStore(gobject.TYPE_BOOLEAN,
-                                       gobject.TYPE_STRING,
-                                       gobject.TYPE_STRING,
-                                       gobject.TYPE_STRING,
-                                       gobject.TYPE_STRING)
-        categories = root.xpathEval2('/checklist/category')
+                                  gobject.TYPE_BOOLEAN,
+                                  gobject.TYPE_STRING,
+                                  gobject.TYPE_STRING,
+                                  gobject.TYPE_STRING,
+                                  gobject.TYPE_STRING,
+                                  gobject.TYPE_STRING,
+                                  gobject.TYPE_PYOBJECT,
+                                  gobject.TYPE_PYOBJECT)
+
         # Record each category as a toplevel in the tree
+        categories = root.xpathEval2('/checklist/category')
         for category in categories:
             iter = self.tree.append(None)
-            self.tree.set(iter, DISPLAY, None,
-                    RESOLUTION, ' \npass\nfail',
-                    SUMMARY, category.prop('name'))
+            self.tree.set(iter,
+                          ISITEM, False,
+                          RESLIST, ['Needs Reviewing', 'Pass', 'Fail'],
+                          RESOLUTION, 'Needs Reviewing',
+                          OUTPUT, None,
+                          OUTPUTLIST, {'Needs Reviewing':None, 
+                                       'Pass':None, 'Fail':None},
+                          SUMMARY, category.prop('name'))
 
             # Entries are subheadings
             node = category.children
@@ -76,12 +93,24 @@ class CheckList:
                 elif node.name == 'entry':
                     entry = self.__xmlToEntry(node)
                     entryIter=self.tree.append(iter)
-                    ### FIXME: Not the complete entry.
-                    self.tree.set(entryIter, DISPLAY, entry.display,
-                            RESOLUTION, entry.states[0], ### FIXME
-                            SUMMARY, entry.name,
-                            DESC, entry.desc,
-                            OUTPUT, entry.states[0]['output']);
+                    self.tree.set(entryIter,
+                                  ISITEM, True,
+                                  DISPLAY, entry.display,
+                                  SUMMARY, entry.name,
+                                  DESC, entry.desc,
+                                  INPUT, entry.input)
+                    # Construct the resolution from multiple states
+                    resolutions={'Needs Reviewing': None}
+                    resolutionList=['Needs Reviewing']
+                    for i in range(len(entry.states)):
+                        resolutions[entry.states[i]['name']] = entry.states[i]['output']
+                        resolutionList.append(entry.states[i]['name'])
+                        
+                    self.tree.set(entryIter,
+                                  RESLIST, resolutionList,
+                                  OUTPUTLIST, resolutions,
+                                  RESOLUTION, 'Needs Reviewing',
+                                  OUTPUT, resolutions['Needs Reviewing'])
                 else:
                     # DTD validation should make this ignorable.
                     pass
@@ -101,6 +130,7 @@ class CheckList:
         entry=self.__Entry()
         # Set defaults
         entry.display = False
+        entry.input = None
 
         entry.name = node.prop('name')
         fields = node.children
