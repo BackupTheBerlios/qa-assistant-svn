@@ -113,6 +113,8 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.outputColumn = column
         self.checkView.append_column(column)
 
+        self.tips = TreeTips(self.checkView, checklist.DESC)
+
         self.listPane.add(self.checkView)
         self.checkView.show()
 
@@ -126,11 +128,12 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.reviewView = Review(self.checklist.tree, self.properties)
         self.reviewView.show()
         self.reviewPane.add(self.reviewView)
-
-        self.tips = TreeTips(self.checkView, checklist.DESC)
-
         self.reviewScroll.hide()
 
+        #
+        # Blast off!
+        #
+        self.__check_readiness()
         self.ReviewerWindow.show()
 
     #
@@ -146,6 +149,24 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.exit(1)
 
         self.checkView.set_model(self.checklist.tree)
+
+    def __check_readiness(self):
+        """Checks whether an SRPM is loaded or not.
+
+        This should be called everytime property.SRPM changes.
+        """
+        if self.properties.SRPM:
+            self.startLabel.hide()
+            self.listPane.show()
+            self.grabBar.show()
+            if self.grabArrow.get_property('arrow-type') == gtk.ARROW_RIGHT:
+                self.reviewScroll.show()
+        else:
+            if self.grabArrow.get_property('arrow-type') == gtk.ARROW_RIGHT:
+                self.reviewScroll.hide()
+            self.grabBar.hide()
+            self.listPane.hide()
+            self.startLabel.show()
 
     def __translate_option_mode(self, column, cell, model, iter):
         """Translate from header/item value to mode type.
