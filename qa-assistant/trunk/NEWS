@@ -5,6 +5,13 @@ QA Assistant
 Checklist Reviewer to aid Quality Assurance
 -------------------------------------------
 
+:Author: Toshio Kuratomi
+:Contact: toshio[AT]tiki-lounge.com
+:Date: $Date$
+:Revision: $Rev$
+
+..contents::
+
 0.4
 ===
 This release marks completeness of core features.  Everything needed to write
@@ -12,16 +19,18 @@ a review from within QA Assistant is now available.  I'm now using qa-assistant
 to write QA reports for the fedora-us system.  The save and checklist formats
 used in this release are not permanent.  Talks with Erik LaBianca are leading
 to a new combined format that will allow embedding tests for items within
-the checklist, thus being much more flexible in what can be provided.
+the checklist, thus being much more flexible in what can now be provided.
 
 * You can now add your own checklist items to a review.  Use the
   "QA Actions::Add checklist item" menu item when you want to add a comment
   that the standard checklist does not support.
 * Saving and loading in-progress reviews is now supported.
-* Some minor bugfixes to the python build process.
-* Fix output entry when the output contains angle brackets "<>"
+* Output reviews now do textwrap of long lines so GPG signing and submitting
+  to bugzilla works better.
 * DTDs are now entered into the system catalog.  XML validation now uses the
   catalogs to retrieve DTDs rather than saving filesystem path information.
+* Some minor bugfixes to the python build process.
+* Fix output entry when the output contains angle brackets "<>"
 
 0.3
 ===

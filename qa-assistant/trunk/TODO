@@ -42,6 +42,7 @@ glade/GUI:
     + Review object output format
 * Accelerators for QA Action items
 * Disable pieces of the QA Action menu when there is no SRPM being reviewed
+* Consider widgets that do textwrap for treeview and/or Review widget.
 
 Extra GNOME Functionality:
 ==========================
@@ -51,12 +52,9 @@ Extra GNOME Functionality:
 Programming:
 ============
 * GenericQA needs to provide a menu item to toggle treetip display
-* When saving and loading, there's something wrong with headers.  Either
-  they are being marked as items or for some other reason they are getting
-  "Display" value added.  It looks like the saving code is saving the headers
-  when we really should be regenerating them after loading a file.
 * Command line argument parsing
   - If a savefile is given, open that
+  - Use optparse/optik
 * Enhance tracking entries into the editor.  We want
   people to be able to shift text around from Needswork and Non-blocker, and
   to add to them but we want to keep track of what entry is associated with
@@ -69,19 +67,10 @@ Programming:
     and use fedora-startqa in the backend.  (Look through their SRPM stuff --
     it might be better code than I have... If we can put it into a SRPM class
     like I have, then it could be callable from either my script or theirs.)
-* review.publish needs to do wordwrapping of lines.  Look into whether a
-  textBuffer object has the necessary wordwrapping even without a textView.
-  (python 2.3's textwrap would do this for publish, not sure about viewing.)
-  The Optik library on FC1 has textwrap built in.  So, on FC1::
-    import optparse
-    from optparse import textwrap
-  On FC2 (with python 2.3):
-    import optparse, textwrap
 * Update to the fedora QAFormat output style
 * XML stuff to conform better with libxml2's guidelines document:
   file:///usr/share/doc/libxml2-devel-2.6.6/guidelines.html
-  (Namespace, URL, Make sure I follow recommendations for element/attribute,
-  catalogs!, and catalog setup)
+  (Namespace, URL, Make sure I follow recommendations for element/attribute)
 * Create a common XML save format/checklist with Erik LaBianca for the
   checklist.  This will involve integrating XML with test infrastructure.
 - Write a proper check that we can use a file (os.access doesn't work for

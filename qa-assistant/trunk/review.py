@@ -13,6 +13,14 @@ import re, string
 import gtk, gobject
 import checklist
 
+try:
+    import textwrap
+except ImportError:
+    try:
+        from optik import textwrap
+    except ImportError:
+        from optparse import textwrap
+
 class MyRendererText(gtk.CellRendererText):
     __gproperties__ = {
         'resolution' : (gobject.TYPE_STRING, 'Resolution state',
@@ -47,6 +55,8 @@ class Review(gtk.VBox):
         gobject.GObject.__init__(self)
         self.properties = properties
         self.addPaths = {}
+        self.textwrap = textwrap.TextWrapper(initial_indent='* ',
+                subsequent_indent='  ')
 
         self.set_property('homogeneous', False)
         self.resolution = gtk.Label()
@@ -159,14 +169,15 @@ class Review(gtk.VBox):
                     value = string.replace(value, '&amp;', '&')
                     value = string.replace(value, '&lt;', '<')
                     value = string.replace(value, '&gt;', '>')
+                    value = self.textwrap.fill(value) + '\n'
                     if res == 'Pass':
-                        goodList.append('* ' + value + "\n")
+                        goodList.append(value)
                     elif res == 'Fail':
-                        workList.append('* ' + value + "\n")
+                        workList.append(value)
                     elif res == 'Non-Blocker':
-                        minorList.append('* ' + value + "\n")
+                        minorList.append(value)
                     elif res == 'Not-Applicable' or res == 'Needs-Reviewing':
-                        notesList.append('* ' + value + "\n")
+                        notesList.append(value)
             iter = self.list.iter_next(iter)
             
         buffer+=("\n", "MD5Sums:\n", self.hashes.get_text())
