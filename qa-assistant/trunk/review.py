@@ -230,8 +230,8 @@ class Review(gtk.VBox):
                     break
                 listIter = self.list.iter_next(listIter)
         else:
-            # Don't care about Cateogries (toplevel items)
-            return
+            # Don't care about Categories (toplevel items)
+            pass
 
         self.__resolution_check(treeStore)
 

@@ -18,16 +18,23 @@ class Properties:
     class FileError(SRPM.FileError):
         pass
 
-    def __init__(self, checklist=None):
+    def __init__(self, checklist=None, saveDTD=None):
         """Create a new properties box."""
 
         ### FIXME: we really need to take this information from the user
         # instead of setting it here.  But I just want to get something
         # working right now.
-        self.checklistName = checklist
+        self.checklist = checklist
+        self.saveDTD = saveDTD
         self.SRPM = None
         self.bugzillaURL = None
         self.bugzillaNumber = None
+
+        ### FIXME: Need to be set when we load the checklist, not here.
+        self.checklistName = 'fedoraus'
+        self.checklistRev = '0.1'
+
+        ### FIXME: The following need to go into preferences (GConf)
         # Directories last searched (for FileSelect Dialogs)
         self.lastSRPMDir = './'
         self.lastSaveFileDir = './'

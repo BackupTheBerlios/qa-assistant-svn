@@ -25,6 +25,7 @@ from properties import Properties
 from optionrenderer import OptionCellRenderer
 from review import Review
 from treetips import TreeTips
+from savefile import SaveFile
 
 class QAReviewer(gnomeglade.GnomeApp):
     #
@@ -117,6 +118,20 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.reviewPane.add(self.reviewView)
         self.reviewScroll.hide()
 
+        dtdFile = os.path.join('data', 'qasave.dtd')
+        saveDTD = self._GnomeApp__uninstalled_file(dtdFile)
+        if saveDTD == None:
+            dtdFile = os.path.join(__programName__, dtdFile)
+            saveDTD = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR, dtdFile)
+            if saveDTD == []:
+                saveDTD = None
+        if saveDTD:
+            self.saveFile = SaveFile(self.checklist.tree, self.properties,
+                    saveDTD)
+        else:
+            ### FIXME: Error out gracefully.
+            sys.stderr.write('Unable to locate the qasave dtd.  Is qa-assistant installed properly?')
+
         #
         # Command line initialization
         #
@@ -144,7 +159,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         # to reload our checklistPane everytime we load a new checklist....
         # -- Some restructuring of code to do there.
         # -- May only need to make sure self.checklist.tree is set correctly?
-        filename = os.path.join('data', self.properties.checklistName)
+        filename = os.path.join('data', self.properties.checklist)
         checkFile = self._GnomeApp__uninstalled_file(filename)
         if checkFile == None:
             filename = os.path.join(__programName__, filename)
@@ -300,6 +315,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         change the value in our model.  Other parts of the model may also be
         affected by this change as well.
         """
+
         self.checklist.tree.set(iter, checklist.RESOLUTION, newValue)
         outputlist = self.checklist.tree.get_value(iter, checklist.OUTPUTLIST)
         out = outputlist[newValue]
@@ -369,38 +385,35 @@ class QAReviewer(gnomeglade.GnomeApp):
     #
     # Menu/Toolbar callbacks
     #
-    
-    def on_menu_publish_activate(self, *extra):
-        """Publish a review to a file."""
-        
-        # Check that the review is in a completed state
-        if self.reviewView.resolution.get_text() == 'Incomplete Review':
-            msgDialog = gtk.MessageDialog(self.ReviewerWindow,
-                    gtk.DIALOG_DESTROY_WITH_PARENT,
-                    gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
-                    'You have not checked all items in the checklist so the review is incomplete.  Are you sure you want to submit a review based on the current work?')
-            msgDialog.set_title('Incomplete review: submit anyway?')
-            msgDialog.set_default_response(gtk.RESPONSE_NO)
-            response = msgDialog.run()
-            msgDialog.destroy()
-            if response == gtk.RESPONSE_NO or response == gtk.RESPONSE_NONE:
-                return
-        
-        # File select dialog for use in file selecting callbacks.
-        fileSelect = gtk.FileSelection(title='Select a file to publish the review into')
-        if (os.path.isdir(self.properties.lastSRPMDir) and
-                os.access(self.properties.lastSRPMDir, os.R_OK|os.X_OK)):
-            fileSelect.set_filename(self.properties.lastReviewDir)
+
+    def on_menu_save_as_activate(self, *extra):
+        """Save the current review to a file"""
+       
+        fileSelect = gtk.FileSelection(title='Select the file to save the review into.')
+        if (os.path.isdir(self.properties.lastSaveFileDir) and
+                os.access(self.properties.lastSaveFileDir, os.R_OK|os.X_OK)):
+            fileSelect.set_filename(self.properties.lastSaveFileDir)
+
+        filename = None
         response = fileSelect.run()
         try:
             if response == gtk.RESPONSE_OK:
                 filename = fileSelect.get_filename()
-                self.properties.lastReviewDir = os.path.dirname(filename)+'/'
-                self.reviewView.publish(fileSelect.get_filename())
         finally:
             fileSelect.destroy()
             del fileSelect
 
+        if filename:
+            ### FIXME: Check if file exists
+            # If so, prompt to overwrite
+            self.properties.lastSaveFileDir = os.path.dirname(filename)+'/'
+            self.saveFile.set_filename(filename)
+            try:
+                self.saveFile.publish()
+            except IOError, msg:
+                ### FIXME: MSG Dialog that we were unable to save the file
+                pass
+                
     def on_menu_quit_activate(self, *extra):
         """End the program.
 
@@ -488,15 +501,18 @@ class QAReviewer(gnomeglade.GnomeApp):
             fileSelect.set_filename(self.properties.lastSRPMDir)
 
         fileSelect.hide_fileop_buttons()
+        filename = None
         response = fileSelect.run()
         try:
             if response == gtk.RESPONSE_OK:
                 filename = fileSelect.get_filename()
-                self.properties.lastSRPMDir = os.path.dirname(filename)+'/'
-                self.SRPM_into_properties(filename)
         finally:
             fileSelect.destroy()
             del fileSelect
+
+        if filename:
+            self.properties.lastSRPMDir = os.path.dirname(filename)+'/'
+            self.SRPM_into_properties(filename)
 
     ### FIXME: Features we want to implement but haven't had the time yet:
     def on_menu_submit_activate(self, *extra):
@@ -518,16 +534,10 @@ Relative priority: after save functionality."""
     def on_menu_save_activate(self, *extra):
         """Save the current review to a file"""
         msg = """Saves a review to a file.  This is a snapshot of the review at this moment.  The publish/submit features will allow one to print the review out and submit to bugzilla.
-        
-Relative priority: Publish is more important."""
-        self.not_yet_implemented(msg)
-        pass
 
-    def on_menu_save_as_activate(self, *extra):
-        """Save the current review to a file"""
-        msg = """Saves a review to a file.  This is a snapshot of the review at this moment.  The publish/submit features will allow one to print the review out and submit to bugzilla.
+***Note*** 'Save as' is currently working.  Need a little extra logic to get 'save' itself to work.  Please use save as until then.
         
-Relative priority: Publish is more important."""
+Relative priority: After load partial review from file."""
         self.not_yet_implemented(msg)
         pass
         

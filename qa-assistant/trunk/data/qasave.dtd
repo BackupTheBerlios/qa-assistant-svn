@@ -4,7 +4,7 @@
   <!ATTLIST qasave
     version CDATA #FIXED '0.1'
   >
-  <!ELEMENT checklist EMPTY>
+  <!ELEMENT checklist (#PCDATA)>
     <!ATTLIST checklist
       name CDATA #REQUIRED
       revision CDATA #REQUIRED

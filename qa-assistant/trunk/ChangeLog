@@ -1,3 +1,110 @@
+2004-04-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r71    
+    * genericqa.py: Add Rev and Id keyword expansion.
+    * treetips.py: Add Rev and Id keyword expansion.
+    * review.py: Bugfix ListStore.append takes a tuple, not a straight sequence
+      of values.
+    * srpmqa.py: Add Rev and Id keyword expansion.
+    * checklist.py: Beginning of changes to allow Saving of work.
+      - Add a MODIFIED entry to the tree.
+      - self.addPaths hash to alert us that an entry is being added.
+      - __modified_row and __added_row replace broken __add_entry_to_lookup
+      - __modified_row: new function
+        + Sets the MODIFIED flag on the row.
+        + Adds new entries to the entries hash for quick lookup of existing
+          checklist items.
+      - __added_row: New function
+        + Sets MODIFIED flag on a new row so it gets saved.
+        + Adds the row path to addPaths so __modified_row can add it when the
+          SUMMARY information becomes available.
+    * data/checklist.dtd: Use ENTITY for Enumerated values.
+    * data/qasave.dtd: New dtd that defines a savefile.
+    * data/sample-save.xml: A sample savefile.
+    * Makefile.am: Move comments on the install-data-hook above the definition
+      to make it more portable.
+    
+2004-04-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r70    
+    * genericqa.py:
+      - Add an attribute to cache the path where we add custom checklist items.
+      - Use the customItemsPath attribute instead of searching.
+      - Don't emit the row-inserted signal manually, gtk takes care of it
+        automatically.
+    * review.py:
+      - Add an attribute to cache items being added.
+      - Stop using self.tree.  It was unnecessary to hold a reference to the
+        tree because it was sent to our functions whenever we needed to use
+        data from it.
+      - __update_data(): Now does most of the work when adding entries as well.
+      - __add_data(): Functionality moved to __update_data because row-inserted
+        is emitted when the row is created.  But it is created empty.  So we
+        have no way to use it at that point.  New __add_data() just flags the
+        treeStore's path as being added so __update_data doesn't have to
+        guess that an addition is coming.
+    
+2004-04-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r69    
+    * paths.py.pyin: Add Id and Rev keyword expansion.
+    * review.py: Change 'if variable == True:' to 'if variable:' form
+    * gnomeglade.py: Fix typo: gnome.PARAM_GNOME_SYSCONFIGDIR => SYSCONFDIR
+    * qareviewer.py: Change 'if variable == True:' to 'if variable:' form
+    * configure.ac:
+      - Add a header to describe what the file does.
+      - Set Id and Rev keyword expansion
+      - Check for PYGNOME existance as well as pygtk.
+    * TODO: Reformat.
+    * qa-assistant.spec.in: Add Requires gnome-python-gconf2 and pygtk2
+    * Makefile.am: Add a header and Id Rev expansion
+    * glade/qa-assistant.strings, glade/qa-assistant.glade:
+      - Change QA Actions Mnemonic
+      - Change the Start label to reflect the change in menus
+      - Add others to the AUTHORS section of the about dialog
+    * NEWS: Started summary of what the changes are for this release
+    
+2004-04-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r68    
+    * genericqa.py:
+      - Change the 'Add Checklist Item' mnemonic
+      - add_item_to_checklist_callback: Now performs.  We are able to add custom
+        review items using this action.
+    * treetips.py: Do not pop-up a tooltip if there is no tooltip text.
+    * review.py: Load new checklist entries into the Review widget when they
+      are added to the checklist tree.
+    * srpmqa.py: Some notes on things fedora-startqa does that we might want to
+      add to the SRPM Actions.
+    * checklist.py:
+      - Change function names from __xmlToEntry() form to __xml_to_entry()
+      - Create a new data struct 'entries' which is a map of Summary => iter.
+        The immediate need was to have fast lookups of what Summary items
+        appear in the checklist.  Eventualy, the Review widget should also use
+        this to quickly access an iter from a Summary value.
+      - colorize_output: Move colorization of output to its own function.
+      - __add_to_entry_lookup: New function to support the entries dict.
+    * qareviewer.py:
+      - Rename columns 'pass/fail' and 'Description' to 'Resolution' and
+        'Summary'.
+      - Use checklist.colorize_output()
+      - Set default responses on dialog boxes
+    * TODO:
+      - Add note about architectural changes for QA Functions
+      - Remove add non-checklist items as it's finished
+    * glade/qa-assistant.glade: Change the Mnemonic on QA Actions menu.
+    * NEWS: Add ability to add custom checklist items to 0.4 announce.
+    
+2004-04-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r66    
+    * Add generated spec file and .pyo's to ignore list
+    * qa-assistant.desktop.in: Remove leading _ on internationalized entries
+      because we're not yet sophisticated enough to use i18n
+    * qareviewer.py: Bump version to 0.4
+    * configure.ac: Bump version to 0.4
+    * TODO: Druid on New note
+    * qa-assistant.spec.in: Make the desktop install conform to Fedora Extras
+    * Makefile.am: Automake's py_compile script doesn't account for DESTDIR.
+      Created an install-data-hook that sets compiled in paths properly
+    * NEWS: Begin the 0.4 notes
+    
+2004-04-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r65    
+    * ChangeLog: Update to r64
+    * README: Add a quick install section.  Remove redundant stuff.  Note that
+      subversion server is currently unavailable.
+    * NEWS: Remove subversion archive from announcement.  Rewrite summary.
+    
 2004-04-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r64    
     * treetips.py: FIXME notes
     * ChangeLog: Update to rev 61

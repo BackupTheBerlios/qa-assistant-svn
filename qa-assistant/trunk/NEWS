@@ -6,13 +6,13 @@ QA Assistant -- A checklist reviewer to aid Quality Assurance
 This release marks completeness of core features.  Everything needed to write
 a review from within QA Assistant is now available.  Future work will be
 directed towards adding "enhancements" to the core feature set.  Still on the
-schedule to be added are load/save of an in progress review, preferences,
-interaction with issue trackers, prettification, and a visit from the Human
-Interface Guidelines fairy.
+schedule to be added are GConf2 preferences, interaction with issue trackers,
+prettification, and a visit from the Human Interface Guidelines fairy.
 
 * You can now add your own checklist items to a review.  Use the
   "QA Actions::Add checklist item" menu item when you want to add a comment
   that the standard checklist does not support.
+* Saving and loading in-progress reviews is now supported.
 * Some minor bugfixes to the python build process.
 
 0.3

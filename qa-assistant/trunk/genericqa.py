@@ -9,7 +9,6 @@
 __revision__ = "$Rev$"
 
 import os
-
 import gtk
 
 import checklist
@@ -40,25 +39,35 @@ class GenericQA(gtk.Menu):
                     gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
                     'You have not checked all items in the checklist so the review is incomplete.  Are you sure you want to submit a review based on the current work?')
             msgDialog.set_title('Incomplete review: submit anyway?')
+            msgDialog.set_default_response(gtk.RESPONSE_NO)
             response = msgDialog.run()
             msgDialog.destroy()
-            if response == gtk.RESPONSE_NO:
+            if (response == gtk.RESPONSE_NO or response == gtk.RESPONSE_NONE
+                    or response == gtk.RESPONSE_DELETE_EVENT):
                 return
         
         # File select dialog for use in file selecting callbacks.
         fileSelect = gtk.FileSelection(title='Select a file to publish the review into')
-        if (os.path.isdir(self.app.properties.lastSRPMDir) and
-                os.access(self.app.properties.lastSRPMDir, os.R_OK|os.X_OK)):
+        if (os.path.isdir(self.app.properties.lastReviewDir) and
+                os.access(self.app.properties.lastReviewDir, os.R_OK|os.X_OK)):
             fileSelect.set_filename(self.app.properties.lastReviewDir)
+
+        filename = None
         response = fileSelect.run()
         try:
             if response == gtk.RESPONSE_OK:
                 filename = fileSelect.get_filename()
-                self.app.properties.lastReviewDir = os.path.dirname(filename)+'/'
-                self.app.reviewView.publish(fileSelect.get_filename())
         finally:
             fileSelect.destroy()
             del fileSelect
+
+        if filename:
+            self.app.properties.lastReviewDir = os.path.dirname(filename)+'/'
+            try:
+                self.app.reviewView.publish(filename)
+            except IOError, msg:
+                ### FIXME: MSG Dialog that we could not publish the review
+                pass
 
     def add_item_to_checklist_callback(self, callingMenu):
         """Adds a checklist entry to the checklist.
@@ -166,3 +175,4 @@ class GenericQA(gtk.Menu):
                 checklist.OUTPUT, output,
                 checklist.RESLIST, resList,
                 checklist.OUTPUTLIST, outputList)
+        self.app.resolution_changed(None, res, newItem)

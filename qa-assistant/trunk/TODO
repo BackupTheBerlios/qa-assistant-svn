@@ -6,8 +6,7 @@ glade/GUI:
 * Add a New dialog to take input about bugzilla
   - If new then make sure we have both a bugzilla # and an SRPM
 * Pressing save should dump the present state to an xml file
-  - Going to make this part of the Review widget
-  - class SaveFile(?) Maybe this wil just be a method on the review widget.
+  - class SaveFile (Not going to be part of the Review widget)
 * Pressing open should load a dumped xml file
 * Create a logo to go along with the icon.  Think up some other small pixmaps
   for the menu/toolbar: toggle Preview, new from bugzilla, new from SRPM,
@@ -60,3 +59,7 @@ Programming:
   textBuffer object has the necessary wordwrapping even without a textView.
   (python 2.3's textwrap would do this for publish, not sure about viewing.)
 * Update to the fedora QAFormat output style
+* XML stuff to conform better with libxml2's guidelines document:
+  file:///usr/share/doc/libxml2-devel-2.6.6/guidelines.html
+  (Namespace, URL, Make sure I follow recommendations for element/attribute,
+  catalogs!, and catalog setup)
