@@ -8,64 +8,8 @@ Preferences to Add Via GConf
 
 Preferences
 -----------
-Preferences are set on the app.  They could be implemented as GConf
-variables.
-
-Person
-(Probably happen in the review widget, publish function.)
-* Whether to sign [s] [d] [c]
-* Signing identity [s] [d] [c]
-* Path to gpg binary [s] [d] [c]
-
-Files
-(Probably happen in the main program)
-* Directory to unrpm into [s] [d]
-
-Display
-(Happen in the checklist.)
-* Automatically display failed reviews [s] [c] [d]
-* Text colours [s] [c] [d]
-
-  (These can probably be implemented in the checkview and cause settings
-  to change on the checkview's treetip.)
-* Tooltip DESCRIPTION enable/disable [s] [c] [d]
-* Tooltip timeout [s] [c] [d]
-
-Status Key:
-  [s] In schema
-  [c] Used in Code
-  [d] Settable via preferences dialog
-
-Coding wise we need three things:
-
-1) We need to write the gconf schema file describing the keys.
-   [Done]
-
-2) Write code to make use of the values.
-  * Where should the GConfClient reside?  If each place that uses it has a
-    copy, it's wasteful but modular.  OTOH, gconf.client_get_default() doesn't
-    seem to create a new client, just get a reference to a main gconf client.
-    The app keeps a copy of it, then it needs to pass the client to the other
-    modules somehow. [Going with each module that uses it]
-    [Test then Done]
-
-3) We need to have a dialog box that has entries for all the properties.
-   This can be a glade dialog as the box should be the same for all checklists.
-   The dialog needs to take input about all the preferences listed here.
-   When the submit button is pressed, put the information into the gconf
-   database and change the effect of the values on the program.
-   [Test then Done]
-
-http://developer.gnome.org/doc/API/2.0/gconf/
-
-(These are program properties.  It should start out as the current working
-directory everytime the program starts and change as the program progresses.
-The passphrase will be asked for every time.)
-* File directories [done]
-* user/gpg-pasphrase  [done]
-
-(Hmmm is this a gpg option instead?)
-* Keyserver to download new keys from
+All currently needed preferences have been implemented.
+Infrastructure exists and seems workable.
 
 Druid
 -----
@@ -74,13 +18,13 @@ can do useful things.  Once we know what checklist to load, we should be able
 to invoke functions to take onLoad information from users.
 
 The Druid will have the following pathways:
+
 1) Info screen.
 2) (A) Load savefile (B) New checklist
-3A) Open a file chooser with the CWD for the user to pick from
-3B) Open a selector of the system installed checklists
-4pre) Load checklist
-4) Display a properties dialog to get the properties that the checklist
-   requires (onLoad) if any.
+3) A) Open a file chooser with the CWD for the user to pick from
+   B) Open a selector of the system installed checklists
+4) Load checklist.  Display a properties dialog to get the properties that
+   the checklist requires (onLoad) if any.
 5) Start the program.
 
 When loading a new checklist after the program is started, we should skip
@@ -92,6 +36,16 @@ selector.)  Then proceed to 4pre.
 
 Properties
 ----------
+    # Output:
+    # Three consumers:
+    #   - CheckList needs to convert into XML
+    #   - PropertiesWidget needs to convert into list of labels/entry boxes.
+    #   - Functions need to get values from individual properties and set them
+    #     for others.
+    # How best to handle this?
+    # CheckList:
+    # for propKey in props.keys():
+    #       info = props[propKey]
 Properties are set on the checklist.  The checklist type should provide a
 set of properties that are legal.  Perhaps implement as GObject values on
 the checklist object (Can't do this as it isn't extensible.  The checklist
@@ -121,8 +75,45 @@ RequireTypes:
 
 overrides are implemented as user invocable functions.
 
+Properties widget that allows setting the properties (properties.py)
+
+Properties data structure that is set from checklist and used by the widget
+and the functions.  The functions are a set of methods 
+
+::
+  class Checklist():
+    Has a Properties.
+
+  class Properties(dict):
+    __init__()
+    clear()
+    set(name, value)
+    add(name, value=None)
+    output() sorted list of Properties.
+    
+  class PropertiesWidget():
+    __init__(self, model=None):
+    set_model(model)
+
 Functions
 ---------
+::
+  class Functions():
+    __init__(self, Properties):
+    clear()
+    add(name, args, type)
+    output(xmlNode)
+    menuFunctions()
+    do(string FuncName)
+
+  class FunctionsMenu():
+    __init__(self, model=None)
+    set_model()
+
+  class FedoraUSFunctions(Functions):
+    Functions.__init__(self, Properties)
+    SRPMReview()
+    
 
 Functions are tied into properties.  Both are declared by the checklist.
 Properties are defined in the checklist while functions are defined in code
@@ -132,6 +123,22 @@ as arguments.
 So each Function module has to have access to the checklist's properties.
 How?
 
+Also, properties may be set from functions.  So we have the following
+dependence::
+
+  Func_foo (Prop_A) -> Prop_B
+  When Prop_A.set() -> Call Func_foo() Prop_B.set()
+  FunctionClass has a Properties.
+  Prop_A.set():
+  	function_list = Properties.propset[Prop_A]
+	for func in function_list:
+		Functions.invoke(func)
+  class SpecificFuncClass(FuncClass):
+  	def invoke(funcName):
+		eval('self.'+funcName)
+	def funcName():
+		set Prop_B = Prop_A
+  
 Most functions are selectable from a menu entry.  How does this affect
 things?  We need to create a menu from the functions and assign the
 functions as callbacks.  The functions in the menu need to have access to
@@ -148,7 +155,9 @@ Other things that get set depending on the checklist:
 
 * Application's title bar: app.set_title()
 * Appplication's status bar: app.mainWinAppBar.push()
+
   - Ideas for statusbar info:
+
     + The main identifier of the review (SRPM name)
     + Number of pass/fail/needs-reviewing/etc
 

@@ -3,10 +3,12 @@
 # $Id$
 
 #TESTS = test.py
-TESTS = testcreation.py \
+TESTS = propertiestest.py \
+	testcreation.py \
 	testtreetips.py \
 	testchecklist.py 
-EXTRA_DIST = test.py \
+EXTRA_DIST = propertiestest.py \
+	     test.py \
 	     testchecklist.py \
 	     testtreetips.py \
 	     testcreation.py

@@ -49,7 +49,7 @@ class SecurityError(Error):
         self.id = id
         self.filename = filename
 
-class SRPM:
+class SRPM(object):
     __PYVER = int(float(sys.version[:3])*100)
     __BLOCKSIZE=8192
 

@@ -23,6 +23,9 @@ class TestCheckList(unittest.TestCase):
                 'fedoraus.xml')
         self.checklist = checklist.CheckList(self.checkFile)
 
+    def tearDown(self):
+        del self.checklist
+
     def test_CheckListPangoize(self):
         '''Escape output for pango usage
 
@@ -188,16 +191,16 @@ class TestCheckList(unittest.TestCase):
     # test check_category_resolution(changedRow == iter, newValue of row)
 
     
-    def tearDown(self):
-        del self.checklist
-
 class TestCheckListCreation(unittest.TestCase):
     '''Test Creation of CheckList objects.'''
     def setUp(self):
         libxml2.debugMemory(1)
         self.dataDir = os.path.join(test.srcdir, '..', 'data')
 
-    def test0_CheckListCreateSuccess(self):
+    def tearDown(self):
+        libxml2.debugMemory(0)
+
+    def test_0CheckListCreateSuccess(self):
         '''Create a CheckList
 
         Create a checklist.  Make sure the returned object is a CheckList.
@@ -237,9 +240,6 @@ class TestCheckListCreation(unittest.TestCase):
         self.assert_(libxml2.debugMemory(1) == 0,
                 'FAIL: %d bytes leaked' % (libxml2.debugMemory(1)))
         del self.checklist
-
-    def tearDown(self):
-        libxml2.debugMemory(0)
 
 def suite():
     creationSuite = unittest.makeSuite(TestCheckListCreation, 'test_')

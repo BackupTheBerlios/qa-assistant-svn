@@ -164,7 +164,7 @@ Relative Priority: Publish will be the primary submission for now.  This is an e
 
 ### FIXME: copied here from properties.py.  Being replaced.
 import SRPM
-class Properties:
+class Properties(object):
     class SecurityError(SRPM.SecurityError):
         pass
     class FileError(SRPM.FileError):

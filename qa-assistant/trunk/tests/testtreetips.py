@@ -27,6 +27,9 @@ class TestTreeTips(unittest.TestCase):
         self.view = gtk.TreeView(self.model)
         self.tt = treetips.TreeTips(self.view)
 
+    def tearDown(self):
+        del self.tt
+
     def test_TreeTipsSetDelay(self):
         '''Setting the delay property to another value'''
         self.tt.set_property('delay', 1000)
@@ -65,9 +68,6 @@ class TestTreeTips(unittest.TestCase):
         self.assert_(isinstance(self.tt.get_property('active-tips-data'),
             StringType))
 
-
-    def tearDown(self):
-        del self.tt
 
 def suite():
     otherPriority = unittest.makeSuite(TestTreeTips, 'test_')

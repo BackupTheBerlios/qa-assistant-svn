@@ -18,6 +18,7 @@ Packaging Errors
   as well as other problems that may not show up until later.
 * Need to clear my gconf cache of any keys created during testing that aren't
   going to be distributed to guard against error.
+  
 Programming Errors
 ------------------
 * Use gtk.TreeStore.set instead of self.set in checklist.  Significant
@@ -53,10 +54,12 @@ Programming Errors
     svn repository.  The repository or a tarball needs to be accessbile to run
     make dist-check, et al.
 
+* There's something wrong with directories and saving/loading the reviews.
+  After saving the review, I'm unable to reload just by putting in the name
+  without any path information.
+
 Working: Need to test
 ---------------------
-* Using the save function (rather than save_as) doesn't seem to be saving the
-  file.
 * Creation of Custom checklist items is not being displayed in the CheckView
   even though it is being created in the checklist.
 * Change of state in the Checklist is not being reflected in the Review.
