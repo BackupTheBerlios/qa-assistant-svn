@@ -14,8 +14,10 @@ Checklist Reviewer to Aid Quality Assurance
 Version 0.4.1
 =============
 This is a bugfix release.
+
 * Fix a bug in loading saved checklists that caused the custom category to
   be displayed as an item.
+* Fix for distuninstallcheck which was picking up on the XML catalogs.
 
 Version 0.4
 ===========

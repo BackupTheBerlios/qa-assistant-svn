@@ -54,6 +54,9 @@ Desktopdir = $(datadir)/applications
 Desktop_in_files = qa-assistant.desktop.in
 Desktop_DATA = $(Desktop_in_files:.desktop.in=.desktop)
 
+# remove xml catalogs from the check
+distuninstallcheck_listfiles = find $(prefix) -type f -not -path $(ROOTCATALOG) -not -path $(CATALOG) -print
+
 # Need to use INTLTOOL to do this when we i18n the code
 $(Desktop_DATA): $(Desktop_in_files)
 	cp $< $@
