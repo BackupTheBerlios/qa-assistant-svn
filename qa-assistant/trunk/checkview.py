@@ -83,8 +83,7 @@ class CheckView(gtk.TreeView):
         '''
 
         # Set the checklist to the new resolution and output values
-        checklist = self.get_model()
-        checklist.set(changedRow, checklist.RESOLUTION, newValue)
+        self.get_model().set(changedRow, checklist.RESOLUTION, newValue)
        
     def display_toggle(self, cell, path, *data):
         '''Toggles outputting a message for the review.

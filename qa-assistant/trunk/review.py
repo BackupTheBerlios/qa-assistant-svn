@@ -83,6 +83,7 @@ class Review(gtk.VBox):
         """Display the new widget"""
         self.show_all()
 
+    ## FIXME: This definitly doesn't work.
     def publish(self, filename):
         """Write the review to a file."""
 
@@ -208,7 +209,7 @@ class Review(gtk.VBox):
         # when there's a group.  So we have to wait until we get a proper
         # summary (our key value) when we add the entry to the list
         summary = treeStore.get_value(updateIter, checklist.SUMMARY).lower()
-        res = treeStore.get_value(updateIter, self.checklist.RESOLUTION)
+        res = treeStore.get_value(updateIter, checklist.RESOLUTION)
         if not (summary and res and len(path) > 1):
             # 1) Don't care about Categories (toplevel items)
             # 2) Items that don't have summary's and resolutions yet are in
@@ -218,7 +219,7 @@ class Review(gtk.VBox):
         if self.entries.has_key(summary):
             # Update an old item
             key = self.entries[summary]
-            if not treeStore.get_value(updateIter, self.checklist.DISPLAY):
+            if not treeStore.get_value(updateIter, checklist.DISPLAY):
                 # No longer need to display it
                 key = self.entries[summary]
                 if key[0] == 'Needs-Reviewing' or key[0] == 'Not-Applicable':
@@ -246,13 +247,13 @@ class Review(gtk.VBox):
                 else:
                     self.reviewBoxes[key[0]].add(label)
             # Change output
-            label.set_markup(treeStore.get_value(updateIter, self.checklist.OUTPUT))
+            label.set_markup(treeStore.get_value(updateIter, checklist.OUTPUT))
         else:
             # New item
-            if treeStore.get_value(updateIter, self.checklist.DISPLAY):
+            if treeStore.get_value(updateIter, checklist.DISPLAY):
                 key = (res, self.lastEntry)
                 self.entries[summary] = key
-                label = gtk.Label(treeStore.get_value(updateIter, self.checklist.OUTPUT))
+                label = gtk.Label(treeStore.get_value(updateIter, checklist.OUTPUT))
                 label.set_use_markup(True)
                 label.set_property('xalign', 0.0)
                 label.set_line_wrap(True)
@@ -263,30 +264,3 @@ class Review(gtk.VBox):
                     self.reviewBoxes[key[0]].add(label)
                 label.show()
                 self.lastEntry += 1
-
-    ### FIXME: this needs to become a simple cached value in the checklist.
-    # It's really checklist metadata.
-    # Will be part of the header manipulation
-    def __resolution_check(self, treeStore):
-        """Checks the treeStore to decide the recommendation for this review
-
-        This depends on the category status being correct so if there are
-        bugs, be sure to check there as well.
-        """
-        catIter = treeStore.get_iter_first()
-        moreWork = False
-        while catIter:
-            value = treeStore.get_value(catIter, self.checklist.RESOLUTION)
-            if value == 'Fail':
-                self.resolution.set_text('NEEDSWORK')
-                return
-            elif value == 'Needs-Reviewing':
-                moreWork = True
-            catIter = treeStore.iter_next(catIter)
-
-        if moreWork:
-            self.resolution.set_text('Incomplete Review')
-        else:
-            self.resolution.set_text('PUBLISH +1')
-
-#gobject.type_register(Review)

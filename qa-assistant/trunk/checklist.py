@@ -19,6 +19,8 @@ import gobject
 
 import error
 
+    
+# TreeStore entries displayed on the screen
 ISITEM=0     # Entry is an item as opposed to category
 DISPLAY=1    # Write the output to the review
 SUMMARY=2    # Unique title for the entry
@@ -82,17 +84,6 @@ class CheckList (gtk.TreeStore):
             + formatVersion + '//EN'
     canonicalURL = 'http://qa-assistant.sf.net/dtds/checklist/' \
             + formatVersion + '/checklist.dtd'
-    
-    # TreeStore entries displayed on the screen
-    ISITEM=0     # Entry is an item as opposed to category
-    DISPLAY=1    # Write the output to the review
-    SUMMARY=2    # Unique title for the entry
-    DESC=3       # Long description of what to do to verify the entry
-    RESOLUTION=4 # Current resolution
-    OUTPUT=5     # Current resolution's output
-    RESLIST=6    # Python list of possible resolutions
-    OUTPUTLIST=7 # Python hash of outputs keyed to resolution
-    TEST=8       # Python class that holds any automated test information
 
     class __Entry:
         '''Private class.  Holds entry information until ready to output.'''
@@ -100,7 +91,7 @@ class CheckList (gtk.TreeStore):
     class __Property:
         '''Property information.'''
 
-        def __init__(self, type, value):
+        def __init__(self, type, value, require, function=None, functionType=None, args=None):
             '''Initialize a property.
             
             Attributes:
@@ -109,6 +100,10 @@ class CheckList (gtk.TreeStore):
             '''
             self.type = type
             self.value = value
+            self.require = require
+            self.args = args
+            self.function = function
+            self.functionType = functionType
 
     class __Test:
         '''Information related to automated tests embedded in the XML files.
@@ -200,13 +195,33 @@ class CheckList (gtk.TreeStore):
         # Extract properties from the CheckList file
         properties = root.xpathEval2('/checklist/properties/property')
         for p in properties:
-            self.properties[p.prop('name')] = self.__Property(p.prop('type'), \
-                    p.content)
+            propChild = p.children
+            value = None
+            function = None
+            functionType = None
+            args = []
+            while propChild:
+                if propChild.name == 'require':
+                    require = propChild.prop('type')
+                    requireChild = propChild.children
+                    while requireChild:
+                        if requireChild.name == 'arg':
+                            args.append(requireChild.content)
+                        elif requireChild.name == 'function':
+                            function = requireChild.content
+                            functionType = requireChild.prop('type')
+                        requireChild = requireChild.next
+                elif propChild.name == 'value':
+                    value = node.content
+                propChild = propChild.next
+            # Set the property
+            self.properties[p.prop('name')] = self.__Property(p.prop('type'),
+                    value, require, function, functionType, args)
 
         # Extract functions for the QA menu
         functions = root.xpathEval2('/checklist/functions/function')
         for function in functions:
-            self.functions.append(function.content)
+            self.functions.append((function.content, function.prop('type')))
 
         # Record each category as a toplevel in the tree
         categories = root.xpathEval2('/checklist/category')
@@ -214,14 +229,14 @@ class CheckList (gtk.TreeStore):
         for category in categories:
             newCat = self.append(None)
             self.set(newCat,
-                    self.ISITEM, False,
-                    self.RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
-                    self.RESOLUTION, 'Needs-Reviewing',
-                    self.OUTPUT, None,
-                    self.OUTPUTLIST, {'Needs-Reviewing':None,
+                    ISITEM, False,
+                    RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
+                    RESOLUTION, 'Needs-Reviewing',
+                    OUTPUT, None,
+                    OUTPUTLIST, {'Needs-Reviewing':None,
                                  'Pass':None, 'Fail':None},
-                    self.SUMMARY, category.prop('name'),
-                    self.TEST, None)
+                    SUMMARY, category.prop('name'),
+                    TEST, None)
             self.entries[category.prop('name').lower()] = newCat
 
             # Entries are subheadings
@@ -230,16 +245,16 @@ class CheckList (gtk.TreeStore):
                 if node.name == 'description':
                     # Set DESCRIPTION of the heading
                     desc = string.join(string.split(node.content))
-                    self.set(newCat, self.DESC, desc)
+                    self.set(newCat, DESC, desc)
                 elif node.name == 'entry':
                     entry = self.__xml_to_entry(node)
                     entryIter=self.append(newCat)
                     self.set(entryIter,
-                            self.ISITEM, True,
-                            self.DISPLAY, entry.display,
-                            self.SUMMARY, entry.name,
-                            self.TEST, entry.test,
-                            self.DESC, entry.desc)
+                            ISITEM, True,
+                            DISPLAY, entry.display,
+                            SUMMARY, entry.name,
+                            TEST, entry.test,
+                            DESC, entry.desc)
                     self.entries[entry.name.lower()] = entryIter
                     
                     # Construct the resolution from multiple states
@@ -254,10 +269,10 @@ class CheckList (gtk.TreeStore):
                             resolutionList.append(entry.states[i]['name'])
                         
                     self.set(entryIter,
-                            self.RESLIST, resolutionList,
-                            self.OUTPUTLIST, outputList,
-                            self.RESOLUTION, entry.state,
-                            self.OUTPUT, outputList[entry.state])
+                            RESLIST, resolutionList,
+                            OUTPUTLIST, outputList,
+                            RESOLUTION, entry.state,
+                            OUTPUT, outputList[entry.state])
                 else:
                     # DTD validation should make this ignorable.
                     pass
@@ -266,11 +281,41 @@ class CheckList (gtk.TreeStore):
 
         checkFile.freeDoc()
 
+        ### FIXME: Merge code:  This is pretty close to what we have in:
+        # __check_resolution().  We could potentially merge these two pieces
+        # of code together.
+        category = self.get_iter_root()
+        catIter = category
+        while catIter:
+            entryIter = self.iter_children(catIter)
+            newRes = 'Pass'
+            while entryIter:
+                res = self.get_value(entryIter, RESOLUTION)
+                if res == 'Fail':
+                    newRes = 'Fail'
+                    break
+                elif res == 'Needs-Reviewing':
+                    newRes = 'Needs-Reviewing'
+                entryIter = self.iter_next(entryIter)
+            gtk.TreeStore.set(self, catIter, RESOLUTION, newRes)
+            catIter = self.iter_next(catIter)
+        # Instead of code we could have:
+        # self.__check_resolution(category, 'Pass') 
+        newRes = 'Pass'
+        while category:
+            res = self.get_value(category, RESOLUTION)
+            if res == 'Fail':
+                newRes = 'Fail'
+                break
+            elif res == 'Needs-Reviewing':
+                newRes = 'Needs-Reviewing'
+            category = self.iter_next(category)
+        self.resolution = newRes
+
     def do_resolution_changed(self, newValue):
         ### FIXME: We need to actually process resolution changed requests
         # here.
-        print "This is a test of the resolution changed signal"
-        print 'The new value is %s' % newValue
+        print 'The new resolution is %s' % newValue
         pass
 
     def add_entry(self, summary, item=None, display=None,
@@ -328,30 +373,30 @@ class CheckList (gtk.TreeStore):
             else:
                 # Create the 'Custom Checklist Items' category
                 self.set(self.customItemsIter,
-                        self.SUMMARY, 'Custom Checklist Items',
-                        self.ISITEM, False,
-                        self.RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
-                        self.RESOLUTION, 'Needs-Reviewing',
-                        self.OUTPUT, None,
-                        self.OUTPUTLIST, {'Needs-Reviewing':None,
+                        SUMMARY, 'Custom Checklist Items',
+                        ISITEM, False,
+                        RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
+                        RESOLUTION, 'Needs-Reviewing',
+                        OUTPUT, None,
+                        OUTPUTLIST, {'Needs-Reviewing':None,
                                      'Pass':None, 'Fail':None},
-                        self.DESC, "Review items that you have comments on even " \
+                        DESC, "Review items that you have comments on even " \
                               "though they aren't on the standard checklist.",
-                        self.TEST, None)
+                        TEST, None)
                 newItem = self.append(self.customItemsIter)
                 self.entries['custom checklist items'] = self.customItemsIter
         
         # Set up the new item
         self.set(newItem,
-                self.SUMMARY, summary,
-                self.DESC, desc,
-                self.ISITEM, item,
-                self.DISPLAY, display,
-                self.RESOLUTION, resolution,
-                self.OUTPUT, output,
-                self.RESLIST, resList,
-                self.OUTPUTLIST, outputList,
-                self.TEST, None)
+                SUMMARY, summary,
+                DESC, desc,
+                ISITEM, item,
+                DISPLAY, display,
+                RESOLUTION, resolution,
+                OUTPUT, output,
+                RESLIST, resList,
+                OUTPUTLIST, outputList,
+                TEST, None)
         self.entries[sumLow] = newItem
 
     def publish(self, filename=None):
@@ -385,16 +430,26 @@ class CheckList (gtk.TreeStore):
        
         # Output properties we're concerned with
         properties = root.newChild(None, 'properties', None)
-        for prop in self.properties.keys():
-            node = properties.newTextChild(None, 'property',
-                    self.properties[prop].value)
-            node.setProp('name', prop)
-            node.setProp('type', self.properties[prop].type)
+        for propName in self.properties.keys():
+            prop = self.properties[propName]
+            node = properties.newChild(None, 'property', None)
+            node.setProp('name', propName)
+            node.setProp('type', prop.type)
+            require = node.newChild(None, 'require', None)
+            require.setProp('type', prop.require)
+            for arg in prop.args:
+                require.newTextChild(None, 'arg', arg)
+            if prop.function:
+                function = require.newTextChild(None, 'function', prop.function)
+                function.setProp('type', prop.functionType)
+            if prop.value:
+                value = node.newTextChild(None, 'value', prop.value)
 
         # Output functions
         functions = root.newChild(None, 'functions', None)
         for func in self.functions:
-            node = functions.newTextChild(None, 'function', func)
+            node = functions.newTextChild(None, 'function', func[0])
+            node.setProp('type', func[1])
         
         # Output entries
         self.foreach(self.__create_entry, root)
@@ -475,42 +530,25 @@ class CheckList (gtk.TreeStore):
                 ### FIXME: Check GConf2 preferences for auto-display on fail
                 # Auto display to review if it's a fail
                 if newValue == 'Fail' or newValue == 'Non-Blocker':
-                    gtk.TreeStore.set(self, row, self.DISPLAY, True)
+                    gtk.TreeStore.set(self, row, DISPLAY, True)
 
-                self.check_category_resolution(row, newValue)
+                self.__check_resolution(row, newValue)
         
-    def check_category_resolution(self, changedRow, newValue):
-        '''Checks a rows category to see if its status should change.
+    def __check_resolution(self, changedRow, newValue):
+        '''Checks whether to change a category's resolution.
         
         Arguments:
         :changedRow: The entry row that has changed.
         :newValue: The new value of the row.
 
-        This function is a small hack.  It really should be a signal handler
-        that gets called when a resolution is changed on the CheckList.
-        Unfortunately, `gtk.TreeStore` only supports row-changed, not a
-        column-changed signal.  So we are instead calling this function when
-        the changed signal occurs on the checkView column looking at
-        RESOLUTION.
-
-        ### FIXME: Ways to change this function:
-
-        1) Make it able to resync to the current state of the checklist, not
-           just on individual entry changes.
-
-           * When given no value on newValue, we need to walk the values of
-             each set, tallying what values we are going to set without a
-             newValue to compare to.  This is a simpler operation, but the
-             code has no shortcuts whereas the current implementation has
-             several.  Don't know if there's a performance gain from the
-             simplicity or a loss from the lack of shortcuts.  Need to try it
-             out and see.
+        Called when a row's resolution has changed.  We check whether the
+        parent of the resolution needs to have its resolution changed as well.
         '''
         # Load category information to check if it needs updating.
         category = self.iter_parent(changedRow)
         if category:
             # We are checking through all the entries of a single category
-            catRes = self.get_value(category, self.RESOLUTION)
+            catRes = self.get_value(category, RESOLUTION)
             entryIter = self.iter_children(category)
         else:
             # We are checking through the categories of a checklist.
@@ -529,16 +567,19 @@ class CheckList (gtk.TreeStore):
             if catRes != 'Pass':
                 while entryIter:
                     nodeRes = self.get_value(entryIter,
-                            self.RESOLUTION)
+                            RESOLUTION)
                     if nodeRes == 'Fail':
                         return
                     entryIter = self.iter_next(entryIter)
-        elif (newValue == 'Pass' or newValue == 'Not-Applicable' or 
-                newValue == 'Non-Blocker'):
+        else:
+        # These are the values we want here.  They are also the only ones
+        # left, therefore we can use a simple else.
+        #elif (newValue == 'Pass' or newValue == 'Not-Applicable' or 
+        #        newValue == 'Non-Blocker'):
             # Unless another entry is Fail or Needs-Reviewing, change to Pass
             newValue = 'Pass'
             while entryIter:
-                nodeRes = self.get_value(entryIter, self.RESOLUTION)
+                nodeRes = self.get_value(entryIter, RESOLUTION)
                 if nodeRes == 'Needs-Reviewing':
                     if catRes == 'Needs-Reviewing':
                         return
@@ -660,18 +701,18 @@ sys.exit(4)
         '''
 
         # Check if we're adding an entry or a category.
-        if tree.get_value(entryIter, self.ISITEM):
+        if tree.get_value(entryIter, ISITEM):
             # Entry node
             entry = root.lastChild().newChild(None, 'entry', None)
-            if tree.get_value(entryIter, self.DISPLAY):
+            if tree.get_value(entryIter, DISPLAY):
                 entry.setProp('display', 'true')
             else:
                 entry.setProp('display', 'false')
-            entry.setProp('state', tree.get_value(entryIter, self.RESOLUTION))
+            entry.setProp('state', tree.get_value(entryIter, RESOLUTION))
 
             # state nodes
-            resolutions = tree.get_value(entryIter, self.RESLIST)
-            outputs = tree.get_value(entryIter, self.OUTPUTLIST)
+            resolutions = tree.get_value(entryIter, RESLIST)
+            outputs = tree.get_value(entryIter, OUTPUTLIST)
             states = entry.newChild(None, 'states', None)
             for res in resolutions:
                 content = outputs[res]
@@ -681,7 +722,7 @@ sys.exit(4)
                 state.setProp('name', res)
                 
             # test node
-            test = tree.get_value(entryIter, self.TEST)
+            test = tree.get_value(entryIter, TEST)
             if test:
                 testNode = entry.newChild(None, 'test', None)
                 for arg in test.arguments:
@@ -697,9 +738,9 @@ sys.exit(4)
             entry = root.newChild(None, 'category', None)
 
         # Common to both categories and entries:
-        entry.setProp('name', tree.get_value(entryIter, self.SUMMARY))
+        entry.setProp('name', tree.get_value(entryIter, SUMMARY))
         descNode = entry.newTextChild(None, 'description',
-                tree.get_value(entryIter, self.DESC))
+                tree.get_value(entryIter, DESC))
 
 gobject.signal_new('resolution-changed', CheckList,
         gobject.SIGNAL_RUN_LAST, gobject.TYPE_BOOLEAN,

@@ -65,8 +65,8 @@ class QAReviewer(gnomeglade.GnomeApp):
             self.ReviewerWindow.set_property('icon', gnomeglade.load_pixbuf(iconFile))
 
         # load the checklist data (Associates itself with checkView)
-        self.__load_checklist()
         self.checkView = CheckView()
+        self.__load_checklist()
 
         self.grabArrow=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
         self.grabArrow.set_size_request(4,4)
@@ -150,14 +150,15 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.reviewView.show()
         self.reviewPane.add(self.reviewView)
         # Create the primary view on our checklist for the listPane
-        try:
-            self.checkView.destroy()
-        except AttributeError:
-            # No problems as long as checkView doesn't exist at this point
-            pass
-        self.checkView = CheckView(self.checklist)
-        self.listPane.add(self.checkView)
-        self.checkView.show()
+        #try:
+        #    self.checkView.destroy()
+        #except AttributeError:
+        #    # No problems as long as checkView doesn't exist at this point
+        #    pass
+        #self.checkView = CheckView(self.checklist)
+        #self.listPane.add(self.checkView)
+        #self.checkView.show()
+        self.checkView.set_model(self.checklist)
 
     def SRPM_into_properties(self, filename):
         '''Add an SRPM file into our properties structure.
@@ -299,7 +300,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             except AttributeError:
                 # No problems as long as reviewView no longer exists.
                 pass
-            self.reviewView = Review(self.checklist, self.properties)
+            self.reviewView = Review(self.checklist)
             ### FIXME: This must be replaced with a header method in the checklist
             #self.reviewView.update_hash()
             self.reviewView.show()

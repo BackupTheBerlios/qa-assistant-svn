@@ -1,3 +1,33 @@
+2004-10-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r119    
+    * checklist.py:
+      - Create a resolution attribute that holds the CheckList's resolution.
+      - Note about workarounds because we can't add custom gproperties.
+      - Create a resolution-changed signal that is emitted when the CheckList
+        resolution is changed.
+      - Temporary do_resolution_changed() signal handler.  Doesn't do anything
+        yet.  We may not need to do anything with it.
+      - set() method that overrides the gtk.TreeStore set method.  We have to
+        do this so we can find out if any rows have had their RESOLUTION
+        changed.  If so, we decide if we should update the category and
+        CheckList resolutions as well.
+      - check_category_resolution():
+        + now works for both categories and the CheckList's resolution.
+        + No longer sets any values except the resolution.  These other parts
+          are done in the self.set() method.
+        + Check whether the category is already set to Needs-Reviewing so we
+          don't set it unnecessarily.
+    * checkview.py: Remove call to check_category_resolution().  This is
+      managed entirely by the CheckList now.
+    
+2004-10-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r118    
+    * review.py: Set line wrapping in the labels showing the review items.
+    * tests/test.py: Add treetips to the complement of tests.
+    * tests/testtreetips.py: A set of tests for the treetips module.
+    * tests/Makefile.am: Add treetips to the complement of tests.
+    * treetips.py: Fix a syntax error when checking which property we need
+      to set.
+    * ChangeLog: Update to (r117).
+    
 2004-10-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r117    
     * review.py:
       - Check that we're being passed a CheckList type.
