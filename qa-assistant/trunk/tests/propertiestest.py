@@ -131,9 +131,20 @@ class TestProperties(unittest.TestCase):
         newValue = 'http://localhost/test/bas-1.0-1.src.rpm'
         self.assertRaises(KeyError, self.prop.__setitem__,
                 'Invalid', newValue)
-    ### FIXME:
-    # test error try to change a value on a non-existent property
-    # test add values and return a sorted list of keys
+
+    def test_PropertiesKeyOrder(self):
+        '''Check Properties stores keys in FIFO order.
+
+        Test that we can add PropEntries to the Properties object and retrieve
+        the keys for the objects in the same order we put them in.
+        '''
+        for i in ('one', 'two', 'three'):
+            propEntry = properties.PropEntry()
+            propEntry.valueType = 'string'
+            propEntry.propType = 'optional'
+            self.prop[i] = propEntry
+    
+        self.assert_(self.prop.keys() == [self.name, 'one', 'two', 'three'])
 
     def tearDown(self):
         pass

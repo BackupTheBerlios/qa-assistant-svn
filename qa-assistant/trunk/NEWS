@@ -12,7 +12,7 @@ Checklist Reviewer to Aid Quality Assurance
 
 .. contents::
 
-Version 0.4.90.2
+Version 0.4.90.3
 ================
 *This is a development release.*  It's like a snapshot but with a tad more
 care put in.  It is likely to have major bugs.  Things that you see here
@@ -35,6 +35,8 @@ making the checklists more extensible.
 * Now able to set preferences in the program.
 * You are now able to sign the review with gnupg.
 * A Druid to walk through starting a review.
+* CheckList Properties have been implemented and setting properties has been
+  merged into the Druid and menu.
 * The Review widget is now much nicer to look at.
 * CheckList is now a subclass of gtk.TreeStore.
 
