@@ -84,3 +84,7 @@ Programming:
   catalogs!, and catalog setup)
 * Create a common XML save format/checklist with Erik LaBianca for the
   checklist.  This will involve integrating XML with test infrastructure.
+- Write a proper check that we can use a file (os.access doesn't work for
+  this purpose.  [How does review.py work?])
+  + For both review.py and savefile we could use try: except IOERROR: to trap
+    failure to write the file.

@@ -8,10 +8,15 @@ AC_INIT([QA Assistant], [0.4], [abadger1999@sourceforge.net], qa-assistant)
 AC_CONFIG_SRCDIR([qareviewer.py])
 AM_INIT_AUTOMAKE([gnu check-news dist-bzip2 -Wall])
 
+AC_SUBST(CHECKLISTVER, [0.2])
+AC_SUBST(QASAVEVER, [0.1])
+
 AM_MAINTAINER_MODE
 
 AC_PATH_PROG(GCONFTOOL, gconftool-2)
 AM_GCONF_SOURCE_2
+
+AC_PATH_PROG(XMLCATALOG, xmlcatalog)
 
 dnl check for python
 AM_PATH_PYTHON
