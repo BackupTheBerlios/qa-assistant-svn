@@ -94,7 +94,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         renderer = gtk.CellRendererText()
         renderer.connect('edited', self.output_edited, self.checklist.tree)
         column = gtk.TreeViewColumn('Output', renderer,
-                                    text=checklist.OUTPUT,
+                                    markup=checklist.OUTPUT,
                                     visible=checklist.DISPLAY,
                                     editable=checklist.DISPLAY)
         self.outputColumn = column
@@ -138,6 +138,12 @@ class QAReviewer(gnomeglade.GnomeApp):
     # 
 
     def __load_checklist(self):
+        ### FIXME: When calling this function to load a new checklist, we
+        # need to be careful.  There was a bug where loading a new checklist
+        # was causing editing of cells to no longer work.  I think we have
+        # to reload our checklistPane everytime we load a new checklist....
+        # -- Some restructuring of code to do there.
+        # -- May only need to make sure self.checklist.tree is set correctly?
         filename = os.path.join('data', self.properties.checklistName)
         checkFile = self._GnomeApp__uninstalled_file(filename)
         if checkFile == None:
@@ -154,7 +160,9 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.stderr.write("Unable to find checklist: %s\n" % (filename))
             sys.exit(1)
         try:
-            self.checklist = checklist.CheckList(checkFile)
+            self.checklist = checklist.CheckList(checkFile,
+                    self.properties.failColor, self.properties.minorColor,
+                    self.properties.passColor)
         except (libxml2.parserError, libxml2.treeError, checklist.Error), msg:
             ### FIXME: When we can select checklists via property, we need to
             # print error and recover.
@@ -258,6 +266,17 @@ class QAReviewer(gnomeglade.GnomeApp):
         iter = model.get_iter_from_string(row)
         path = self.checklist.tree.get_path(iter)
         name = self.checklist.tree.get_value(iter, checklist.RESOLUTION)
+        if name == 'Fail':
+            color = self.properties.failColor
+        elif name == 'Non-Blocker' or name == 'Needs-Reviewing':
+            color = self.properties.minorColor
+        elif name == 'Pass':
+            color = self.properties.passColor
+        else:
+            color = None
+        if color:
+            newValue='<span foreground="' + color + '">' + newValue + '</span>'
+
         outDict = self.checklist.tree.get_value(iter, checklist.OUTPUTLIST)
         outDict[name] = newValue
         self.checklist.tree.set(iter, checklist.OUTPUT, newValue)

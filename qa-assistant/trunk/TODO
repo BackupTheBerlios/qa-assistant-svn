@@ -13,9 +13,6 @@ glade/GUI:
 
 - Pressing open should load a dumped xml file
 
-- Colorize output depending on the resolution state (green for pass,
-  red for blocker, pink for let it slide.)
-
 - Create a logo to go along with the icon.  Think up some other small pixmaps
   for the menu/toolbar: toggle Preview, new from bugzilla, new from SRPM,
   Publish Report, Submit Report
@@ -63,3 +60,7 @@ Programming:
 
 - Prompt before outputting a review when the review is in state
   'Needs Reviewing'
+
+Build Infrastructure:
+=====================
+- Write a spec file

@@ -3,14 +3,19 @@ QA Assistant -- A checklist reviewer to aid Quality Assurance
 
 0.3
 ===
+This release adds infrastructure and cosmetic enhancements.  The main
+feature enhancement is a bugfix that was preventing editing of the output
+string in the checklist Pane.
 
+* Displays the SRPM that's being reviewed in the titlebar and statusbar
+* Colorized output for checklist items.
+* Now has an automake/autoconf build.  This means the package is now
+  installable with standard ./configure ; make; make install steps
+* Fixed a bug that prevented editing of the output string in the checklist
 * Website and downloads moved to sourceforge.
   http://sourceforge.net/projects/qa-assistant
 * Anonymous Subversion repository 0.32 open at
   http://springer.homelinux.com:8080/svn/fedora/qa-assistant/trunk
-* Now has an automake/autoconf build.  This means the package is now
-  installable with standard ./configure ; make; make install steps
-* Displays the SRPM that's being reviewed in the titlebar and statusbar
 
 0.2
 ===

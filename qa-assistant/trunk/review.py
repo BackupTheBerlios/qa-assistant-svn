@@ -75,7 +75,7 @@ class Review(gtk.VBox):
         self.goodComments.set_headers_visible(False)
         renderer = MyRendererText()
         column = gtk.TreeViewColumn('Output', renderer,
-                                    text=self.__OUTPUT,
+                                    markup=self.__OUTPUT,
                                     resolution=self.__RESOLUTION,
                                     display=self.__DISPLAY)
         column.set_cell_data_func(renderer, self.__filter_good)
@@ -90,7 +90,7 @@ class Review(gtk.VBox):
         self.workComments.set_headers_visible(False)
         renderer = MyRendererText()
         column = gtk.TreeViewColumn('Output', renderer,
-                                    text=self.__OUTPUT,
+                                    markup=self.__OUTPUT,
                                     resolution=self.__RESOLUTION,
                                     display=self.__DISPLAY)
         column.set_cell_data_func(renderer, self.__filter_work)
@@ -105,7 +105,7 @@ class Review(gtk.VBox):
         self.minorComments.set_headers_visible(False)
         renderer = MyRendererText()
         column = gtk.TreeViewColumn('Output', renderer,
-                                    text=self.__OUTPUT,
+                                    markup=self.__OUTPUT,
                                     resolution=self.__RESOLUTION,
                                     display=self.__DISPLAY)
         column.set_cell_data_func(renderer, self.__filter_minor)
@@ -120,7 +120,7 @@ class Review(gtk.VBox):
         self.noteComments.set_headers_visible(False)
         renderer = MyRendererText()
         column = gtk.TreeViewColumn('Output', renderer,
-                                    text=self.__OUTPUT,
+                                    markup=self.__OUTPUT,
                                     resolution=self.__RESOLUTION,
                                     display=self.__DISPLAY)
         column.set_cell_data_func(renderer, self.__filter_note)

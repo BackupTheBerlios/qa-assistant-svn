@@ -41,7 +41,7 @@ class CheckList:
     class __Entry:
         """Private class.  Holds entry information until ready to output."""
 
-    def __init__(self, path):
+    def __init__(self, path, failColor, minorColor, passColor):
         
         libxml2.registerErrorHandler(self.__noDisplayParseError, None)
         ctxt = libxml2.newParserCtxt()
@@ -106,11 +106,25 @@ class CheckList:
                                   SUMMARY, entry.name,
                                   DESC, entry.desc)
                     # Construct the resolution from multiple states
-                    resolutions={'Needs-Reviewing': None}
+                    resolutions={'Needs-Reviewing': ('<span foreground="' +
+                                 minorColor + '"> </span>')}
                     resolutionList=['Needs-Reviewing']
                     for i in range(len(entry.states)):
                         name = entry.states[i]['name']
-                        resolutions[name] = entry.states[i]['output']
+                        output = entry.states[i]['output']
+                        if name == 'Fail':
+                            color = failColor
+                        elif name == 'Non-Blocker' or name == 'Needs-Reviewing':
+                            color = minorColor
+                        elif name == 'Pass':
+                            color = passColor
+                        else:
+                            color = None
+                        if color:
+                            output = ('<span foreground="' + color + '">' +
+                                        output + '</span>')
+
+                        resolutions[name] = output
                         if name != 'Needs-Reviewing':
                             resolutionList.append(entry.states[i]['name'])
                         

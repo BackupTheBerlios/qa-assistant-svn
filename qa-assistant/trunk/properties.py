@@ -32,6 +32,10 @@ class Properties:
         self.lastSRPMDir = './'
         self.lastSaveFileDir = './'
         self.lastReviewDir = './'
+        # Colors to use on output text
+        self.failColor = 'red'
+        self.minorColor = 'purple'
+        self.passColor = 'dark green'
         pass
 
     def dialog(self):
