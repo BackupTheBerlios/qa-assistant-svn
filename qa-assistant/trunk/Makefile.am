@@ -5,34 +5,9 @@
 # making and distribution of the whole program.
 # $Id$
 
-SUBDIRS = tests
-bin_SCRIPTS = qa-assistant qa-convert
-
-qa-convert: qa-assistant
-qa-assistant: paths.py \
-	qaconst.py
+SUBDIRS = tests src
 
 qa_assistantdir = $(datadir)/qa-assistant
-
-qa_assistant_PYTHON = \
-		SRPM.py \
-		checklist.py \
-		checkload.py \
-		checkview.py \
-		error.py \
-		genericqa.py \
-		gnomeglade.py \
-		optionrenderer.py \
-		properties.py \
-		qareviewer.py \
-		review.py \
-		srpmqa.py \
-		treetips.py
-
-# Generated program files
-nodist_qa_assistantdir = $(datadir)/qa-assistant
-nodist_qa_assistant_PYTHON = paths.py \
-			     qaconst.py
 
 iconsdir = $(datadir)/pixmaps
 icons_DATA = pixmaps/qa-icon.png
@@ -61,6 +36,10 @@ uifiles_DATA = glade/qa-assistant.glade \
 Desktopdir = $(datadir)/applications
 Desktop_in_files = qa-assistant.desktop.in
 Desktop_DATA = $(Desktop_in_files:.desktop.in=.desktop)
+	
+schemadir = @GCONF_SCHEMA_FILE_DIR@
+schema_in_files = qa-assistant.schemas.in
+schema_DATA = $(schema_in_files:.schemas.in=.schemas)
 
 # remove xml catalogs from the check
 distuninstallcheck_listfiles = find $(prefix) -type f -not -path $(ROOTCATALOG) -not -path $(CATALOG) -print
@@ -69,17 +48,10 @@ distuninstallcheck_listfiles = find $(prefix) -type f -not -path $(ROOTCATALOG) 
 $(Desktop_DATA): $(Desktop_in_files)
 	cp $< $@
 
-GCONF_SCHEMA_FILES = \
-		     qa-assistant.schemas
-
 EXTRA_DIST = \
 	PREFERENCES \
 	TODO \
 	BUGS \
-	qa-assistant.pyin \
-	qa-convert.pyin \
-	paths.py.pyin \
-	qaconst.py.in \
 	autogen.sh \
 	qa-assistant.spec \
 	qa-assistant.spec.in \
@@ -89,34 +61,21 @@ EXTRA_DIST = \
 	$(uifiles_DATA) \
 	$(Desktop_in_files)	\
 	$(Desktop_DATA)		\
-	$(GCONF_SCHEMA_FILES)	\
+	$(schema_DATA)	\
 	$(icons_DATA)		
 
 CLEANFILES= \
-	   $(nodist_qa_assistant_PYTHON) \
-	   qa-assistant \
-	   qa-convert \
-	   *.pyc \
-	   *.pyo \
 	   qa-assistant*.tar.*
 
-%: %.pyin
-	sed -e "s,@#datadir#@,$(datadir)," \
-	    -e "s,@#libdir#@,$(libdir)," \
-	    -e "s,@#prefix#@,$(prefix)," \
-	    -e "s,@#sysconfdir#@,$(sysconfdir)," \
-	    -e "s,@#pkgdatadir#@,$(pkgdatadir)," < $<  > $@
-	    
-install-schemas: $(GCONF_SCHEMA_FILES)
+if GCONF_SCHEMAS_INSTALL
+install-data-local: $(schema_DATA)
 	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) \
-			    gconftool-2 --makefile-install-rule $<
+			    $(GCONFTOOL) --makefile-install-rule $<
+else
+install-data-local:
+endif
 			    
 install-data-hook:
-# automake's py_compile script compiles DESTDIR into the module's paths
-# which is not what we want.  (DESTDIR is a staging area so it
-# shouldn't be included in the built files.)  This takes care of it.
-	python -c "import compileall ; compileall.compile_dir('$(DESTDIR)$(qa_assistantdir)', None, '$(qa_assistantdir)', True)"
-
 # Rules to install the DTDs into the system xmlcatalog
 # Create subcatalog
 	if test ! -f $(DESTDIR)$(CATALOG); then \

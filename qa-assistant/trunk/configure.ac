@@ -5,7 +5,7 @@ dnl Description: Controls the configure process for qa-assistant
 dnl $Id$
 
 AC_INIT([QA Assistant], [0.4.90.1], [abadger1999@sourceforge.net], qa-assistant)
-AC_CONFIG_SRCDIR([qareviewer.py])
+AC_CONFIG_SRCDIR([src/qareviewer.py])
 AM_INIT_AUTOMAKE([gnu check-news dist-bzip2 -Wall])
 
 AC_SUBST(CHECKLISTVER, [0.3])
@@ -48,6 +48,7 @@ AC_SUBST(PYGNOME_LIBS)
 AC_OUTPUT([
 Makefile
 tests/Makefile
+src/Makefile
 qa-assistant.spec
-qaconst.py
+src/qaconst.py
 ])

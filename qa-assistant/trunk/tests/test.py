@@ -18,7 +18,9 @@ if os.environ.has_key('srcdir'):
     srcdir = os.environ['srcdir']
 else:
     srcdir = '.'
-sys.path.extend((os.path.join(srcdir, '..'), srcdir, '..'))
+
+sys.path.extend((os.path.join(srcdir, '..', 'src'),
+    os.path.join('..', 'src')))
 
 import testcreation
 import testchecklist
