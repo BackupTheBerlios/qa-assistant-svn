@@ -12,7 +12,7 @@ events, and send things off for future processing.
 """
 __programName__ = "qa-assistant"
 __programHumanName__ = "QA Assistant"
-__version__ = "0.4"
+__version__ = "0.4.1"
 __revision__ = "$Rev$"
 
 import libxml2
@@ -119,6 +119,12 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.grabArrow.show()
 
         self.reviewScroll.hide()
+
+        # Create our Clipboard
+        self.clipboard = gtk.Clipboard(gtk.gdk.display_get_default(),
+                'CLIPBOARD')
+        self.clipPrimary = gtk.Clipboard(gtk.gdk.display_get_default(),
+                'PRIMARY')
 
         #
         # Command line initialization
@@ -666,7 +672,6 @@ Relative Priority: Low.  There's too much programming to do for me to spend too 
         '''Copy from the clipboard into the selection.'''
         entry = self.ReviewerWindow.focus_widget
         if isinstance(entry, gtk.Editable):
-            print entry
             entry.paste_clipboard()
 
     def on_menu_clear_activate(self, *extra):
