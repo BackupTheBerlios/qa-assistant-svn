@@ -40,7 +40,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         ### FIXME: Absolute dependence on arguments[0] being an SRPM without a
         # check to make sure of it.  Need to fix that up with cmd-line args.
         self.SRPM = None
-        if len(arguments) == 1:
+        if len(arguments) == 2:
             try:
                 self.SRPM = SRPM.SRPM(arguments[1])
             except SRPM.FileError, message:

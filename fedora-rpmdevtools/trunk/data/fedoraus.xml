@@ -11,7 +11,7 @@
       you verify that the source comes from a genuine project and gives you
       a clue as to where to start looking if intentional security bugs are
       found.</description>
-    <entry name="SRPM GPG signed">
+    <entry name="SRPM GPG signed" display="true">
       <states>
         <state name="Pass">GPG signature checked and found good</state>
         <state name="Fail">Missing or Bad GPG Signature</state>
