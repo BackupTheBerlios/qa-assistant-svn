@@ -27,22 +27,6 @@ class TestCreation(unittest.TestCase):
         self.dataDir = os.path.join(test.srcdir, '..', 'data')
 
     #
-    # CheckList creation tests
-    #
-    def test0_ChecklistCreateSuccess(self):
-        checkFile = os.path.join(self.dataDir, 'fedoraus.xml')
-        self.assert_(isinstance(checklist.CheckList(checkFile),
-            checklist.CheckList))
-
-    def test_ChecklistInvalidFile(self):
-        self.assertRaises(error.InvalidChecklist, checklist.CheckList,
-                os.path.join(self.dataDir, 'sample-save.xml'))
-
-    def test_ChecklistNotAFile(self):
-        self.assertRaises(error.InvalidChecklist, checklist.CheckList,
-                'gobbledygook.xml')
-
-    #
     # Treetip creation function
     #
     def test_TreetipCreateSuccess(self):

@@ -15,6 +15,7 @@ import test
 
 import checklist
 import error
+import libxml2
 
 class TestCheckList(unittest.TestCase):
     def setUp(self):
@@ -186,12 +187,64 @@ class TestCheckList(unittest.TestCase):
     # test set()
     # test check_category_resolution(changedRow == iter, newValue of row)
 
+    
     def tearDown(self):
         del self.checklist
 
+class TestCheckListCreation(unittest.TestCase):
+    '''Test Creation of CheckList objects.'''
+    def setUp(self):
+        libxml2.debugMemory(1)
+        self.dataDir = os.path.join(test.srcdir, '..', 'data')
+
+    def test0_CheckListCreateSuccess(self):
+        '''Create a CheckList
+
+        Create a checklist.  Make sure the returned object is a CheckList.
+        '''
+        checkFile = os.path.join(self.dataDir, 'fedoraus.xml')
+        self.assert_(isinstance(checklist.CheckList(checkFile),
+            checklist.CheckList))
+
+    def test_CheckListInvalidFile(self):
+        '''Catch creating a CheckList with a non-CheckList file
+        
+        Try to create a CheckList with a non-CheckList xml file.  Make sure
+        we raise an InvalidCheckList exception.
+        '''
+        self.assertRaises(error.InvalidChecklist, checklist.CheckList,
+                os.path.join(self.dataDir, 'sample-save.xml'))
+
+    def test_CheckListNotAFile(self):
+        '''Catch creating a CheckList with a non-existant file
+
+        Try to create a checklist with a non-existent file.  Make sure
+        we raise an InvalidCheckList exception.
+        '''
+        self.assertRaises(error.InvalidChecklist, checklist.CheckList,
+                'gobbledygook.xml')
+
+    def test_CheckListCreateMemoryTest(self):
+        '''Create a checklist with no memory leaks
+
+        libxml2 requires special memory handling.  Check that we can create a
+        CheckList and destory it without any memory leaks from the libxml2
+        library.
+        '''
+        self.checklist = checklist.CheckList(os.path.join(self.dataDir,
+            'fedoraus.xml'))
+        libxml2.cleanupParser()
+        self.assert_(libxml2.debugMemory(1) == 0,
+                'FAIL: %d bytes leaked' % (libxml2.debugMemory(1)))
+        del self.checklist
+
+    def tearDown(self):
+        libxml2.debugMemory(0)
+
 def suite():
-    otherPriority = unittest.makeSuite(TestCheckList, 'test_')
-    return otherPriority
+    creationSuite = unittest.makeSuite(TestCheckListCreation, 'test_')
+    runSuite = unittest.makeSuite(TestCheckList, 'test_')
+    return unittest.TestSuite((creationSuite, runSuite))
 
 if __name__ == '__main__':
     suite = suite()

@@ -49,6 +49,7 @@ glade/GUI:
   will have to be provided.  The Review output is still not taken care of...
 
 * Disable pieces of the QA Action menu when there is no SRPM being reviewed
+ 
   - Will be taken care of in the merge with checklist.  Now have functions
     listed in the checklist that should make this happen.
 
@@ -97,6 +98,13 @@ Programming:
 * Fix the uninstalled_file lookups
 
   - DTDs have to be selected correctly when the program isn't installed.
+    This can be done by setting a libxml environment variable
+    XML_CATALOG_FILES.  May also be possible to use xmlCatalogAddLocal() to
+    do this.
+    Also look into: xmlCatalogResolve(),xmlCatalogLocalResolve() Family of
+    functions.
+    Setting XML_DEBUG_CATALOG will allow us to debug what's going on.
+    http://www.xmlsoft.org/catalog.html
   - Program should use uninstalled files only when it is uninstalled.  If it is
     installed but happens to be run in a build directory, it needs to
     recognize that.  Also, there is currently a small period where the
@@ -111,11 +119,17 @@ Programming:
     Currently paths.py is built from paths.pyin at build time.  We'd need to
     create one paths.py at build time and a separate one at install time to
     make this work.
+    + This looks like the way to go.  The new objective is to set all
+      information in the paths.py and have minimal setup processing and no
+      special processing in the main body of the program.
 
  * Finish writing unittests for the program.  We've barely scratched the
    surface of this.  When completed it should allow one to quickly figure
    out what's working and what's broken in the package.
-
+   - Basically need a set of unittests for each object defined in the program.
+     Don't yet know how to unittest the widgets.  The model objects and the
+     program object should work much better, though.
+     
 Done -- Needs testing
 =====================
 * Create preferences infrastructure : check PREFERENCES for ideas. [Nearly done]

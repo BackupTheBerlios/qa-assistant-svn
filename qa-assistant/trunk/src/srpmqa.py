@@ -163,6 +163,7 @@ Relative Priority: Publish will be the primary submission for now.  This is an e
             self.mainWinAppBar.push("No SRPM selected")
 
 ### FIXME: copied here from properties.py.  Being replaced.
+import SRPM
 class Properties:
     class SecurityError(SRPM.SecurityError):
         pass

@@ -161,20 +161,24 @@ class CheckList (gtk.TreeStore):
             raise error.InvalidChecklist('%s was not an XML file' % (path))
 
         if not ctxt.isValid():
+            checkFile.freeDoc()
             raise error.InvalidChecklist('File does not validate against '
                     'the checklist DTD')
 
         root = checkFile.getRootElement()
         if root.name != 'checklist':
+            checkFile.freeDoc()
             raise error.InvalidChecklist('File is not a valid checklist '
                     'policy file')
         if root.prop('version') != self.formatVersion:
+            checkFile.freeDoc()
             raise error.InvalidChecklist('Checklist file is not a known '
                     'version')
        
         # Extract the name and revision of the CheckList
         self.name = root.prop('name')
         if not self.name:
+            checkFile.freeDoc()
             raise error.InvalidChecklist('Checklist file does not specify '
                     'a name for itself')
         self.revision = root.prop('revision') or '0'
@@ -183,6 +187,7 @@ class CheckList (gtk.TreeStore):
         if summary:
             self.summary = summary[0].content
         else:
+            checkFile.freeDoc()
             raise error.InvalidChecklist('Checklist does not have a summary')
 
         # Create GtkTreeModel struct to store info in.
