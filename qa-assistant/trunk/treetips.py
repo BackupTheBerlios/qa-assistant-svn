@@ -34,7 +34,7 @@ class TreeTips(gtk.Widget):
         'delay' : (gobject.TYPE_INT,
                 'MSecs before displaying the tooltip.',
                 'The delay between the mouse pausing over the widget and the display of the tooltip in msec.',
-                0, 1200, 500,
+                0, 60000, 500,
                 gobject.PARAM_READWRITE),
         'enabled' : (gobject.TYPE_BOOLEAN,
                 'If TRUE the tooltips are enabled',
@@ -119,7 +119,6 @@ class TreeTips(gtk.Widget):
     def do_set_property(self, prop, value):
         '''Set the property of writable properties.
 
-        At this moment, only delay is a writable property.
         '''
         if prop.name == 'delay':
             self.delay = value

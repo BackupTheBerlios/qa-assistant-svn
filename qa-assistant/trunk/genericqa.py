@@ -46,9 +46,9 @@ class GenericQA(gtk.Menu):
         
         # File select dialog for use in file selecting callbacks.
         fileSelect = gtk.FileSelection(title='Select a file to publish the review into')
-        if (os.path.isdir(self.app.properties.lastReviewDir) and
-                os.access(self.app.properties.lastReviewDir, os.R_OK|os.X_OK)):
-            fileSelect.set_filename(self.app.properties.lastReviewDir)
+        if (os.path.isdir(self.app.lastReviewDir) and
+                os.access(self.app.lastReviewDir, os.R_OK|os.X_OK)):
+            fileSelect.set_filename(self.app.lastReviewDir)
 
         filename = None
         response = fileSelect.run()
@@ -60,7 +60,7 @@ class GenericQA(gtk.Menu):
             del fileSelect
 
         if filename:
-            self.app.properties.lastReviewDir = os.path.dirname(filename)+'/'
+            self.app.lastReviewDir = os.path.dirname(filename)+'/'
             try:
                 self.app.reviewView.publish(filename)
             except IOError, msg:

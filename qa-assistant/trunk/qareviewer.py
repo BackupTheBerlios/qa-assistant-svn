@@ -10,9 +10,6 @@
 The main program object.  From here we set up the user interface, receive
 events, and send things off for future processing.
 """
-__programName__ = "qa-assistant"
-__programHumanName__ = "QA Assistant"
-__version__ = "0.4"
 __revision__ = "$Rev$"
 
 import sys
@@ -21,12 +18,15 @@ import libxml2
 import gtk
 import gnome
 
+from qaconst import *
 import gnomeglade
 import error
 from properties import Properties
 from review import Review
 from checklist import CheckList
 from checkview import CheckView
+
+__version__ = VERSION
 
 class QAReviewer(gnomeglade.GnomeApp):
     #
@@ -48,9 +48,10 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         # Load the interface
         gladefile = 'glade/qa-assistant.glade'
-        gnomeglade.GnomeApp.__init__(self, __programName__, __version__,
+        gnomeglade.GnomeApp.__init__(self, PROGRAMNAME, __version__,
                 gladefile, 'ReviewerWindow')
-        self.program.set_property(gnome.PARAM_HUMAN_READABLE_NAME, __programHumanName__)
+        self.program.set_property(gnome.PARAM_HUMAN_READABLE_NAME,
+                HUMANPROGRAMNAME)
         
         #
         # Create additional interface components
@@ -119,7 +120,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         filename = os.path.join('data', checklist)
         checkFile = gnomeglade.uninstalled_file(filename)
         if checkFile == None:
-            filename = os.path.join(__programName__, filename)
+            filename = os.path.join(PROGRAMNAME, filename)
             checkFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
                     filename)
             if checkFile == []:
@@ -217,7 +218,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             SRPMName = os.path.basename(self.properties.SRPM.filename)
             self.mainWinAppBar.pop()
             self.mainWinAppBar.push(SRPMName)
-            self.ReviewerWindow.set_title(__programHumanName__ + ' - ' +
+            self.ReviewerWindow.set_title(HUMANPROGRAMNAME + ' - ' +
                     SRPMName)
             self.startLabel.hide()
             self.listPane.show()
@@ -230,7 +231,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             self.grabBar.hide()
             self.listPane.hide()
             self.startLabel.show()
-            self.ReviewerWindow.set_title(__programHumanName__)
+            self.ReviewerWindow.set_title(HUMANPROGRAMNAME)
             self.mainWinAppBar.pop()
             self.mainWinAppBar.push("No SRPM selected")
 
@@ -378,7 +379,7 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
         if gladeFile == None:
-            filename = os.path.join(__programName__, 'glade/qa-assistant.glade')
+            filename = os.path.join(PROGRAMNAME, 'glade/qa-assistant.glade')
             gladeFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
                     filename)
             if gladeFile == []:
@@ -387,7 +388,7 @@ class QAReviewer(gnomeglade.GnomeApp):
                 gladeFile = gladeFile[0]
 
         about = gtk.glade.XML(gladeFile, 'AboutWindow').get_widget('AboutWindow')
-        about.set_property('name', __programHumanName__)
+        about.set_property('name', HUMANPROGRAMNAME)
         about.set_property('version', __version__)
         iconFile = gnomeglade.uninstalled_file('pixmaps/qa-icon.png')
         if iconFile == None:
@@ -515,7 +516,7 @@ Relative Priority: Low.  There's too much programming to do for me to spend too 
 
         gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
         if gladeFile == None:
-            filename = os.path.join(__programName__, 'glade/qa-assistant.glade')
+            filename = os.path.join(PROGRAMNAME, 'glade/qa-assistant.glade')
             gladeFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
                     filename)
             if gladeFile == []:

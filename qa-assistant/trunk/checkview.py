@@ -9,7 +9,9 @@
 __revision__ = '$Rev$'
 
 import gtk
+import gconf
 
+from qaconst import *
 from optionrenderer import OptionCellRenderer
 from treetips import TreeTips
 import checklist
@@ -52,6 +54,21 @@ class CheckView(gtk.TreeView):
         self.append_column(column)
 
         self.tips = TreeTips(self, checklist.DESC)
+
+        # Get preferences from gconf for setting the treetip help.
+        self.gconfClient = gconf.client_get_default()
+        self.gconfClient.add_dir(GCONFPREFIX, gconf.CLIENT_PRELOAD_NONE)
+        key = GCONFPREFIX + '/disable-checklist-descriptions'
+        self.gconfClient.notify_add(key, self.__change_treetip_show)
+        if self.gconfClient.get_bool(key):
+            self.tips.disable()
+        else:
+            self.tips.enable()
+        key = GCONFPREFIX + '/checklist-description-wait'
+        self.gconfClient.notify_add(key, self.__change_treetip_delay)
+        tipDelay = self.gconfClient.get_int(key)
+        if tipDelay:
+            self.tips.set_property('delay', tipDelay)
 
     def display_output(self, display):
         '''Hides or shows the output column.
@@ -149,3 +166,29 @@ class CheckView(gtk.TreeView):
         else:
             mode=gtk.CELL_RENDERER_MODE_INERT
         cell.set_property('mode', mode)
+
+        #
+        # GConf helper functions
+        #
+        
+    def __change_treetip_show(self, client, connectID, entry, extra):
+        '''Enable and disable showing the help description.
+
+        '''
+        if entry.value and entry.value.type == gconf.VALUE_BOOL:
+            if entry.value.get_bool():
+                self.tips.disable()
+            else:
+                self.tips.enable()
+
+    def __change_treetip_delay(self, client, connectID, entry, extra):
+        '''Change the timeout before the help is displayed.
+
+        '''
+        if entry.value and entry.value.type == gconf.VALUE_INT:
+            delay = entry.value.get_int()
+            if delay:
+                self.tips.set_property('delay', delay)
+            else:
+                self.tips.set_property('delay', 500)
+

@@ -9,7 +9,8 @@ SUBDIRS = tests
 bin_SCRIPTS = qa-assistant qa-convert
 
 qa-convert: qa-assistant
-qa-assistant: paths.py
+qa-assistant: paths.py \
+	qaconst.py
 
 qa_assistantdir = $(datadir)/qa-assistant
 
@@ -29,7 +30,8 @@ qa_assistant_PYTHON = \
 
 # Generated program files
 nodist_qa_assistantdir = $(datadir)/qa-assistant
-nodist_qa_assistant_PYTHON = paths.py
+nodist_qa_assistant_PYTHON = paths.py \
+			     qaconst.py
 
 iconsdir = $(datadir)/pixmaps
 icons_DATA = pixmaps/qa-icon.png
@@ -74,6 +76,7 @@ EXTRA_DIST = \
 	qa-assistant.pyin \
 	qa-convert.pyin \
 	paths.py.pyin \
+	qaconst.py.in \
 	autogen.sh \
 	qa-assistant.spec \
 	qa-assistant.spec.in \

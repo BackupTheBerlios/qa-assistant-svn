@@ -26,15 +26,6 @@ class Properties:
         # working right now.
         self.SRPM = None
 
-        ### FIXME: The following need to go into preferences (GConf)
-        # Directories last searched (for FileSelect Dialogs)
-        self.lastSRPMDir = './'
-        self.lastSaveFileDir = './'
-        self.lastReviewDir = './'
-        # Colors to use on output text
-        self.failColor = 'red'
-        self.minorColor = 'purple'
-        self.passColor = 'dark green'
         pass
 
     def dialog(self):

@@ -49,4 +49,5 @@ AC_OUTPUT([
 Makefile
 tests/Makefile
 qa-assistant.spec
+qaconst.py
 ])

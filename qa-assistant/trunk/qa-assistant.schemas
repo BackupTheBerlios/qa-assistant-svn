@@ -98,18 +98,18 @@
       </locale>
     </schema>
     <schema>
-      <key>/schemas/apps/qa-assistant/show-checklist-descriptions</key>
-      <applyto>/apps/qa-assistant/show-checklist-descriptions</applyto>
+      <key>/schemas/apps/qa-assistant/disable-checklist-descriptions</key>
+      <applyto>/apps/qa-assistant/disable-checklist-descriptions</applyto>
       <owner>qa-assistant</owner>
       <type>bool</type>
-      <default>true</default>
+      <default>false</default>
       <locale name="C">
-        <short>Display checklist description in a popup window</short>
+        <short>Don't display checklist descriptions.</short>
         <long>
           Each checklist entry can have a long description associated with
           it that explains what the entry is for.  It may also contain hints
-          for filling out the item.  Setting this to True enables display of
-          these descriptions.  A False setting disables it.
+          for filling out the item.  Setting this to False enables display of
+          these descriptions.  A True setting disables it.
         </long>
       </locale>
     </schema>

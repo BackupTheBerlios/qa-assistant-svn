@@ -16,6 +16,10 @@ Person
 * Whether to sign [s]
 * Signing identity [s]
 
+Files
+(Probably happen in the main program)
+* Directory to unrpm into [s]
+
 Display
 (Happen in the checklist.)
 * Automatically display failed reviews [s] [c]
@@ -23,12 +27,8 @@ Display
 
   (These can probably be implemented in the checkview and cause settings
   to change on the checkview's treetip.)
-* Tooltip DESCRIPTION enable/disable [s]
-* Tooltip timeout [s]
-
-Files
-(Probably happen in the main program)
-* Directory to unrpm into [s]
+* Tooltip DESCRIPTION enable/disable [s] [c]
+* Tooltip timeout [s] [c]
 
 Status Key:
   [s] In schema
@@ -49,17 +49,6 @@ Coding wise we need three things:
     seem to create a new client, just get a reference to a main gconf client.
     The app keeps a copy of it, then it needs to pass the client to the other
     modules somehow. [Going with each module that uses it]
-  * Colors: When initially creating the checklist, we need to create
-     properties for the output color states.
-     - When the color changes, GConfClient is notified.  When that happens,
-       call a function to change the values of the checklist OUTPUT to the new
-       values.
-       [Ugh.  ths would mean changing each of the OUTPUT strings, not just the
-       ones that are displayed.  Maybe we want to move back to pangoizing on
-       DISPLAY, rather than PANGOIZE on entry into the checklist.]  So values
-       in OUTPUTLIST are unpangoized.  values in OUTPUT are pangoized.  Values
-       in OUTPUT that are changed are entered into OUTPUTLIST and then
-       pangoized.] [check]
 
 3) We need to have a dialog box that has entries for all the properties.
    This can be a glade dialog as the box should be the same for all checklists.
@@ -93,3 +82,6 @@ the checklist object.
 * Bugzilla URL
 * SRPM to check
 * QA checklist loaded
+
+We have a properties dict in the CheckList right now.
+What are we going to do with that?

@@ -18,6 +18,7 @@ import gtk
 import gobject
 import gconf
 
+from qaconst import *
 import error
 
 # TreeStore entries displayed on the screen
@@ -82,9 +83,6 @@ class CheckList (gtk.TreeStore):
     canonicalURL = 'http://qa-assistant.sf.net/dtds/checklist/' \
             + formatVersion + '/checklist.dtd'
 
-    # Prefix for the gconf keys
-    __GCONFPREFIX = '/apps/qa-assistant'
-
     class __Entry:
         '''Private class.  Holds entry information until ready to output.'''
 
@@ -142,12 +140,12 @@ class CheckList (gtk.TreeStore):
         self.colorRE = re.compile('^#[A-Fa-f0-9]{6}$')
         self.gconfClient = gconf.client_get_default()
 
-        self.gconfClient.add_dir(self.__GCONFPREFIX, gconf.CLIENT_PRELOAD_NONE)
+        self.gconfClient.add_dir(GCONFPREFIX, gconf.CLIENT_PRELOAD_NONE)
         self.__init_colors('/pass-color')
         self.__init_colors('/fail-color')
         self.__init_colors('/minor-color')
         self.__init_colors('/notes-color')
-        key = self.__GCONFPREFIX + '/no-auto-display'
+        key = GCONFPREFIX + '/no-auto-display'
         self.noAutoDisplay = self.gconfClient.get_bool(key)
         self.gconfClient.notify_add(key, self.__change_auto_display)
         
@@ -579,7 +577,7 @@ class CheckList (gtk.TreeStore):
         Initializes the colors for displaying the checklist from gconf into
         our private variables.
         '''
-        key = self.__GCONFPREFIX + colorKey
+        key = GCONFPREFIX + colorKey
         self.gconfClient.notify_add(key, self.__color_changed, colorKey)
         color = self.gconfClient.get_string(key)
         if color and self.colorRE.match(color):
