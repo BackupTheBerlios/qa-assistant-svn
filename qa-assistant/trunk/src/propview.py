@@ -12,12 +12,10 @@ import gtk
 import properties
 
 class PropertiesView(gtk.HBox):
-    '''
+    '''View and set Properties on a CheckList.
 
+    PropertiesView displays and sets properties on the model.
     '''
-    # The Properties structure holds information about all the properties on
-    # the checklist.  We are going to use this as the model.
-    #
     # What things are we going to do to the model?
     # We need to create a widget that allows setting of the properties.
     #  - The widget must have a callback that checks if it has all required
@@ -29,13 +27,16 @@ class PropertiesView(gtk.HBox):
         gtk.HBox.__init__(self)
 
         self.model = model
-        if model:
-            self.create_layout()
+        self.create_layout()
             
     def create_layout(self):
         '''
         '''
         props = self.model
+        if not props:
+            self.add(gtk.Label(
+                'This Checklist does not contain any properties.'))
+            return
         
         self.labels = gtk.VBox()
         self.entries = gtk.VBox()
@@ -46,16 +47,24 @@ class PropertiesView(gtk.HBox):
         for propName in props.keys():
             label = gtk.Label(propName)
             self.labels.add(label)
-            value = props[propName].value or ''
             if props[propName].propType == 'automatic':
+                value = props[propName].value or '<No value>'
                 self.propDisplays[propName] = gtk.Label(value)
             else:
-                self.propDisplays[propName] = gtk.Entry()
-                self.propDisplays[propName].set_text(value)
-                ### FIXME: Set a callback to update properties when Entry
-                # changes are "committed"
+                value = props[propName].value or ''
+                entry = gtk.Entry()
+                entry.set_text(value)
+                entry.connect('focus-out-event', self._change_property,
+                        propName)
+                self.propDisplays[propName] = entry
             self.entries.add(self.propDisplays[propName])
             
+    def _change_property(self, entry, event, propName):
+        '''
+
+        '''
+        self.model[propName] = entry.get_text()
+        
     ### FIXME: Method to tell us if all onload Properties have been satisfied
 
     def set_model(self, model):

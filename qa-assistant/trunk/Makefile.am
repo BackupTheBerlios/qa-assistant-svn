@@ -28,6 +28,8 @@ datafilesdir = $(qa_assistantdir)/data
 datafiles_DATA = data/fedoraus.xml \
 		 data/softwarerelease.xml
 
+noinst_DATA = data/minimal-valid.xml
+
 uifilesdir = $(qa_assistantdir)/glade
 uifiles_DATA = glade/qa-assistant.glade \
 	glade/qa-assistant.gladep \

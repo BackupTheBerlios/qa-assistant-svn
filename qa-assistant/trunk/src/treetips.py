@@ -55,9 +55,11 @@ class TreeTips(gtk.Widget):
     def __init__(self, treeview=None, column=None):
         '''Create a new TreeTips Group.
 
-        Keyword -- arguments:
-        treeview -- the treeview the tips are associated with
-        column -- the column id the tip text comes from
+        :Parameters:
+            treeview : gtk.TreeView === Treeview for which the tips display,
+                default is None.
+            column : integer === Column id in the Treemodel holding the treetip
+                    text, default is None.
         '''
         if treeview:
             try:
@@ -188,20 +190,20 @@ class TreeTips(gtk.Widget):
         return False
 
     def __compute_tooltip_position(self, cellInfo, popupWidth, popupHeight):
-        '''Figures out where the tooltip should be placed on the page
+        '''Figures out where the tooltip should be placed on the page::
 
-        [p] = pointer
-        x =      [p]
-             +---------+
-        (half on each side)
-
-        y =      [p]
-            +------------+
-            |____________|
-        If it fits else:
-            +------------+
-            |____________|
-                 [p]
+          [p] = pointer
+          x =      [p]
+               +---------+
+          (half on each side)
+  
+          y =      [p]
+              +------------+
+              |____________|
+          If it fits else:
+              +------------+
+              |____________|
+                   [p]
         '''
 
         xOrigin, yOrigin = self.view.get_bin_window().get_origin()

@@ -247,7 +247,7 @@ class NewDruid(gtk.Window):
         propertiesPage.set_title('Set Checklist Properties')
         propertiesPage.set_logo(self.logo)
         
-        propForm = PropertiesWidget()
+        propForm = PropertiesView()
         self.propertiesPage.append_item('', propForm, '')
       
         self.druidWidget.add(propertiesPage)

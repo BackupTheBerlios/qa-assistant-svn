@@ -448,21 +448,23 @@ class CheckList (gtk.TreeStore):
         node.setProp('revision', self.baseRevision)
        
         # Output properties we're concerned with
-        props = root.newChild(None, 'properties', None)
-        for propName in self.properties.keys():
-            prop = self.properties[propName]
-            node = props.newChild(None, 'property', None)
-            node.setProp('name', propName)
-            node.setProp('type', prop.valueType)
-            require = node.newChild(None, 'require', None)
-            require.setProp('type', prop.propType)
-            for arg in prop.args:
-                require.newTextChild(None, 'arg', arg)
-            if prop.function:
-                function = require.newTextChild(None, 'function', prop.function)
-                function.setProp('type', prop.functionType)
-            if prop.value:
-                node.newTextChild(None, 'value', prop.value)
+        if self.properties:
+            props = root.newChild(None, 'properties', None)
+            for propName in self.properties.keys():
+                prop = self.properties[propName]
+                node = props.newChild(None, 'property', None)
+                node.setProp('name', propName)
+                node.setProp('type', prop.valueType)
+                require = node.newChild(None, 'require', None)
+                require.setProp('type', prop.propType)
+                for arg in prop.args:
+                    require.newTextChild(None, 'arg', arg)
+                if prop.function:
+                    function = require.newTextChild(None, 'function',
+                            prop.function)
+                    function.setProp('type', prop.functionType)
+                if prop.value:
+                    node.newTextChild(None, 'value', prop.value)
 
         # Output functions
         functions = root.newChild(None, 'functions', None)

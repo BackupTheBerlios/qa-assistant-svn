@@ -1,10 +1,78 @@
+2005-02-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r167    
+    * src/checkload.py: Rename PropertiesWidget object to PropertiesView.
+    
+2005-02-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r166    
+    * src/propview.py: New module that creates a widget PropertiesView that
+      allows displaying and setting the Properties.
+    * src/checkload.py:
+      + build_properties(): Remove the placeholder and use the PropertiesView
+        widget instead.
+      + properties_create(): Fill the PropertiesView with the Properties from
+        the current CheckList.
+    * src/Makefile.am: Add propview.py.
+    * BUGS: Note that gtk.TreeStore.set() performance may not be possible.
+    
+2005-02-22 Toshio Kuratomi <toshio@tiki-lounge.com> - r165    
+    * tests/propertiestest.py:
+      + Add check that keys are correctly returned as FIFO order.
+      + Set expansion of svn:keywords Rev, Id, Date.
+    * configure.ac: Up version to 0.4.90.3.
+    * Up version to 0.4.90.3 and add note about implementing properties.
+    
+2005-02-22 Toshio Kuratomi <toshio@tiki-lounge.com> - r164    
+    * src/properties.py:
+      + Add svn:keyword expansion for Rev and Id
+      + keys(): Removed unused sorted argument.
+    * src/review.py: Added import of gobject.
+    * src/preferences.py: Remove import of os.
+    * src/checkview.py: Added import of gobject.
+    * src/checklist.py: Fix value entry.  Needs to be set into the propEntry
+      rather than a local variable.
+    * src/qareviewer.py:
+      + Added import of gtk.glade.
+      + Note that on_menu_new_srpm_activate() is totally broken.
+    * src/checkload.py: Note that we need to replace the file checker with the
+      new FileSelector.
+    * src/gpg.py: Add svn:keyword expansion of Rev and Id.
+    
+2005-02-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r163    
+    * src/properties.py:
+      + PropEntry:
+        - Add a functionType attribute.
+        - Initialize all values to None and empty list.
+      + Properties: Note that we still want to add type checking and the
+        ability to invoke functions to set properties.
+    * src/checklist.py:
+      + Remove the private __Properties class.  Replaced by PropEntry.
+      + __init__(): 
+        - self.properties now instantiates a properties.Properties object.
+        - Rename local var properties to props so it doesns't conflict with
+          the properties module.
+        - Fill a PropEntry and add it to self.properties rather than using the
+          __Properties private class and putting it in a private list.
+      + publish(): Retrieve values from the Properties object to set into the
+        savefile.
+    * tests/testchecklist.py, tests/checklisttest.py: Renamed testchecklist.py
+      to checklisttest.py.
+    * tests/testtreetips.py, tests/treetipstest.py: Renamed testtreetips.py to
+      treetipstest.py.
+    * tests/Makefile.am: Change names on all renamed files.
+    * tests/testcreation.py, tests/creationtest.py: Renamed testcreation.py to
+      creationtest.py.
+    * tests/test.py:
+      + Change names on all renamed files.
+      + Add the propertiestest module to the set of all tests.
+    
+2005-02-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r162    
+    * ChangeLog: Update to (r161).
+    
 2005-02-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r161    
     * src/properties.py:
       + Add a PropEntry class for getting information into and out of the
         Properties class.
       + Move PropertiesWidget out to another class.
-      + __init__(): Keep the keys in a __sortedKeys variable.  This is structured
-        in terms of what order these were added.
+      + __init__(): Keep the keys in a __sortedKeys variable.  This is
+        structured in terms of what order these were added.
       + __setitem__(): Override Properties[] so we can set values or add new
         values through this interface.
       + keys(): Override keys to return __sortedkeys.
