@@ -30,3 +30,7 @@ gchar *s = N_("*");
 gchar *s = N_("Report Number");
 gchar *s = N_("Enter a buzilla report number to ");
 gchar *s = N_("*");
+gchar *s = N_("QA Assistant Druid");
+gchar *s = N_("Start a New QA QA Review");
+gchar *s = N_("QA Assistant uses the consept of filling out a checklist to approach th e creation of a QA Report.  This Druid will walk you through the process of starting a new QA Review using QA Assistant's checklists.");
+gchar *s = N_("QA Assistant Preferences");

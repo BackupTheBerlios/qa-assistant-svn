@@ -65,6 +65,9 @@ distuninstallcheck_listfiles = find $(prefix) -type f -not -path $(ROOTCATALOG) 
 $(Desktop_DATA): $(Desktop_in_files)
 	cp $< $@
 
+GCONF_SCHEMA_FILES = \
+		     qa-assistant.schemas
+
 EXTRA_DIST = \
 	PREFERENCES \
 	TODO \
@@ -80,6 +83,7 @@ EXTRA_DIST = \
 	$(uifiles_DATA) \
 	$(Desktop_in_files)	\
 	$(Desktop_DATA)		\
+	$(GCONF_SCHEMA_FILES)	\
 	$(icons_DATA)		
 
 CLEANFILES= \
@@ -96,7 +100,11 @@ CLEANFILES= \
 	    -e "s,@#prefix#@,$(prefix)," \
 	    -e "s,@#sysconfdir#@,$(sysconfdir)," \
 	    -e "s,@#pkgdatadir#@,$(pkgdatadir)," < $<  > $@
-
+	    
+install-schemas: $(GCONF_SCHEMA_FILES)
+	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) \
+			    gconftool-2 --makefile-install-rule $<
+			    
 install-data-hook:
 # automake's py_compile script compiles DESTDIR into the module's paths
 # which is not what we want.  (DESTDIR is a staging area so it

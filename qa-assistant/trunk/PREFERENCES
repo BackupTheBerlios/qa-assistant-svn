@@ -11,15 +11,57 @@ Preferences
 Preferences are set on the app.  They could be implemented as GConf
 variables.
 
-* Automatically display failed reviews
-* Signing identity
+Person
+* Whether to sign [s]
+* Signing identity [s]
+
+Display
+* Automatically display failed reviews [s]
+* Text colours [s]
+* Tooltip DESCRIPTION enable/disable [s]
+* Tooltip timeout [s]
+
+Files
+* Directory to unrpm into [s]
+
+Coding wise we need three things:
+
+1) We need to write the gconf schema file describing the keys.
+
+2) We need to have a dialog box that has entries for all the properties.
+   This can be a glade dialog as the box should be the same for all checklists.
+   The dialog needs to take input about all the preferences listed here.
+   [preferences.py]
+
+3) When the submit button is pressed, put the information into the gconf
+   database and change the effect of the values on the program.
+
+   * Colors: When initially creating the checklist, we need to create
+     properties for the output color states.
+     - When the color changes, GConfClient is notified.  When that happens,
+       call a function to change the values of the checklist OUTPUT to the new
+       values.
+       [Ugh.  ths would mean changing each of the OUTPUT strings, not just the
+       ones that are displayed.  Maybe we want to move back to pangoizing on
+       DISPLAY, rather than PANGOIZE on entry into the checklist.]  So values
+       in OUTPUTLIST are unpangoized.  values in OUTPUT are pangoized.  Values
+       in OUTPUT that are changed are entered into OUTPUTLIST and then
+       pangoized.]
+
+http://developer.gnome.org/doc/API/2.0/gconf/
+
+(This one is a program property.  It should start out as the current working
+directory everytime the program starts and change as the program progresses.)
+* File directories
+
+(Hmmm is this a gpg option instead?)
 * Keyserver to download new keys from
-* Directory to unrpm into
-* Text colours
+
+Properties?
 * Submit to bugzilla or publish to file
+
+Druid?
 * Default QA checklist to load
-* Tooltip DESCRIPTION enable/disable
-* What bugzilla to check
 
 Properties
 ----------

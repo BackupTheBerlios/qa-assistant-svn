@@ -66,6 +66,7 @@ class QAReviewer(gnomeglade.GnomeApp):
                 iconFile = iconFile[0]
         if iconFile:
             self.ReviewerWindow.set_property('icon', gnomeglade.load_pixbuf(iconFile))
+            #self.NewDruid.set_property('icon', gnomeglade.load_pixbuf(iconFile))
 
         # Create the views onto the checklist
         self.checkView = CheckView()
@@ -92,6 +93,12 @@ class QAReviewer(gnomeglade.GnomeApp):
         # Command line initialization
         #
         ### FIXME: take care of the command line args
+
+        ### FIXME: When checking for commandline args also use it to change
+        # these values.
+        self.lastSRPMDir = './'
+        self.lastSaveFileDir = './'
+        self.lastReviewDir = './'
 
         ### FIXME: Absolute dependence on arguments[1] being an SRPM without a
         # check to make sure of it.  Need to fix that up with cmd-line args.

@@ -66,7 +66,7 @@ class TreeTips(gtk.Widget):
             except AttributeError, TypeError:
                 raise TypeError, ('The value of view must be an object that'
                         'implements leave-notify-event and motion-notify-event '
-                        'gsignals')
+                        'gsignals such as gtk.TreeStore.')
 
         gobject.GObject.__init__(self)
 
