@@ -1,3 +1,40 @@
+2004-09-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r112    
+    * tests, tests/testchecklist.py, test.py, tests/Makefile.am,
+      tests/testcreation.py, configure.ac, Makefile.am: The tests directory
+      holds unittests for QA Assistant.  Currently, there are two in-progress
+      modules: One that tests creation of new objects.  A second that tests
+      the functioning of checklist objects.
+    
+2004-09-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r111    
+    * checklist.py: Correct a syntax error in our lowercasing of entries for
+      duplication checking that our unittesting framework caught.  Need to
+      start working on merging unittests into the program's build.
+    
+2004-09-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r110    
+    * Warning: Untested.  Probably broken.  Basic changes to the data format.
+    * checklist.py: Bugfix: When checking for duplicate entries, ignore case
+      as we probably want to consider "Parts Move", "Parts move", and
+      "parts move" as duplicates of each other.
+    * BUGS: Move the duplicate entries bug to testing.
+    * data/checklist.dtd:
+      - Add file to the allowed PropType's.  I was going to rely on file URL
+        but have decided a file type makes it easier to know when to open a
+        file selection dialog.
+      - Add FuntionType that tells where a function is to be used.
+      - Add RequireType that tells at what point a Property needs to be known.
+      - Restructure property element to hold a function that can select the
+        property's value.
+    * data/fedoraus.xml:
+      - Use the new function information for properties.
+      - Add type information to functions.
+    
+2004-09-23 Toshio Kuratomi <toshio@tiki-lounge.com> - r109    
+    * AUTHORS, BUGS, PREFERENCES, NEWS, README, TODO: Small formatting fixes
+      to make the files ReStructuredText compliant.  I can now transform them
+      all with rst2html to make HTML documentation.
+    * qareviewer.py: Remove 'None' from a conditional.
+    * ChangeLog: Update to r108
+    
 2004-09-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r108    
     * checklist.py:
       - Removed __added_row from handling __row-inserted signals and
@@ -5,7 +42,7 @@
         add_entry().
       - add_entry() no longer returns an iter to the new entry as using
         the iter is taken care of in add_entry().
-      - Fix exception name DuplicateItem instad of DuplicateItemError.
+      - Fix exception name DuplicateItem instead of DuplicateItemError.
       - Fix problem in check_category_resolution() where an iter variable
         was split into two when it was renamed.
     * BUGS:
@@ -283,7 +320,7 @@
         item that is already allocated.
       - add_entry(): returns an iter to the new entry.  not sure if this
         should be a permanent part of the API or just a quick hack to get
-        resoution changing working.
+        resolution changing working.
     * qareviewer.py:
       - Remove all the DTD handling stuff as it's now done with xml catalogs
         instead.
@@ -376,7 +413,7 @@
 2004-07-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r79    
     * Merge the savefile branch back to the mainline.
     * properties.py:
-      - Remove cheklistName and checklistRev as these are now set on
+      - Remove checklistName and checklistRev as these are now set on
         checklist load now. (r75)
       - Create a set method to set a property if it exists. (r78)
     * savefile.py:
@@ -466,7 +503,7 @@
       - Fix looking for properties.checklist (filename) instead of
         checklistName (symbolic name)
       - Remove the publish callback as it's now in genericqa.py
-      - Create on_menu_save_as_activate modelled on genericqa.py:publish
+      - Create on_menu_save_as_activate modeled on genericqa.py:publish
         (review).
       - Rearrange things with the FileSelectDialog when loading an SRPM to
         run as little as possible under the try:finally: block.
@@ -474,7 +511,7 @@
       that we need to look at.
     * data/qasave.dtd: <checklist> is no longer empty.  Instead it contains
       the filename of the checklist.
-    * data/sample-save.xml: <checklist> now contians the filename of the
+    * data/sample-save.xml: <checklist> now contains the filename of the
       checklist.
     * NEWS: Add saving and loading to the new features.
     
@@ -528,7 +565,7 @@
     * configure.ac:
       - Add a header to describe what the file does.
       - Set Id and Rev keyword expansion
-      - Check for PYGNOME existance as well as pygtk.
+      - Check for PYGNOME existence as well as pygtk.
     * TODO: Reformat.
     * qa-assistant.spec.in: Add Requires gnome-python-gconf2 and pygtk2
     * Makefile.am: Add a header and Id Rev expansion
@@ -552,7 +589,7 @@
       - Change function names from __xmlToEntry() form to __xml_to_entry()
       - Create a new data struct 'entries' which is a map of Summary => iter.
         The immediate need was to have fast lookups of what Summary items
-        appear in the checklist.  Eventualy, the Review widget should also use
+        appear in the checklist.  Eventually, the Review widget should also use
         this to quickly access an iter from a Summary value.
       - colorize_output: Move colorization of output to its own function.
       - __add_to_entry_lookup: New function to support the entries dict.
@@ -620,8 +657,8 @@
     * genericqa.py: A new subclass of gtk.Menu.  This represents a generic QA
       Menu with callbacks for its menu items.  Actions that can be performed
       on all QA checklists should be added here.
-    * srpmqa.py: A new subclass of genericqa.py that adds menuitems and callbacks
-      for actions specific to writing a review of an srpm.
+    * srpmqa.py: A new subclass of genericqa.py that adds menuitems and
+      callbacks for actions specific to writing a review of an srpm.
     * checklist.py: Comments for each of the TreeModel field enums
     * qareviewer.py: Import the proper QA Menu code depending on the type of
       checklist we load.
@@ -646,8 +683,8 @@
     * TODO, NEWS: Check for 'Needs-Reviewing' Resolution done.
     
 2004-04-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r59    
-    * checklist.py, qareviewer.py: Give the whole props array to the new checklist
-      rather just the colors.
+    * checklist.py, qareviewer.py: Give the whole props array to the new
+      checklist rather just the colors.
     * TODO: Note that textwrap is a python 2.3 method.
     
 2004-04-15 Toshio Kuratomi <toshio@tiki-lounge.com> - r58    
@@ -662,11 +699,11 @@
       - Note about __load_checklist bug
       - Set colors when editing an output string
     * TODO: Remove colorize.  Add spec file
-    * NEWS: Add coloiize to the list of new features
+    * NEWS: Add colorize to the list of new features
     
 2004-04-15 Toshio Kuratomi <toshio@tiki-lounge.com> - r56    
-    * qareviewer.py: Fix a bug where reloading the checklist causes editing of the
-      entries to stop working.
+    * qareviewer.py: Fix a bug where reloading the checklist causes editing of
+      the entries to stop working.
     
 2004-04-14 Toshio Kuratomi <toshio@tiki-lounge.com> - r50    
     * ChangeLog: Update to r49
@@ -682,15 +719,15 @@
     * paths.py.pyin: Python file that has variables which make expands to point
       at various parts of the installation path.  This gives us access to the
       paths the user gives to configure for Gnome functions.
-    * qa-assistant.desktop.in: First stab at a desktop file to put things in the
-      menus.  It is a .in because intltool messes with it.  However, we aren't
-      yet using that.
+    * qa-assistant.desktop.in: First stab at a desktop file to put things in
+      the menus.  It is a .in because intltool messes with it.  However, we
+      aren't yet using that.
     * qa-assistant, qa-assistant.pyin: Moved qa-assistant to .pyin because we
       need make to append the install directory ($pkgdatadir) to the python
       import path.
     * gnomeglade.py:
       - Set the gnome PARAM_APP_* properties on the GnomeApp object using the
-        confiugre values stored in paths.py
+        configure values stored in paths.py
       - GnomeApp.__uninstalled_file(): looks for the filename in the program's
         directory.  Useful when testing the program in the build directory.
       - GnomeApp.locate_file(): simulate the libgnome function.  Look for
@@ -699,7 +736,7 @@
     * README:
       - Changes for sourceforge and the fact that it can now install
       - Bump version to 0.3
-    * checklist.py: Accomodate the checklist now having a type.
+    * checklist.py: Accommodate the checklist now having a type.
     * qareviewer.py:
       - Separate programName from programHumanName
       - Bump version to 0.3
@@ -765,19 +802,19 @@
       - __SRPM_into_properties() loads a new SRPM file into the properties
         structure
       - __check_readiness() figures out whether we've got an SRPM and are ready
-        to load a checklist or need to display a label that says we aren't ready
-        to do anything yet.
+        to load a checklist or need to display a label that says we aren't
+        ready to do anything yet.
       - Implement persistent directories for FileSelect Dialogs
       - Implement New From SRPM menu item
     * TODO: Move notes from qa-assistant into the TODO
     * qa-assistant: Move TODO comments into the TODO
     * glade/qa-assistant.glade: Create startLabel which displays a message when
-      we don't have an SRPM targetted (So the user won't start filling in a
+      we don't have an SRPM targeted (So the user won't start filling in a
       checklist by mistake.)
     
 2004-04-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r40    
-    * treetips.py: Fix timeoutID to keep from popping up tooltips when we aren't
-      hovering over a tooltip item.
+    * treetips.py: Fix timeoutID to keep from popping up tooltips when we
+      aren't hovering over a tooltip item.
     * checklist.py: Remove extraneous whitespace from the xml content nodes.
       May revisit this in the future.
     * TODO: Note that python textwrap may be able to solve the wordwrapping in
@@ -824,7 +861,7 @@
     * TODO: Add note to work on scripts to install and distribute the program
     
 2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r34    
-    * Copy fedora-rpmdevtools over to the new project.  Will delete extaneous
+    * Copy fedora-rpmdevtools over to the new project.  Will delete extraneous
       files shortly.
     
 2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r33    
@@ -877,19 +914,21 @@
     * qareviewer.py: Catch exceptions from libxml2.treeError as well as
       libxml2.parserError
     * TODO: Logo item and needing something to "force" the user to edit output
-      items when they could add useful information that the program can't guess.
+      items when they could add useful information that the program can't
+      guess.
     * data/checklist.dtd:
       - Remove input
       - Set false as the default display state
       - Remove output: information is now directly in the state tag
     * data/fedoraus.xml:
-      - Add DoCTYPE line to associate with checklist.dtd
+      - Add DOCTYPE line to associate with checklist.dtd
       - Add many more entries from the Fedora Checklist
       - Changes to output and input for new dtd.
     
 2004-03-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r26    
     * qareviewer.py:
-      - Reorder menu callbacks in depth first order they appear in the menu bar.
+      - Reorder menu callbacks in depth first order they appear in the menu
+        bar.
       - publish_activate: Prompt user for a filename to save the review to.
     * TODO: Remove items that have been completed and notes to enhance others.
     * glade/qa-assistant.strings, glade/qa-assistant.glade: Remove the
@@ -942,8 +981,8 @@
       Assistant
     * properties.py: Initial work on a properties class to keep properties
       for the review
-    * review.py: Initial, non-working start on the review widget.  May implement
-      as a glade custom widget
+    * review.py: Initial, non-working start on the review widget.  May
+      implement as a glade custom widget
     * PREFERENCES: split into preferences/properties
     * qareviewer.py: add SRPM and Properties code
       - Reorganized the method ordering to be more logical
@@ -975,10 +1014,10 @@
       custom optionrenderer that simulates a combo box. 
     
 2004-03-09 Toshio Kuratomi <toshio@tiki-lounge.com> - r18    
-    Able to switch from review view to in-list view.
-
+    * Able to switch from review view to in-list view.
+    
 2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r17    
-    Parsing the checklist is done.  Doesn't display well or do anything yet.
+    * Parsing the checklist is done.  Doesn't display well or do anything yet.
     
 2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r16    
     * qareviewer.py, fedora-qareviewer: Split QAReviewer Class to its own file.
@@ -993,11 +1032,12 @@
     * Change <help> to <description>
 
 2004-03-02 Toshio Kuratomi <toshio@tiki-lounge.com> - r12    
-    Set up svn properties on the files.
-
+    * Set up svn properties on the files.
+    
 2004-03-02 Toshio Kuratomi <toshio@tiki-lounge.com> - r11    
-    Initial import of fedora-qareviewer, a program to aid Quality Assurance Reviews
-
+    * Initial import of fedora-qareviewer, a program to aid Quality Assurance
+      Reviews.
+    
 2004-03-02 Toshio Kuratomi <toshio@tiki-lounge.com> - r10    
     * COPYING: checkin a copy of the GPL version 2
 
@@ -1014,26 +1054,30 @@
         the RPM header MD5's against the actual md5s
     
 2004-02-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r8    
-    * fedora.md5: Note that the regex check for directory structure isn't exact.
+    * fedora.md5: Note that the regex check for directory structure isn't
+      exact.
     
 2004-02-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r7    
-    Set keyword expansion on the file
+    * Set keyword expansion on the file.
     
 2004-02-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r6    
-    Remove some comments that aren't going to be implemented now
-
+    * Remove some comments that aren't going to be implemented now.
+    
 2004-02-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r5    
-    New Program fedora-md5 that replaces the old shell script of the same name
-
+    * New Program fedora-md5 that replaces the old shell script of the same
+      name.
+    
 2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r4    
-    $ keyword should be $
-
+    * $ keyword should be $
+    
 2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r3    
-    Get svn:keywords right
-
+    * Get svn:keywords right
+    
 2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r2    
-    Expand keywords in the script
+    * Expand keywords in the script.
     
 2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r1    
-    Checkin my script and a directory layout.  The script performs hashing of source files fine but doesn't do any of the other stuff I have planned.
-
+    * Checkin my script and a directory layout.  The script performs hashing
+      of source files fine but doesn't do any of the other stuff I have
+      planned.
+    

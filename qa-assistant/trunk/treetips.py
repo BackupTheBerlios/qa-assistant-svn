@@ -30,7 +30,17 @@ class TreeTips(gtk.Widget):
         treeview -- the treeview the tips are associated with
         column -- the column id the tip text comes from
         """
+       
+        assert isinstance(treeview, gtk.TreeView), \
+                "%s is not a gtk.TreeView" % (treeview)
+        self.tree = treeview
+
+        ### FIXME: make sure that the data we are getting is correct.
+        # 2) treeview has a column numbered column that is a string type.
+        # Get model from treeview.  attempt to get model[column].  if that
+        # is a string we're set, else assert.
         
+        self.column = column
         self.tipWindow = gtk.Window(gtk.WINDOW_POPUP)
         self.tipWindow.set_app_paintable(True)
         self.tipWindow.set_border_width(4)
@@ -40,8 +50,6 @@ class TreeTips(gtk.Widget):
         self.label.set_alignment(0.5, 0.5)
         self.tipWindow.add(self.label)
         self.timeoutID = 0
-        self.tree = treeview
-        self.column = column
         self.path = None
         self.screenWidth = gtk.gdk.screen_width()
         self.screenHeight = gtk.gdk.screen_height()

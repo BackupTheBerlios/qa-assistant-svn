@@ -14,17 +14,20 @@ import sys
 import os
 import unittest
 
-sys.path.extend((os.path.join(os.environ['srcdir'], '..'),
-    os.environ['srcdir']))
+if os.environ.has_key('srcdir'):
+    srcdir = os.environ['srcdir']
+else:
+    srcdir = '.'
+sys.path.extend((os.path.join(srcdir, '..'), srcdir))
 
-import testchecklist
 import testcreation
+import testchecklist
 
 if __name__ == '__main__':
-    suiteCheck = unittest.makeSuite(testchecklist.TestCheckList, 'test')
-    suiteCreate = unittest.makeSuite(testcreation.TestCreation, 'test')
-    alltests = unittest.TestSuite((suiteCreate, suiteCheck))
-    result = unittest.TextTestRunner(verbosity=2).run(alltests)
+    createSuite = testcreation.suite()
+    checkSuite = testchecklist.suite()
+    suite = unittest.TestSuite((createSuite, checkSuite))
+    result = unittest.TextTestRunner(verbosity=2).run(suite)
     if result.wasSuccessful():
         sys.exit(0)
     else:

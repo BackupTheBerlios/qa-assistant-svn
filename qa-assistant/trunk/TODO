@@ -92,3 +92,7 @@ Programming:
     recognize that.  Also, there is currently a small period where the
     program searches for uninstalled files when it is installed.  This needs
     to be changed so installation removes this penalty.
+
+* Finish writing unittests for the program.  We've barely scratched the surface
+  of this.  When completed it should allow one to quickly figure out what's
+  working and what's broken in the package.

@@ -8,9 +8,10 @@
 echo "Warning: This script will run configure for you -- if you need to pass"
 echo "  arguments to configure, please give them as arguments to this script."
 
-aclocal
-automake --add-missing --force-missing
-autoconf
+#aclocal
+#automake --add-missing --force-missing
+#autoconf
+autoreconf --force --install --symlink
 ./configure $*
 
 exit 0
