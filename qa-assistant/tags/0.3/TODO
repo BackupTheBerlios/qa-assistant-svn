@@ -1,0 +1,54 @@
+glade/GUI:
+==========
+- Publish Button should be added to toolbar
+
+- Submit Button should be added to toolbar
+  + Pressing Submit will build the review and submit upstream and down.
+
+- Add a New dialog to take input about bugzilla
+  + If new then make sure we have both a bugzilla # and an SRPM
+
+- Pressing save should dump the present state to an xml file
+  + class SaveFile
+
+- Pressing open should load a dumped xml file
+
+- Create a logo to go along with the icon.  Think up some other small pixmaps
+  for the menu/toolbar: toggle Preview, new from bugzilla, new from SRPM,
+  Publish Report, Submit Report
+
+- When the reviewer really should add additional information, how should we
+  make it happen?  A field in the XML file under state?  And that causes
+  qa-assistant to pop up a textEntry dialog when the item enters that state?
+
+Extra GNOME Functionality:
+==========================
+- Create preferences infrastructure : check PREFERENCES for ideas.
+
+Programming:
+============
+- Command line argument parsing
+  + If a savefile is given, open that
+
+- Enhance tracking entries into the editor.  We want
+  people to be able to shift text around from Needswork and Non-blocker, and
+  to add to them but we want to keep track of what entry is associated with
+  what entry id.
+
+- Ability to add non-checklist item review items: ie "Fails to call my dog
+  into dinner which is what I expect gdogcaller to do."
+
+- Automate some review tasks
+  + checkheader
+  + checksig
+  + verify source against spec file/canonical URL
+  + look at the new fedora-startqa for more ideas.  Perhaps we can coordinate
+    and use fedora-startqa in the backend.  (Look through their SRPM stuff --
+    it might be better code than I have... If we can put it into a SRPM class
+    like I have, then it could be callable from either my script or theirs.)
+
+- review.publish needs to do wordwrapping of lines.  Look into whether a
+  textBuffer object has the necessary wordwrapping even without a textView.
+  (python 2.3's textwrap would do this for publish, not sure about viewing.)
+
+- Update to the fedora QAFormat output style
