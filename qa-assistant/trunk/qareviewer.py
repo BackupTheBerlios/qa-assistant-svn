@@ -114,7 +114,7 @@ class QAReviewer(gnomeglade.GnomeApp):
                 checkFile = None
             else:
                 checkFile = checkFile[0]
-        if checkFile == None:
+        if not checkFile:
             ### FIXME: When we can select checklists via property, we need to
             # print error and recover.
             sys.stderr.write("Unable to find checklist: %s\n" % (filename))

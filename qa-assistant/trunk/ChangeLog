@@ -1,3 +1,132 @@
+2004-09-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r108    
+    * checklist.py:
+      - Removed __added_row from handling __row-inserted signals and
+        __modified_row from row-changed.  Migrate functionality into
+        add_entry().
+      - add_entry() no longer returns an iter to the new entry as using
+        the iter is taken care of in add_entry().
+      - Fix exception name DuplicateItem instad of DuplicateItemError.
+      - Fix problem in check_category_resolution() where an iter variable
+        was split into two when it was renamed.
+    * BUGS:
+      - Move five bugs into the fixed/testing category.
+      - Add note to make duplicate item entry case insensitive.
+    * genericqa.py:
+      - The CheckList is now responsible for setting the entries dict.
+        Remove the code from here that did that.
+      - Fix exception name DuplicateItem.
+    
+2004-09-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r107    
+    * Warning:  This is another known broken commit.
+    * Subversion property mergelog updated to reflect merge from the current
+      0.4 branch.
+    * qaconvert.py: File renamed qa-convert.pyin.
+    * checklist.py:
+      - Copied the gtk.TreeModel constants back out to the module level.
+        Have to decide if it makes more sense to be at the module or class
+        level.
+      - Throw an exception if the user specified checklist isn't an XML file.
+      - When loading a checklist savefile, change the revision to an integer.
+      - Note to see what happens if we move the row-inserted and row-changed
+        signal handler functionality into the add_entry function.
+      - Move check_category_resolution method into CheckList from qareviewer.
+        Should be ported, but still needs to be called by the CheckList when
+        we open a savefile.
+    * BUGS: List of known bugs.  Currently very long.  Helps inform of what
+      is known to be broken in the current checkin.
+    * qareviewer.py:
+      - Move CheckList display into CheckView.py.
+      - Create a CheckView object to take its place.
+    * configure.ac: Change the checklist DTD path to version 0.3
+    * data/checklist.dtd: Lowercase the "url" proptype.
+    * data/fedoraus.xml: Change ticketURL from type string to "url"
+    * NEWS:
+      - Note that checklist is no longer tied to SRPM QA.
+      - Merge note that distuninstallcheck was fixed in 0.4.1 (r106)
+    * properties.py: Remove bugzillaURL and bugzillaNumber as the code now
+      uses in XML properties.
+    * genericqa.py:
+      - Use the error module to get the exception values.
+      - Remove the resolution_changed call from here.  Need to test whether
+        it works automatically in CheckList/CheckView interaction or if we'll
+        need to write some code to handle this.
+    * qa-convert.pyin: Renamed from qaconvert.py.  This is now a toplevel
+      program that will convert from qasave 0.1 format to checklist 0.3.
+    * checkview.py: Functionality moved from qareviewer.py to display a
+      checklist.  Reimplemented as a subclass of gtk.TreeView.
+    * TODO: Save and load buttons for toolbar is done.
+    * Makefile.am:
+      - Add the qa-convert script as a build target.
+      - Add checkview.py and error.py and removed savefile.py from the
+        qa-assistant files.
+      - Add qa-convert.pyin to the EXTRA_DIST
+      - Overrode the default distuninstallcheck_listfiles to not error on
+        the XML catalogs.  From 0.4 branch (r106)
+    
+2004-09-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r105    
+    * savefile.py: Rename to qaconvert.py
+    * qaconvert.py: Conversion to a script that can read in qasave 0.1 files
+      and output checklist 0.3 files.
+      - Changes to allow running as a standalone script
+      - Rename base class from SaveFile to QAConverter
+      - Now a subclass of CheckList
+      - load(): The new __init__().
+        Changes to initialize an 0.3 format checklist, layer the qasave 0.1
+        on top, and still have a valid 0.3 format checklist in memory.
+      - Removed pieces related to saving.  We're only loading this format.
+        Saves take place as an 0.3 CheckList.
+      - Changes to use the CheckList attributes and publish function to output
+        a correct 0.3 checklist file.
+    
+2004-09-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r104    
+    * Note: Saving and loading checklists should now work entirely with the
+      new code.  There are still some known cosmetic bugs but they are
+      being worked on as part of the next phase of rewriting.
+    * checklist.py:
+      - Create __Property class to save property information.
+      - Bugfix: Save and load property type information.
+      - Bugfix: Use the saved value for resolution instead of the default
+        'Needs-Reviewing' when loading a checklist.
+      - Bugfix: Whether to display a checklist item in the output was being
+        set backwards.  Fixed.
+    * qareviewer.py: New plan for moving the category resolution code after
+      we abstract the CheckView code.
+    
+2004-09-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r103    
+    * This revision is known to not create valid savefiles.
+    * genericqa.py: Remove the checklist import as it's not needed here.
+    * checklist.py:
+      - Move treeModel constants into the CheckList class instead of the
+        module level.
+      - Many conversions of treeModel constants to reference inside the
+        class instead of at the module level.
+      - __init__(): Bugfix properties and functions weren't being extracted
+        from the XML file at all.  This gets them loaded in except for one
+        issue with properties not loading the type attribute.
+      - publish(): Bugfix revision needs to be converted to a string before
+        being saved into the XML.
+      - Change function output to use newTextChild() instead of newChild().
+      - unpangoize_output(): Bugfix span tag is now removed properly.
+      - __xml_to_entry(): Bugfix: the script telling users that an automated
+        test was unable to run needed to specify None for the language
+        versions.
+    * review.py:
+      - Update the checklist treeModel field constants to reference those
+        saved inside the checklist rather than at the module level.
+      - Bugfix indentation problem from iter fixups.
+    * qareviewer.py:
+      - Import the CheckList class from the checklist instead of the whole
+        module.
+      - Convert from SaveFile to CheckList.
+      - Update the checklist treeModel constants to reference those saved
+        inside the checklist rather than at the module level.
+    
+2004-09-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r102    
+    * treetips.py, optionrenderer.py, review.py, qareviewer.py: Rename all
+      variables named iter as it's the name of a python builtin and it's
+      not that descriptive of what's actually being operated on.
+    * ChangeLog: Update to r101
+    
 2004-09-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r101    
     * NEWS: Really add notes about updated DTD and support for automated tests.
     

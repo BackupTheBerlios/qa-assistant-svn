@@ -1,32 +1,33 @@
 Preferences to Add Via GConf
 ============================
 
-:Author: Toshio Kuratomi
+:Author: Toshio Kuratomi <toshio-tiki-lounge.com>
 :Date: $Date$
 
-..contents:
+.. contents::
 
 Preferences
 -----------
 Preferences are set on the app.  They could be implemented as GConf
 variables.
-- Automatically display failed reviews
-- Signing identity
-- keyserver to download new keys from
-- directory to unrpm into
-- text colours
-- submit to bugzilla or publish to file
-- default QA checklist to load
-- tooltip DESCRIPTION enable/disable
-- what bugzilla to check
+
+* Automatically display failed reviews
+* Signing identity
+* Keyserver to download new keys from
+* Directory to unrpm into
+* Text colours
+* Submit to bugzilla or publish to file
+* Default QA checklist to load
+* Tooltip DESCRIPTION enable/disable
+* What bugzilla to check
 
 Properties
 ----------
 Properties are set on the checklist.  The checklist type should provide a
 set of properties that are legal.  Perhaps implement as GObject values on
 the checklist object.
-- MD5Sums
-- bugzilla Number
-- bugzilla URL
-- SRPM to check
-- QA checklist loaded
+
+* MD5Sums
+* Bugzilla URL
+* SRPM to check
+* QA checklist loaded

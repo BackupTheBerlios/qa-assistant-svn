@@ -2,14 +2,14 @@
 QA Assistant
 ============
 
-Gnome Quality Assurance checklist
+Gnome Quality Assurance Checklist
 =================================
 
 :Author: Toshio Kuratomi
-:Contact: toshio[AT]tiki-lounge.com
+:Contact: toshio-tiki-lounge.com
 :Date: $Date$
 
-..contents:
+.. contents::
 
 QA Assistant is a Gnome-Python application that assists a reviewer in
 performing Quality Assurance.  It displays a checklist that the reviewer fills
@@ -18,7 +18,9 @@ for the reviewer to submit.
 
 Quick Install
 -------------
-* Download from sourceforge http://www.sourceforge.net/projects/qa-assistant
+::
+
+  Download from sourceforge http://www.sourceforge.net/projects/qa-assistant
   $ tar -xzvf qa-assistant-VERSION.tar.gz
   $ cd qa-assistant-VERSION
   $ ./configure
@@ -42,7 +44,7 @@ Features
 * Informational popup tips for filling in the checklist
 
 Requirements
-============
+------------
 * python 2.2 (2.3 is now the development platform.  Conditional code to use
   python 2.2 is present but needs testing.)
 * python bindings for libxml2
@@ -56,14 +58,18 @@ process of Fedora.us, the contributed packages section of the Fedora Linux
 Distribution.  As the code matures, more attention will be given to
 creating modules for other QA situations.
 
-qa-assistant is hosted at sourceforge::
+qa-assistant is hosted at sourceforge:
   http://sourceforge.net/projects/qa-assistant
 
 Until sourceforge hosts subversion repositories the development source code
-is available from my home system::
+is available from my home system:
+
   http://springer.homelinux.com:8080/svn/fedora/qa-assistant/trunk
 
 The currently implemented checklist is to aid Quality Assurance of SRPMS for
-the Fedora Extras Project::
-  http://www.fedora.us -- The Project Home Page.
-  http://www.fedora.us/wiki/QAChecklist -- The checklist.
+the Fedora Extras Project:
+
+  http://www.fedora.us
+    The Project Home Page.
+  http://www.fedora.us/wiki/QAChecklist
+    The checklist.

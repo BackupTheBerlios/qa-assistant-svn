@@ -3,11 +3,11 @@ QA Assistant TODO
 =================
 
 :Author: Toshio Kuratomi
-:Contact: toshio[AT]tiki-lounge.com
+:Contact: toshio-tiki-lounge.com
 :Date: $Date$
 :Revision: $Rev$
 
-..contents::
+.. contents::
 
 glade/GUI:
 ==========
@@ -26,19 +26,23 @@ glade/GUI:
   is wrong in the long run.  Instead of the main program creating a QA
   object and operating on it, it should create a QA object and have the
   object operate on it.
+  
   (QAReviewer is really a parent class of the QA objects.  But I don't see a
   way to model this efficiently as we need to create the GUI and base items
   every time the program starts.  Then, when the user chooses a specific
   checklist we would have to destroy the old object and instantiate a new one
   for the new QA object.)
+
   - QAReviewer needs to implement a set of hooks that the QA object attaches
     to.  For instance, QAReviewer provides the QAActions menu at
     self.QAMenuItem.  QA object should create the menu and set:
     self.app.QAMenuItem.set_submenu(menu)
   - Things that may be overridden in this manner:
+  
     + QAMenu
     + Allowable Properties
     + Review object output format
+
 * Accelerators for QA Action items
 * Disable pieces of the QA Action menu when there is no SRPM being reviewed
 * Consider widgets that do textwrap for treeview and/or Review widget.
@@ -59,6 +63,7 @@ Programming:
   to add to them but we want to keep track of what entry is associated with
   what entry id.
 * Automate some review tasks
+
   - checkheader
   - checksig
   - verify source against spec file/canonical URL
@@ -66,6 +71,7 @@ Programming:
     and use fedora-startqa in the backend.  (Look through their SRPM stuff --
     it might be better code than I have... If we can put it into a SRPM class
     like I have, then it could be callable from either my script or theirs.)
+    
 * Update to the fedora QAFormat output style
 * XML stuff to conform better with libxml2's guidelines document:
   file:///usr/share/doc/libxml2-devel-2.6.6/guidelines.html
@@ -74,9 +80,12 @@ Programming:
   checklist.  This will involve integrating XML with test infrastructure.
 * Write a proper check that we can use a file (os.access doesn't work for
   this purpose.  [How does review.py work?])
+  
   - For both review.py and savefile we could use try: except IOERROR: to trap
     failure to write the file.
+    
 * Fix the uninstalled_file lookups
+
   - DTDs have to be selected correctly when the program isn't installed.
   - Program should use uninstalled files only when it is uninstalled.  If it is
     installed but happens to be run in a build directory, it needs to
