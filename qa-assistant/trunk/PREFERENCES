@@ -1,0 +1,20 @@
+List of preference items to add once we have gconf2 preference infrastructure
+in place:
+
+Preferences:
+- Automatically display failed reviews
+- Signing identity
+- keyserver to download new keys from
+- directory to unrpm into
+- text colours
+- submit to bugzilla or publish to file
+- default QA checklist to load
+- tooltip DESCRIPTION enable/disable
+- what bugzilla to check
+
+Properties:
+- MD5Sums
+- bugzilla Number
+- bugzilla URL
+- SRPM to check
+- QA checklist loaded

