@@ -18,14 +18,13 @@ class Properties:
     class FileError(SRPM.FileError):
         pass
 
-    def __init__(self, checklist=None, saveDTD=None):
+    def __init__(self, checklist=None):
         """Create a new properties box."""
 
         ### FIXME: we really need to take this information from the user
         # instead of setting it here.  But I just want to get something
         # working right now.
         self.checklist = checklist
-        self.saveDTD = saveDTD
         self.SRPM = None
         self.bugzillaURL = None
         self.bugzillaNumber = None

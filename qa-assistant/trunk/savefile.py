@@ -8,7 +8,7 @@
 """
 __revision__ = "$Rev$"
 
-import os, re
+import os, re, string
 import libxml2
 import checklist, gnomeglade
 
@@ -28,15 +28,12 @@ class SaveFile:
 
     publicID = '-//BadgerWare//DTD QA Assistant Save File ' + _qaSaveFileVersion_ + '//EN'
     canonicalURL = 'http://qa-assistant.sf.net/dtds/qasave/' + _qaSaveFileVersion_ + '/qasave.dtd'
-    def __init__(self, checklist, properties, dtd, filename=None):
+    def __init__(self, checklist, properties, filename=None):
         ''' '''
         self.checklist = checklist
         self.properties = properties
-        ### FIXME: Instead of using a DTD path, we should be using a DTD
-        # PUBLIC identifier and canonical URL.  Need to figure out that
-        # piece of technology.
-        self.dtd = dtd
         self.filename = filename
+        self.app = gnome.program_get()
 
     #
     # Public Methods
@@ -50,9 +47,7 @@ class SaveFile:
         (set by the initial creation of the SaveFile object.)
         '''
         
-        # Create the xml DOM conforming to qasave.dtd
-        dtd = libxml2.parseDTD(None, self.dtd)
-        dtd.name = 'qasave'
+        # Create the xml DOM conforming to our save DTD
         doc = libxml2.newDoc('1.0')
         doc.createIntSubset('qasave', self.publicID, self.canonicalURL)
         
@@ -114,7 +109,7 @@ class SaveFile:
         checkFile = gnomeglade.uninstalled_file(filename)
         if not checkFile:
             filename = os.path.join(__programName__, filename)
-            checkFile = gnomeglade.locate_file(filename)
+            checkFile = self.app.locate_file(filename)
         if not checkFile:
             ### FIXME: Throw an exception to get out gracefully
             sys.exit(1)
@@ -165,7 +160,6 @@ class SaveFile:
             try:
                 iter = newList.entries[entry.name]
             except KeyError:
-                print entry.name
                 newList.add_entry(entry.name,
                         item=entry.item,
                         display=entry.display,
@@ -270,6 +264,10 @@ class SaveFile:
                 content = outputs[res]
                 if content:
                     content = unspan.match(content).expand(r'\g<1>\g<3>\g<5>')
+                    # Unescape special chars
+                    content = string.replace(content, '&amp;', '&')
+                    content = string.replace(content, '&lt;', '<')
+                    content = string.replace(content, '&gt;', '>')
                 state = states.newChild(None, 'state', None)
                 state.setProp('name', res)
                 state.addContent(content)

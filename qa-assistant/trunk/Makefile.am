@@ -106,19 +106,19 @@ install-data-hook:
 		"checklist/$(CHECKLISTVER)/checklist.dtd" $(DESTDIR)$(CATALOG); \
 		$(XMLCATALOG) --noout --add "rewriteSystem" \
 		"http://qa-assistant.sf.net/dtds/checklist/$(CHECKLISTVER)" \
-		"checklist/$(CHECKLISTVER)/checklist.dtd" $(DESTDIR)$(CATALOG); \
+		"checklist/$(CHECKLISTVER)/" $(DESTDIR)$(CATALOG); \
 		$(XMLCATALOG) --noout --add "rewriteURI" \
 		"http://qa-assistant.sf.net/dtds/checklist/$(CHECKLISTVER)" \
-		"checklist/$(CHECKLISTVER)/checklist.dtd" $(DESTDIR)$(CATALOG); \
+		"checklist/$(CHECKLISTVER)/" $(DESTDIR)$(CATALOG); \
 		$(XMLCATALOG) --noout --add "public" \
 		"-//BadgerWare//DTD QA Assistant Save File $(QASAVEVER)//EN" \
 		"qasave/$(QASAVEVER)/qasave.dtd" $(DESTDIR)$(CATALOG); \
 		$(XMLCATALOG) --noout --add "rewriteSystem" \
 		"http://qa-assistant.sf.net/dtds/qasave/$(QASAVEVER)" \
-		"qasave/$(QASAVEVER)/qasave.dtd" $(DESTDIR)$(CATALOG); \
+		"qasave/$(QASAVEVER)/" $(DESTDIR)$(CATALOG); \
 		$(XMLCATALOG) --noout --add "rewriteURI" \
 		"http://qa-assistant.sf.net/dtds/qasave/$(QASAVEVER)" \
-		"qasave/$(QASAVEVER)/qasave.dtd" $(DESTDIR)$(CATALOG); \
+		"qasave/$(QASAVEVER)/" $(DESTDIR)$(CATALOG); \
 	fi
 # Install delegation into the root catalog
 	if test ! -f $(DESTDIR)$(ROOTCATALOG); then \

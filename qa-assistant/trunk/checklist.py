@@ -31,6 +31,9 @@ class Error(Exception):
     def __str__(self):
         return repr(self.msg)
 
+class duplicateItemError(Error):
+    pass
+
 class CheckList:
     """Holds the data associated with the checklist.
     
@@ -171,7 +174,7 @@ class CheckList:
 
         # Make sure this entry isn't already listed.
         if self.entries.has_key(summary):
-            raise duplicateItemError
+            raise duplicateItemError, ('%s is already present in the checklist.' % (self.entries[summary]))
 
         # Set up all the default values.
         item = item or True
@@ -196,7 +199,6 @@ class CheckList:
                 self.customItemsPath = self.tree.get_path(iter)
                 newItem = iter
             else:
-                print summary
                 # Create the 'Custom Checklist Items' category
                 self.tree.set(iter,
                     SUMMARY, 'Custom Checklist Items',
@@ -222,6 +224,7 @@ class CheckList:
                 OUTPUT, output,
                 RESLIST, resList,
                 OUTPUTLIST, outputList)
+        return newItem
         
     def colorize_output(self, resolution, output):
         """Colorize the output based on the resolution.

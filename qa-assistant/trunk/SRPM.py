@@ -63,7 +63,11 @@ class SRPM:
         transSet = rpm.TransactionSet()
         transSet.setVSFlags(~(rpm._RPMVSF_NOSIGNATURES |
                             rpm._RPMVSF_NODIGESTS | rpm.RPMVSF_NOHDRCHK))
-        filehandle = file(self.filename, 'rb')
+        try:
+            filehandle = file(self.filename, 'rb')
+        except IOError:
+            raise FileError ('Unable to open file: %s' % (self.filename))
+
         try:
             self.hdr = transSet.hdrFromFdno(filehandle.fileno())
         except rpm.error:

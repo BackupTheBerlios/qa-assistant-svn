@@ -78,7 +78,7 @@ class GenericQA(gtk.Menu):
 
         # Dialog to prompt the user for the information
         newItemDialog = gtk.Dialog('New checklist item',
-                self.app.ReviewerWindow, 0, ('Add item', gtk.RESPONSE_OK, 
+                self.app.ReviewerWindow, 0, ('Add item', gtk.RESPONSE_OK,
                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         newItemDialog.set_default_response(gtk.RESPONSE_OK)
         table = gtk.Table(3, 2, False)
@@ -87,9 +87,11 @@ class GenericQA(gtk.Menu):
         table.attach(gtk.Label('Output:'), 0,1, 2,3)
         summaryEntry = gtk.Entry()
         resMenu = gtk.Menu()
-        resMenu.append(gtk.MenuItem('Pass'))
-        resMenu.append(gtk.MenuItem('Fail'))
-        resMenu.append(gtk.MenuItem('Non-Blocker'))
+        resList = ('Pass', 'Fail', 'Non-Blocker')
+        outputList = {}
+        for res in resList:
+            outputList[res] = None
+            resMenu.append(gtk.MenuItem(res))
         resEntry = gtk.OptionMenu()
         resEntry.set_menu(resMenu)
         resEntry.set_history(1)
@@ -117,23 +119,20 @@ class GenericQA(gtk.Menu):
                     msgDialog.destroy()
                     continue
                 res = resEntry.get_history()
-                if res == 0:
-                    res = 'Pass'
-                elif res == 1:
-                    res = 'Fail'
-                elif res == 2:
-                    res = 'Non-Blocker'
+                res = resList[res]
                 output = outputEntry.get_text()
                 output = self.app.checklist.colorize_output(res, output)
+                outputList[res] = output
+
                 try:
-                    self.app.checklist.add_entry(summary, desc=None,
-                    item=True,
-                    display=True,
-                    resolution=res,
-                    output=output,
-                    resList=resList,
-                    outputList=outputList)
-                except:
+                    newItem = self.app.checklist.add_entry(summary, desc=None,
+                            item=True,
+                            display=True,
+                            resolution=res,
+                            output=output,
+                            resList=resList,
+                            outputList=outputList)
+                except checklist.duplicateItemError:
                     msgDialog = gtk.MessageDialog(self.app.ReviewerWindow,
                             gtk.DIALOG_DESTROY_WITH_PARENT,
                             gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
@@ -144,10 +143,12 @@ class GenericQA(gtk.Menu):
                     msgDialog.destroy()
                     continue
                 else:
+                    ### FIXME: This probably should go into checklist.  Which
+                    # Means that resolution_changed probably belongs there
+                    # as well.
                     self.app.resolution_changed(None, res, newItem)
                     break
             else:
                 # User decided not to write a new entry
                 break
-
         newItemDialog.destroy()

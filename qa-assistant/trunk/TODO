@@ -73,7 +73,14 @@ Programming:
   (Namespace, URL, Make sure I follow recommendations for element/attribute)
 * Create a common XML save format/checklist with Erik LaBianca for the
   checklist.  This will involve integrating XML with test infrastructure.
-- Write a proper check that we can use a file (os.access doesn't work for
+* Write a proper check that we can use a file (os.access doesn't work for
   this purpose.  [How does review.py work?])
-  + For both review.py and savefile we could use try: except IOERROR: to trap
+  - For both review.py and savefile we could use try: except IOERROR: to trap
     failure to write the file.
+* Fix the uninstalled_file lookups
+  - DTDs have to be selected correctly when the program isn't installed.
+  - Program should use uninstalled files only when it is uninstalled.  If it is
+    installed but happens to be run in a build directory, it needs to
+    recognize that.  Also, there is currently a small period where the
+    program searches for uninstalled files when it is installed.  This needs
+    to be changed so installation removes this penalty.

@@ -45,19 +45,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         ### FIXME: Merge with checklist.
 
         # Create a structure providing savefiles
-        dtdFile = os.path.join('data', 'qasave.dtd')
-        saveDTD = gnomeglade.uninstalled_file(dtdFile)
-        if not saveDTD:
-            dtdFile = os.path.join(__programName__, dtdFile)
-            saveDTD = gnomeglade.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
-                    dtdFile)
-            if saveDTD == []:
-                saveDTD = None
-        if saveDTD:
-            self.saveFile = SaveFile(None, self.properties, saveDTD)
-        else:
-            ### FIXME: Error out gracefully.
-            sys.stderr.write('Unable to locate the qasave dtd.  Is qa-assistant installed properly?')
+        self.saveFile = SaveFile(None, self.properties)
 
         # Load the interface
         gladefile = 'glade/qa-assistant.glade'
@@ -71,7 +59,7 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         iconFile = gnomeglade.uninstalled_file('pixmaps/qa-icon.png')
         if iconFile == None:
-            iconFile = gnomeglade.locate_file(gnome.FILE_DOMAIN_APP_PIXMAP,
+            iconFile = self.locate_file(gnome.FILE_DOMAIN_APP_PIXMAP,
                                         'qa-icon.png')
             if iconFile == []:
                 iconFile = None
@@ -163,7 +151,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         checkFile = gnomeglade.uninstalled_file(filename)
         if checkFile == None:
             filename = os.path.join(__programName__, filename)
-            checkFile = gnomeglade.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+            checkFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
                     filename)
             if checkFile == []:
                 checkFile = None
@@ -213,6 +201,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         '''
         
         msg = 'Please select "QA Action => From SRPM"\nor "QA Action => From Bugzilla" to start the QA process.'
+        self.properties.lastSRPMDir = os.path.dirname(filename)+'/'
         try:
             self.properties.load_SRPM(filename)
         except Properties.FileError, message:
@@ -313,6 +302,8 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.checklist.tree.set(iter, checklist.OUTPUT, newValue)
         self.checklist.tree.row_changed(path, iter)
 
+    ### FIXME: I believe this shoud go into checklist.  Possibly this whole
+    # section belongs in checklist.
     def resolution_changed(self, renderer, newValue, iter):
         """Changes the display when the user changes an item's state.
 
@@ -536,7 +527,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
         if gladeFile == None:
             filename = os.path.join(__programName__, 'glade/qa-assistant.glade')
-            gladeFile = gnomeglade.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+            gladeFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
                     filename)
             if gladeFile == []:
                 raise Exception("Unable to locate glade file %s" % (filename))
@@ -548,7 +539,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         about.set_property('version', __version__)
         iconFile = gnomeglade.uninstalled_file('pixmaps/qa-icon.png')
         if iconFile == None:
-            iconFile = gnomeglade.locate_file(gnome.FILE_DOMAIN_APP_PIXMAP,
+            iconFile = self.locate_file(gnome.FILE_DOMAIN_APP_PIXMAP,
                                         'qa-icon.png')
             if iconFile == []:
                 iconFile = None
@@ -604,6 +595,8 @@ class QAReviewer(gnomeglade.GnomeApp):
             # load the checklist data (Associates itself with checkView)
             self.SRPM_into_properties(filename)
             self.__load_checklist()
+            # Reset savefile so we don't accidentally overwrite something.
+            self.saveFile.set_filename(None)
 
     ### FIXME: Features we want to implement but haven't had the time yet:
     def on_menu_submit_activate(self, *extra):
@@ -682,7 +675,7 @@ Relative Priority: Low.  There's too much programming to do for me to spend too 
         gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
         if gladeFile == None:
             filename = os.path.join(__programName__, 'glade/qa-assistant.glade')
-            gladeFile = gnomeglade.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+            gladeFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
                     filename)
             if gladeFile == []:
                 raise Exception("Unable to locate glade file %s" % (filename))
