@@ -18,6 +18,8 @@ to look at and more easily programmed against.  Most changes are developer
 visible but not end-user visible:
 
 * Changed checklist into a subclass of gtk.TreeStore.
+* CheckList and SaveFile formats have been combined into the checklist 0.3 dtd.
+* Support for automated tests embedded within the XML files.
 
 Version 0.4.1
 =============
