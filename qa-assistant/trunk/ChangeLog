@@ -1,3 +1,34 @@
+2004-04-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r64    
+    * treetips.py: FIXME notes
+    * ChangeLog: Update to rev 61
+    * qareviewer.py:
+      - New start label message reflects QA Action menu.  Need some
+        architectural thought here.
+      - Not Yet Implemented Dialog path bugfix.
+    
+    
+2004-04-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r63    
+    * configure.ac: Generate qa-assistant.spec
+    * TODO: Spec file written
+    * qa-assistant.spec.in: First cut spec file for qa-assistant.  Needs some
+      touchups to the desktop file handling and check to make sure the URL and
+      Source0 download link are correct.
+    * Makefile.am:
+      - Add genericqa.py and srpmqa.py to the dist scripts.
+      - Remove qa-assistant from the nodist section.  It is already in the
+        bin_SCRIPTS target.  Add qa-assistant manually to CLEANFILES.
+      - Add the *.spec and *.spec.in to EXTRA_DIST
+    * NEWS: Spec file and QA Actions menu notes.
+    
+2004-04-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r62    
+    * genericqa.py: Not yet implemented dialog for adding checklist items
+    * srpmqa.py: Bug fix function calls in From SRPM and From Bugzilla
+    * qareviewer.py: Make SRPM_into_properties a public method
+    * TODO: QA Menu TODO item is now implemented.
+    * glade/qa-assistant.strings, glade/qa-assistant.glade:
+      - Remove Publish and Submit from the File menu.
+      - Add a default_width of 400 to the Not Yet Implemented Dialog.
+    
 2004-04-19 Toshio Kuratomi <toshio@tiki-lounge.com> - r61    
     * genericqa.py: A new subclass of gtk.Menu.  This represents a generic QA
       Menu with callbacks for its menu items.  Actions that can be performed
