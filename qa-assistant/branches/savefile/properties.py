@@ -30,10 +30,6 @@ class Properties:
         self.bugzillaURL = None
         self.bugzillaNumber = None
 
-        ### FIXME: Need to be set when we load the checklist, not here.
-        self.checklistName = 'fedoraus'
-        self.checklistRev = '0.1'
-
         ### FIXME: The following need to go into preferences (GConf)
         # Directories last searched (for FileSelect Dialogs)
         self.lastSRPMDir = './'
