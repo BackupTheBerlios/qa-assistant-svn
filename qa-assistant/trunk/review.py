@@ -155,15 +155,15 @@ class Review(gtk.VBox):
         """Write the review to a file."""
 
         buffer = [self.resolution.get_text()+"\n"]
-        iter = self.list.get_iter_first()
+        resIter = self.list.get_iter_first()
         goodList = []
         workList = []
         minorList = []
         notesList = []
-        while iter:
-            if self.list.get_value(iter, self.__DISPLAY):
-                res = self.list.get_value(iter, self.__RESOLUTION)
-                value = self.list.get_value(iter, self.__OUTPUT)
+        while resIter:
+            if self.list.get_value(resIter, self.__DISPLAY):
+                res = self.list.get_value(resIter, self.__RESOLUTION)
+                value = self.list.get_value(resIter, self.__OUTPUT)
                 if value != None:
                     value = self.checklist.unpangoize_output(value)
                     value = self.textwrap.fill(value) + '\n'
@@ -175,7 +175,7 @@ class Review(gtk.VBox):
                         minorList.append(value)
                     elif res == 'Not-Applicable' or res == 'Needs-Reviewing':
                         notesList.append(value)
-            iter = self.list.iter_next(iter)
+            resIter = self.list.iter_next(resIter)
             
         buffer+=("\n", "MD5Sums:\n", self.hashes.get_text())
         if len(goodList) > 0:
@@ -213,19 +213,19 @@ class Review(gtk.VBox):
             hashBuf = ""
         self.hashes.set_text(hashBuf)
 
-    def __update_data(self, treeStore, path, iter):
+    def __update_data(self, treeStore, path, updateIter):
         """Update internal list from treeStore when treeStore is changed."""
 
         # row-changed gets called once for each item that is updated, even
         # when there's a group.  So we have to wait until we get a proper
         # summary (our key value) to add the entry to the list
-        summary = treeStore.get_value(iter, checklist.SUMMARY)
+        summary = treeStore.get_value(updateIter, checklist.SUMMARY)
         if self.addPaths.has_key(path) and summary:
             # New item
             self.list.append((summary,
-                              treeStore.get_value(iter, checklist.DISPLAY),
-                              treeStore.get_value(iter, checklist.RESOLUTION),
-                              treeStore.get_value(iter, checklist.OUTPUT)))
+                treeStore.get_value(updateIter, checklist.DISPLAY),
+                treeStore.get_value(updateIter, checklist.RESOLUTION),
+                treeStore.get_value(updateIter, checklist.OUTPUT)))
             del self.addPaths[path]
         elif len(path) > 1:
             # Update an old item
@@ -234,11 +234,12 @@ class Review(gtk.VBox):
                 if self.list.get_value(listIter, self.__SUMMARY) == summary:
                     self.list.set(listIter,
                             self.__DISPLAY,
-                            treeStore.get_value(iter, checklist.DISPLAY),
+                            treeStore.get_value(updateIter, checklist.DISPLAY),
                             self.__RESOLUTION,
-                            treeStore.get_value(iter, checklist.RESOLUTION),
+                            treeStore.get_value(updateIter,
+                                checklist.RESOLUTION),
                             self.__OUTPUT,
-                            treeStore.get_value(iter, checklist.OUTPUT))
+                            treeStore.get_value(updateIter, checklist.OUTPUT))
                     break
                 listIter = self.list.iter_next(listIter)
         else:
@@ -247,7 +248,7 @@ class Review(gtk.VBox):
 
         self.__resolution_check(treeStore)
 
-    def __add_data(self, treeStore, path, iter):
+    def __add_data(self, treeStore, path, addIter):
         """Let update know it will be handling an add soon."""
 
         # If it's not a Category (toplevel) row then add it to our list of
@@ -273,16 +274,17 @@ class Review(gtk.VBox):
                                   gobject.TYPE_STRING)
         category = treeStore.get_iter_first()
         while category:
-            iter = treeStore.iter_children(category)
-            while iter:
-                self.list.append((treeStore.get_value(iter, checklist.SUMMARY),
-                              treeStore.get_value(iter, checklist.DISPLAY),
-                              treeStore.get_value(iter, checklist.RESOLUTION),
-                              treeStore.get_value(iter, checklist.OUTPUT)))
-                iter = treeStore.iter_next(iter)
+            entryIter = treeStore.iter_children(category)
+            while entryIter:
+                self.list.append((treeStore.get_value(entryIter,
+                    checklist.SUMMARY),
+                    treeStore.get_value(entryIter, checklist.DISPLAY),
+                    treeStore.get_value(entryIter, checklist.RESOLUTION),
+                    treeStore.get_value(entryIter, checklist.OUTPUT)))
+                entryIter = treeStore.iter_next(entryIter)
             category = treeStore.iter_next(category)
 
-    def __filter_good(self, column, cell, model, iter):
+    def __filter_good(self, column, cell, model, entryIter):
         """Only display comments which have DISPLAY and RESOLUTION=pass."""
         
         cell.set_property('mode', gtk.CELL_RENDERER_MODE_INERT)
@@ -292,7 +294,7 @@ class Review(gtk.VBox):
         else:
             cell.set_property('visible', False)
 
-    def __filter_work(self, column, cell, model, iter):
+    def __filter_work(self, column, cell, model, entryIter):
         """Only display comments which have DISPLAY and RESOLUTION=Fail."""
 
         cell.set_property('mode', gtk.CELL_RENDERER_MODE_INERT)
@@ -302,7 +304,7 @@ class Review(gtk.VBox):
         else:
             cell.set_property('visible', False)
             
-    def __filter_minor(self, column, cell, model, iter):
+    def __filter_minor(self, column, cell, model, entryIter):
         """Only display comments which have DISPLAY and RESOLUTION=Minor."""
 
         cell.set_property('mode', gtk.CELL_RENDERER_MODE_INERT)
@@ -312,7 +314,7 @@ class Review(gtk.VBox):
         else:
             cell.set_property('visible', False)
             
-    def __filter_note(self, column, cell, model, iter):
+    def __filter_note(self, column, cell, model, entryIter):
         """Only display comments which have DISPLAY and Not-Applicable."""
 
         cell.set_property('mode', gtk.CELL_RENDERER_MODE_INERT)
@@ -328,16 +330,16 @@ class Review(gtk.VBox):
         This depends on the category status being correct so if there are
         bugs, be sure to check there as well.
         """
-        iter = treeStore.get_iter_first()
+        catIter = treeStore.get_iter_first()
         moreWork = False
-        while iter:
-            value = treeStore.get_value(iter, checklist.RESOLUTION)
+        while catIter:
+            value = treeStore.get_value(catIter, checklist.RESOLUTION)
             if value == 'Fail':
                 self.resolution.set_text('NEEDSWORK')
                 return
             elif value == 'Needs-Reviewing':
                 moreWork = True
-            iter = treeStore.iter_next(iter)
+             catIter = treeStore.iter_next(catIter)
 
         if moreWork:
             self.resolution.set_text('Incomplete Review')

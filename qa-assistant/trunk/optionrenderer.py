@@ -86,13 +86,13 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
         cell = treeView.get_path_at_pos(x, y)
         path = cell[0]
         model = treeView.get_model()
-        iter = model.get_iter(path)
+        changedIter = model.get_iter(path)
 
         oldValue = self.get_property('selectedoption')
         newValue = menuItem.get_children()[0].get_text()
         if oldValue != newValue:
             self.set_property('selectedoption', newValue)
-            self.emit('changed', newValue, iter)
+            self.emit('changed', newValue, changedIter)
 
     def __compute_menu_position(self, menu):
         """Determine where to place the dropdown menu.

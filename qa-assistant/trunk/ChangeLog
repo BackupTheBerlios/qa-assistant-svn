@@ -1,3 +1,115 @@
+2004-09-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r101    
+    * NEWS: Really add notes about updated DTD and support for automated tests.
+    
+2004-09-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r100    
+    * Warning: This revision is likely to contain bugs.  Possibly serious
+      bugs.  The checklist dtd and checklist.py has been updated to a new
+      checklist format but the code in savefile.py hasn't.  savefile.py is
+      being phased out in development in favour of the new checklist code.
+      The main app has not yet been ported over to this code so some parts
+      are using the new checklist and others are using the old savefile.
+      The design of QA Assistant means the old and new pieces should be
+      insulated from each other but this isn't guaranteed.
+    * error.py:
+      - Add CannotAccessFile exception for when accessing a given filename
+        doesn't work.
+      - Remove InvalidSaveFile as the savefile format is going away.
+    * genericqa.py: Use new checklist pangoize_output() function.
+    * savefile.py: Use pangoize_output() and unpangoize_output when loading
+      and saving information to the XML files.
+    * review.py:
+      - Set the checklist in the __init__ method.  This is in preparation
+        for making Review into a gtk.TreeView subclass.
+      - Use unpangoize_output() when printing a review.
+    * checklist.py:
+      - Rename _checklistFileVersion_ to formatVersion and move it inside
+        the checklist class.
+      - Remove MODIFIED from the TreeStore entries.
+      - Added TEST to the TreeStore entries.
+      - Moved Exceptions to the error module.
+      - More thorough documentation of the CheckList class.
+      - Define publicID and canonicalURL strings for the checklist.
+      - Create a __Test private class for information on the automated
+        tests that might be included in the XML file.
+      - Create self.functions and self.properties from the XML savefile
+        nodes of the same name.
+      - Save the filename too.
+      - Change exception names to be uppercase word start since exceptions
+        are classes.
+      - Remove checklist "type" attribute as the prop is we're moving to
+        use "functions" instead.
+      - Code to extract the base element from the checklist.
+      - Rename all variables named "iter" as that's a python builtin.
+      - Convert from colorize_output() to pangoize_output().
+      - New function publish() from the savefile.  Writes the modified
+        checklist out to a file.  Many changes over the publish function
+        in savefile to write a checklist 0.3 format instead of qasave 0.1.
+      - Rename colorize_output() to pangoize_output().
+      - New function unpangoize_output() provides the reverse of pangoize.
+        It removes pango markup and make entity substitution for &, < , >.
+      - In __xml_to_entry(), extract the test information as well.
+      - New function __create_entry() from savefile.  Heavily modified to
+        make a checklist 0.3 instead of qasave 0.1 entry.
+    * qareviewer.py:
+      - Use error module for checklist exceptions.
+      - Disable checklist.type checking as that's being replaced by the
+        checklist.functions functionality.
+      - Utilize pangoize_output() to make output strings ready for display.
+    * data/checklist.dtd: Work on version 0.3
+      - New PUBLIC and SYSTEM IDs.
+      - Comment everything.
+      - Remove Checklist type.
+      - Merge necessary qasasve data such as base and property.
+      - Add function element to hold information on what additional
+        abilities the checklist wants added to the QA Actions.
+      - Add test element to hold information for running automated tests.
+    * data/fedoraus.xml: Update to checklist.dtd 0.3
+    * NEWS: Add notes about updated DTD and support for automated tests.
+    
+2004-09-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r99    
+    * error.py:
+      - Make the class names uppercase word since they're classes.
+      - New exception InvalidSaveFile.
+    * data/sample-save.xml:
+      - Combine the various Bugzilla properties into one: TicketURL.
+      - Make SRPM property a URL.
+    
+2004-08-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r98    
+    * error.py: New program wide error module to define exceptions.
+    
+2004-08-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r97    
+    * checklist.py:
+      - Make CheckList be a subclass of gtk.TreeStore.
+      - Get rid of the tree attribute as its functionality is now
+        implemented by the class itself.
+      - Switch to a program wide error module for defining exceptions
+        instead of in-module.
+      - Get rid of the props. attribute because properties are only used
+        to define the output colors and those are moving into GConf.
+    * qareviewer.py, savefile.py: CheckList is now a subclass of
+      gtk.TreeStore so invoke the TreeStore methods directly on it instead
+      of a tree that it holds.
+    * review.py: Rename variable tree references to treeStore as it's more
+      appropriate.
+    * NEWS: Note that the CheckList is now a subclass of gtk.TreeStore.
+    
+2004-08-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r96    
+    * configure.ac: Bump version to 0.5
+    * Merged changes from the 0.4 stable branch.
+      - lastmerge: Set to 0.4 branch, rev 95
+      - checklist.py: Fix display of categories as items after loading a
+        savefile (r95)
+      - NEWS: Merge 0.4.1 Release notes (r95)
+    
+2004-08-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r94    
+    * checklist.py: Instead of saving the path to the customItems category,
+      save an iter.
+    * qa-assistant.spec.in: Cleanups after undergoing Fedora.us QA.
+    * NEWS: Start an 0.5 entry.
+    
+2004-08-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r90    
+    * ChangeLog: Update to r89 in preparation for 0.4 release.
+    
 2004-08-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r89    
     * AUTHORS: Reformat into ReStructured Text.
     * README:

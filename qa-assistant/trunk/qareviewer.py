@@ -273,14 +273,14 @@ class QAReviewer(gnomeglade.GnomeApp):
             self.mainWinAppBar.pop()
             self.mainWinAppBar.push("No SRPM selected")
 
-    def __translate_option_mode(self, column, cell, model, iter):
+    def __translate_option_mode(self, column, cell, model, rowIter):
         """Translate from header/item value to mode type.
 
         Keyword -- arguments:
         column: column we're rendering
         cell: cell to perform our transformation on
         model: tree model our data lives in
-        iter: reference to the cell we're operating on
+        rowIter: reference to the cell we're operating on
 
         The mode of the cell depends on whether it is a header/category or an
         item/entry.  However, that is a boolean value and the mode needs to
@@ -299,73 +299,79 @@ class QAReviewer(gnomeglade.GnomeApp):
     # 
     def output_edited(self, cell, row, newValue):
         """Change the text of the output string"""
-        iter = self.checklist.get_iter_from_string(row)
-        path = self.checklist.get_path(iter)
-        name = self.checklist.get_value(iter, checklist.RESOLUTION)
-        ### FIXME:: May be changed into set_output_string(iter, res, output)
+        rowIter = self.checklist.get_iter_from_string(row)
+        path = self.checklist.get_path(rowIter)
+        name = self.checklist.get_value(rowIter, checklist.RESOLUTION)
         newValue = self.checklist.pangoize_output(name, newValue)
 
-        outDict = self.checklist.get_value(iter, checklist.OUTPUTLIST)
+        outDict = self.checklist.get_value(rowIter, checklist.OUTPUTLIST)
         outDict[name] = newValue
-        ### FIXME: ... but is it worthwhile?
-        self.checklist.set(iter, checklist.OUTPUT, newValue)
-        self.checklist.row_changed(path, iter)
+        self.checklist.set(rowIter, checklist.OUTPUT, newValue)
+        self.checklist.row_changed(path, rowIter)
 
     ### FIXME: I believe this should go into checklist.  Possibly this whole
     # section belongs in checklist.
-    def resolution_changed(self, renderer, newValue, iter):
+    def resolution_changed(self, renderer, newValue, changedRow):
         """Changes the display when the user changes an item's state.
 
         Keyword -- arguments:
         renderer: renderer object emitting the signal
         newValue: resolution type we're changing to
-        iter: iter pointing to the node in the tree we're operating on
+        changedRow: iter pointing to the node in the tree we're operating on
 
         When the user changes the resolution of a checklist item, we need to
         change the value in our model.  Other parts of the model may also be
         affected by this change as well.
         """
 
-        self.checklist.set(iter, checklist.RESOLUTION, newValue)
-        outputlist = self.checklist.get_value(iter, checklist.OUTPUTLIST)
+        # Set the checklist to the new resolution and output values
+        self.checklist.set(changedRow, checklist.RESOLUTION, newValue)
+        outputlist = self.checklist.get_value(changedRow, checklist.OUTPUTLIST)
         out = outputlist[newValue]
-        self.checklist.set(iter, checklist.OUTPUT, out)
-        path = self.checklist.get_path(iter)
-        self.checklist.row_changed(path, iter)
-        category = self.checklist.iter_parent(iter)
+        self.checklist.set(changedRow, checklist.OUTPUT, out)
+        
+        # Signal that this row has been changed
+        path = self.checklist.get_path(changedRow)
+        self.checklist.row_changed(path, changedRow)
+
+        # Load category information to check if it needs updating too.
+        category = self.checklist.iter_parent(changedRow)
         catRes = self.checklist.get_value(category, checklist.RESOLUTION)
 
         if newValue == 'Fail' or newValue == 'Non-Blocker':
             ### FIXME: Check preferences for auto-display on fail
             # Auto display to review if it's a fail
-            self.checklist.set(iter, checklist.DISPLAY, True)
+            self.checklist.set(changedRow, checklist.DISPLAY, True)
 
         # Check if the change makes the overall review into a pass or fail
         if newValue == 'Fail':
-
+            # Unless it's already set to Fail, we'll change it.
             if catRes == 'Fail':
                 return
         elif newValue == 'Needs-Reviewing':
+            # If there's no entries for Fail, we'll change to Needs-Reviewing
             if catRes == 'Needs-Reviewing':
                 return
             if catRes != 'Pass':
-                iter = self.checklist.iter_children(category)
-                while iter:
-                    nodeRes = self.checklist.get_value(iter, checklist.RESOLUTION)
+                entryIter = self.checklist.iter_children(category)
+                while changedRow:
+                    nodeRes = self.checklist.get_value(entryIter,
+                            checklist.RESOLUTION)
                     if nodeRes == 'Fail':
                         return
-                    iter = self.checklist.iter_next(iter)
+                    changedRow = self.checklist.iter_next(entryIter)
         elif (newValue == 'Pass' or newValue == 'Not-Applicable' or 
                 newValue == 'Non-Blocker'):
+            # Unless another entry is Fail or Needs-Reviewing, change to Pass
             newValue = 'Pass'
-            iter = self.checklist.iter_children(category)
-            while iter:
-                nodeRes = self.checklist.get_value(iter, checklist.RESOLUTION)
+            entryIter = self.checklist.iter_children(category)
+            while entryIter:
+                nodeRes = self.checklist.get_value(entryIter, checklist.RESOLUTION)
                 if nodeRes == 'Needs-Reviewing':
                     newValue = 'Needs-Reviewing'
                 elif nodeRes == 'Fail':
                     return
-                iter = self.checklist.iter_next(iter)
+                entryIter = self.checklist.iter_next(entryIter)
 
         self.checklist.set(category, checklist.RESOLUTION, newValue)
         path = self.checklist.get_path(category)
@@ -384,13 +390,13 @@ class QAReviewer(gnomeglade.GnomeApp):
         callback takes care of setting the state in the TreeStore.
         """ 
         
-        iter = self.checklist.get_iter(path)
-        value = self.checklist.get_value(iter, checklist.DISPLAY)
+        entryIter = self.checklist.get_iter(path)
+        value = self.checklist.get_value(rowIter, checklist.DISPLAY)
 
         if value:
-            self.checklist.set(iter, checklist.DISPLAY, False)
+            self.checklist.set(entryIter, checklist.DISPLAY, False)
         else:
-            self.checklist.set(iter, checklist.DISPLAY, True)
+            self.checklist.set(entryIter, checklist.DISPLAY, True)
 
     #
     # Menu/Toolbar callbacks

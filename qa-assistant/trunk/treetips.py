@@ -79,8 +79,8 @@ class TreeTips(gtk.Widget):
             self.path = None
         elif self.path != pathReturn[0]:
             self.path = pathReturn[0]
-            iter = model.get_iter(self.path)
-            text = model.get_value(iter, self.column)
+            rowIter = model.get_iter(self.path)
+            text = model.get_value(rowIter, self.column)
             if not text:
                 return False
             self.label.set_text(text)
