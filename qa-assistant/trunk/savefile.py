@@ -29,12 +29,15 @@ class SaveFile:
 
     publicID = '-//BadgerWare//DTD QA Assistant Save File ' + _qaSaveFileVersion_ + '//EN'
     canonicalURL = 'http://qa-assistant.sf.net/dtds/qasave/' + _qaSaveFileVersion_ + '/qasave.dtd'
-    def __init__(self, checklist, properties, filename=None):
+    def __init__(self, app, filename=None):
         ''' '''
-        self.checklist = checklist
-        self.properties = properties
+        self.app = app
+        self.properties = app.properties
+        ### FIXME: This seems like it's just asking for trouble.
+        # When we merge savefile and checklist, this should hopefully
+        # become much cleaner.
+        self.checklist = self.properties.checklist
         self.filename = filename
-        self.app = gnome.program_get()
 
     #
     # Public Methods
@@ -109,8 +112,10 @@ class SaveFile:
         filename = os.path.join('data', filename)
         checkFile = gnomeglade.uninstalled_file(filename)
         if not checkFile:
-            filename = os.path.join(__programName__, filename)
-            checkFile = self.app.locate_file(filename)
+            filename = os.path.join(self.app.program.get_property('app-id'),
+                    filename)
+            checkFile = self.app.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    filename)[0]
         if not checkFile:
             ### FIXME: Throw an exception to get out gracefully
             sys.exit(1)

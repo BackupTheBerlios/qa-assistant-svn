@@ -42,17 +42,17 @@ class QAReviewer(gnomeglade.GnomeApp):
         ### FIXME: Properties is hard-coded right now.  Needs some love.
         self.properties = Properties('fedoraus.xml')
 
-        ### FIXME: Merge with checklist.
-
-        # Create a structure providing savefiles
-        self.saveFile = SaveFile(None, self.properties)
-
         # Load the interface
         gladefile = 'glade/qa-assistant.glade'
         gnomeglade.GnomeApp.__init__(self, __programName__, __version__,
                 gladefile, 'ReviewerWindow')
         self.program.set_property(gnome.PARAM_HUMAN_READABLE_NAME, __programHumanName__)
         
+        ### FIXME: Merge with checklist.
+
+        # Create a structure providing savefiles
+        self.saveFile = SaveFile(self, None)
+
         #
         # Create additional interface components
         #
@@ -302,7 +302,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.checklist.tree.set(iter, checklist.OUTPUT, newValue)
         self.checklist.tree.row_changed(path, iter)
 
-    ### FIXME: I believe this shoud go into checklist.  Possibly this whole
+    ### FIXME: I believe this should go into checklist.  Possibly this whole
     # section belongs in checklist.
     def resolution_changed(self, renderer, newValue, iter):
         """Changes the display when the user changes an item's state.
