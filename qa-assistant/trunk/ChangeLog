@@ -1,3 +1,97 @@
+2005-02-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r161    
+    * src/properties.py:
+      + Add a PropEntry class for getting information into and out of the
+        Properties class.
+      + Move PropertiesWidget out to another class.
+      + __init__(): Keep the keys in a __sortedKeys variable.  This is structured
+        in terms of what order these were added.
+      + __setitem__(): Override Properties[] so we can set values or add new
+        values through this interface.
+      + keys(): Override keys to return __sortedkeys.
+      + Remove all thoughts on ordering according to dependency.  We will
+        depend on checklist authors to define the order that properties should
+        be displayed for filling out instead.
+    * src/srpmqa.py: Make Properties inherit from object so it's a newstyle
+      class.  This class is soon to be phased out, though.
+    * src/SRPM.py: Make Properties inherit from object so it's a newstyle
+      class.
+    * BUGS: Note that the persistence of directories seems to be brokem right
+      now.
+    * PREFERENCES:
+      - Remove most preferences info as it's now implemented.
+      - Bunch of Properties and Function notes that may be out of date compared
+        to the implementation.
+    * tests/testchecklist.py: Move tearDown() near setUp().
+    * tests/propertiestest.py: Unittests for the properties object.
+    * tests/testtreetips.py: Move tearDown() near setUp().
+    * tests/Makefile.am: Add propertiestest.py.
+    * TODO: Note to merge paths.py.pyin with qa-assistant.pyin.
+    
+2005-02-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r160    
+    * src/properties.py: New properties module that has an object to hold
+      properties data and an object to display properies data.
+    
+2005-02-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r159    
+    * src/qa-assistant.pyin: Add commented out code to debug libxml2 memory.
+    * src/srpmqa.py: import SRPM so SRPM evaluation works.
+    * src/checklist.py: __init__(): Be sure to free the checkFile when we
+      hit error conditions.
+    * tests/testchecklist.py:
+      + New test suite TestCheckListCreation: For testing CheckList creation.
+      + Move test0_CheckListCreateSuccess(), test_CheckListInvalidFile(),
+        and test_CheckListNotAFile() from testcreation.py.
+      + New function test_CheckListCreateMemoryTest(): To test that the
+        CheckList doesn't leak memory through libxml2.
+      + suite(): Adapt suite() to use the new creation functions as well.
+    * tests/testcreation.py: Move the CheckList creation functions into
+      testchecklist.py.  Trying to move all the creation functions into the
+      unittests for that module.
+    * TODO: Add some notes on reimplementing uninstalled files.
+    
+2005-02-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r158    
+    * src/properties.py: Delete the present properties.py preparatory to adding
+      a new implementation.
+    * src/srpmqa.py: Add the code from properties.py here.  It may be useful.
+      This files will be whittled down as we implement properties and functions
+      and removed by the time we release 0.5.
+    
+2005-01-31 Toshio Kuratomi <toshio@tiki-lounge.com> - r157    
+    * src/error.py: Add InvalidResolution when the CheckList resolution is not
+      listed in resolutionList.
+    * src/review.py:
+      + publish(): Print out a header of PUBLISH +1 or NEEDSWORK for the review.
+        - Format the output so the category headers have a blank line before and
+          no blank after.
+    * src/checklist.py:
+      + add_entry(): Make resolution default to the first type in the
+        resolutionList.
+        - Check that the resolution is in resList, else raise an exception.
+        - Check that the resolutions from resList are in outputList, otherwise
+          enter them as blank entries.
+    * tests/testchecklist.py:
+      + Give each unittest a short docstring explaining what it does.
+      + test_0CheckListUnpangoize(): Set to be run before any other functions
+        as some of the other unittests use unpangoize_output().
+      + New functions;
+        - test_CheckListAddEntry(): Check that we can add entries using
+          checklist.add_entry().
+        - test_CheckListAddEntryDefaultValuesOk(): Test that adding entries
+          using default vaues yields an entry with the default values we think
+          it should.
+        - test_CheckListAddEntryExplicit(): Test that adding entries using
+          explicit values save entries with those explicit values.
+        - test_CheckListAddEntryInvalidRes(): Test that adding entries with
+          resolutions not in the resolutionList fails.
+        - test_CheckListAddEntryDuplicate(): Test that adding entries that
+          are duplicates of other entries fails.
+        - test_CheckListAddEntryIncompleteOutputList(): Test that adding
+          entries with outputlists that do not include all the resolutions in
+          resList causes the outputlist to grow.
+        - Note that publish() and set() still have to be tested.
+    
+2005-01-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r155    
+    * ChangeLog: Update to (r154).
+    
 2005-01-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r154    
     * src/error.py: Add an exception NotGPGCompatible for when the user
       specifies a gpg program that isn't gpg call compatible.
