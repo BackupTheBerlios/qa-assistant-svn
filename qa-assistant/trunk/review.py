@@ -54,6 +54,14 @@ class Review(gtk.VBox):
         ### FIXME: Do something about packing
         self.add(self.resolution)
 
+        self.hashLabel = gtk.Label('MD5Sums:\n')
+        self.hashLabel.set_property('justify', gtk.JUSTIFY_LEFT)
+        self.hashLabel.set_property('xalign', 0.0)
+        self.add(self.hashLabel)
+        self.hashes = gtk.Label()
+        self.__update_hash(self.properties)
+        self.add(self.hashes)
+
         ### FIXME: Allow editing the OUTPUT from this Widget.  Need to emit
         # row-changed signals that are picked up by the TreeStore (or else
         # change both listStore and treeStore)
@@ -119,21 +127,10 @@ class Review(gtk.VBox):
         self.noteComments.append_column(column)
         self.add(self.noteComments)
 
-        self.hashLabel = gtk.Label('MD5Sums:\n')
-        self.hashLabel.set_property('justify', gtk.JUSTIFY_LEFT)
-        self.hashLabel.set_property('xalign', 0.0)
-        self.add(self.hashLabel)
-        srpmhash, sourcehashes = self.properties.SRPM.hashes()
-        (file, hash) = srpmhash.popitem()
-        hashBuf = hash + '  ' + file + "\n"
-        while sourcehashes:
-            (file, hash) = sourcehashes.popitem()
-            hashBuf += hash + '  ' + file + "\n"
-        self.hashes = gtk.Label(hashBuf)
-        self.add(self.hashes)
-        ### FIXME: so we receive updates from the tree
         self.tree.connect('row-changed', self.__update_data)
-       
+        ### FIXME: Need to connect to a signal when the SRPM changes.
+        # self.properties.connect('hash-change', self.__update_hash)
+
     def show(self):
         """Display the new widget"""
         self.show_all()
@@ -178,6 +175,25 @@ class Review(gtk.VBox):
 
     def submit(self):
         pass
+
+    def update_hash(self):
+        """See __update_hash"""
+        ### FIXME: This is a stopgap until we make properties a gobject and can
+        # connect to a signal for SRPM changes there.
+        self.__update_hash(self.properties)
+
+    def __update_hash(self, properties):
+        """Updates the hashes label withthe current hashes in the properties"""
+        if self.properties.SRPM:
+            srpmhash, sourcehashes = self.properties.SRPM.hashes()
+            (file, hash) = srpmhash.popitem()
+            hashBuf = hash + '  ' + file + "\n"
+            while sourcehashes:
+                (file, hash) = sourcehashes.popitem()
+                hashBuf += hash + '  ' + file + "\n"
+        else:
+            hashBuf = ""
+        self.hashes.set_text(hashBuf)
 
     def __update_data(self, treeStore, path, iter):
         """Update internal list from changes to treeStore on row-changed."""

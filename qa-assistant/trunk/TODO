@@ -2,7 +2,7 @@ glade/GUI:
 ==========
 - Publish Button should be added to toolbar
 
-- Submit Button should be added to toolbar and menu
+- Submit Button should be added to toolbar
   + Pressing Submit will build the review and submit upstream and down.
 
 - Add a New dialog to take input about bugzilla
@@ -74,3 +74,16 @@ Build Architecture
 - Python Distutils or autoconf configure
   + Install files
   + Create distribution tarballs
+
+Miscellaneous stuff from code
+=============================
+# Setup gnome environment
+# Parse commandline
+# class SaveFile
+# class ChecklistRulesFile
+# Initialize the sourceview
+# If a savefile is given, open that
+# If new then make sure we have both a bugzilla # and an SRPM
+# Pregenerate MD5Sums/Sha1Sums
+# Check package signature
+# unrpm sources to buildroot

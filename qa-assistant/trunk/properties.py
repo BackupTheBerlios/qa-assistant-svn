@@ -8,17 +8,31 @@
 """
 __revision__ = "$Rev$"
 
+import SRPM
+
+### FIXME: We should be passing through Exceptions instead of this.
+import sys
+
 class Properties:
-    def __init__(self, checklist, SRPM):
+    class SecurityError(SRPM.SecurityError):
+        pass
+    class FileError(SRPM.FileError):
+        pass
+
+    def __init__(self, checklist=None):
         """Create a new properties box."""
 
         ### FIXME: we really need to take this information from the user
         # instead of setting it here.  But I just want to get something
         # working right now.
         self.checklistName = checklist
-        self.SRPM = SRPM
+        self.SRPM = None
         # self.bugzillaURL
         # self.bugzillaNumber
+        # Directories last searched (for FileSelect Dialogs)
+        self.lastSRPMDir = './'
+        self.lastSaveFileDir = './'
+        self.lastReviewDir = './'
         pass
 
     def dialog(self):
@@ -26,3 +40,26 @@ class Properties:
         
         """
         pass
+
+    def load_SRPM(self, filename):
+        """Given the SRPM's filename, attempt to open a review based on it.
+        
+        Keyword -- arguments:
+            filename -- SRPM filename.
+        
+        Creates an SRPM object from the filename and saves it in self.SRPM.
+        If there is a security problem with the SRPM, then save a SECURITY
+        notice into a special security review property.  If there is a
+        non-security problem, raise the exception.
+        """
+        try:
+            self.SRPM = SRPM.SRPM(filename)
+        ### FIXME: Pass these through to the calling program.
+        except SRPM.FileError, message:
+            self.SRPM = None
+            raise self.FileError(message.__str__())
+        except SRPM.SecurityError, message:
+            ### FIXME:  Write a Review with PUBLISH -1 and security
+            # violation message
+            raise self.SecurityError, message
+        ### FIXME: There are exceptions that SRPM isn't catching yet.

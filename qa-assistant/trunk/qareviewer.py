@@ -16,9 +16,8 @@ __revision__ = "$Rev$"
 
 import libxml2
 import gtk
-import sys
+import sys, os
 
-import SRPM
 import checklist
 import gnomeglade
 from properties import Properties
@@ -36,54 +35,28 @@ class QAReviewer(gnomeglade.GnomeApp):
         Keyword -- arguments:
         arguments: A commandline to process when setting up the environment
         """
-        ### FIXME: take care of the command line args
 
-        ### FIXME: Absolute dependence on arguments[0] being an SRPM without a
-        # check to make sure of it.  Need to fix that up with cmd-line args.
-        self.SRPM = None
-        if len(arguments) == 2:
-            try:
-                self.SRPM = SRPM.SRPM(arguments[1])
-            except SRPM.FileError, message:
-                ### FIXME: Display message to the statusbar
-                sys.stderr.write("Error reading SRPM: %s\n" % (message))
-                sys.exit(1)
-                pass
-            except SRPM.SecurityError, message:
-                ### FIXME:  Write a Review with PUBLISH -1 and security
-                # violation message
-                sys.stderr.write("SECURITY: Problems with SRPM: %s\n" % (message))
-                sys.exit(100)
-                pass
+        # Create the properties for this checklist
+        ### FIXME: Properties is hard-coded right now.  Needs some love.
+        self.properties = Properties('fedoraus.xml')
 
-        if not self.SRPM:
-            ### FIXME:  Hide the checklist
-            # Display note to start by selecting New from SRPM
-            sys.stderr.write("In this release qa-assistant must have the SRPM file as the only argument.\n")
-            sys.exit(1)
-            pass
-
-        ### FIXME: Properties is too hard-coded right now.  Needs some love.
-        self.properties = Properties('fedoraus.xml', self.SRPM)
-        
+        # Load the interface
         gladefile = 'glade/qa-assistant.glade'
         gnomeglade.GnomeApp.__init__(self, __name__, __version__, gladefile,
                 'ReviewerWindow')
 
-        # load the checklist data
-        try:
-            self.checklist = checklist.CheckList('data/'+self.properties.checklistName)
-        except (libxml2.parserError, libxml2.treeError, checklist.Error), msg:
-            ### FIXME: When we can select checklists via property, we need to
-            # print error and recover.
-            sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
-            sys.exit(1)
+        #
+        # Create additional interface components
+        #
 
         # Create a treeview for our listPane
-        self.checkView = gtk.TreeView(self.checklist.tree)
+        self.checkView = gtk.TreeView()
         self.checkView.set_rules_hint(True)
         ### FIXME: Other optional methods of TreeView configuration here.
         
+        # load the checklist data (Associates itself with checkView)
+        self.__load_checklist()
+
         renderer = gtk.CellRendererToggle()
         renderer.set_radio(False)
         column = gtk.TreeViewColumn('Display', renderer,
@@ -97,7 +70,7 @@ class QAReviewer(gnomeglade.GnomeApp):
                                     optionlist=checklist.RESLIST,
                                     selectedoption=checklist.RESOLUTION,
                                     mode=checklist.ISITEM)
-        column.set_cell_data_func(renderer, self.translate_option_mode)
+        column.set_cell_data_func(renderer, self.__translate_option_mode)
         renderer.connect('changed', self.resolution_changed)
         self.checkView.append_column(column)
        
@@ -111,34 +84,110 @@ class QAReviewer(gnomeglade.GnomeApp):
         column = gtk.TreeViewColumn('Output', renderer,
                                     text=checklist.OUTPUT,
                                     visible=checklist.DISPLAY,
-                                    ### FIXME: Need na editable seetting
                                     editable=checklist.DISPLAY)
         self.outputColumn = column
         self.checkView.append_column(column)
 
+        self.tips = TreeTips(self.checkView, checklist.DESC)
+
         self.listPane.add(self.checkView)
+        self.checkView.show()
 
         self.grabArrow=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
         self.grabArrow.set_size_request(4,4)
         label=self.grabBar.get_child()
         self.grabBar.remove(label)
         self.grabBar.add(self.grabArrow)
+        self.grabArrow.show()
 
         self.reviewView = Review(self.checklist.tree, self.properties)
+        self.reviewView.show()
         self.reviewPane.add(self.reviewView)
-
-        self.tips = TreeTips(self.checkView, checklist.DESC)
-        ### FIXME: There are reasons to avoid show_all.  We aren't doing
-        # anything that exposes those problems yet, but I should look into
-        # how problematic it would be to show individually.  (How hard with
-        # glade?)
-        self.ReviewerWindow.show_all()
         self.reviewScroll.hide()
+
+        #
+        # Command line initialization
+        #
+        ### FIXME: take care of the command line args
+
+        ### FIXME: Absolute dependence on arguments[1] being an SRPM without a
+        # check to make sure of it.  Need to fix that up with cmd-line args.
+        if len(arguments) == 2:
+            self.__SRPM_into_properties(arguments[1])
+
+        #
+        # Blast off!
+        #
+        self.__check_readiness()
+        self.ReviewerWindow.show()
 
     #
     # Helper Functions
     # 
-    def translate_option_mode(self, column, cell, model, iter):
+    def __load_checklist(self):
+        try:
+            self.checklist = checklist.CheckList('data/'+self.properties.checklistName)
+        except (libxml2.parserError, libxml2.treeError, checklist.Error), msg:
+            ### FIXME: When we can select checklists via property, we need to
+            # print error and recover.
+            sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
+            sys.exit(1)
+
+        self.checkView.set_model(self.checklist.tree)
+
+    def __SRPM_into_properties(self, filename):
+        msg = "Please use New => From SRPM or New => From Bugzilla to start the QA process."
+        try:
+            self.properties.load_SRPM(filename)
+        except Properties.FileError, message:
+            self.startLabel.set_text("Unable to process that SRPM: %s\n%s" % (message.__str__(), msg))
+        except Properties.SecurityError, message:
+            ### FIXME: 
+            # Set up a review based on the security error
+            # Dialog to display review and ask user if they want to publish
+            # If user selects then publish it to file
+            # [DIALOG]
+            # PUBLISH -1
+            # MD5Sum of src.rpm
+            # Description of problem
+            # [Publish] [Submit to Bugzilla] [Cancel]
+            # [END DIALOG]
+            # else allow user to select a new file
+            #
+            # Everything from here to pass is a hack and needs to go
+            self.startLabel.set_text("SECURITY Error processing SRPM: %s" % (message))
+            del self.properties.SRPM
+            self.propertie.SRPM = None
+            pass
+        else:
+            self.__load_checklist()
+
+        self.__check_readiness()
+
+        ### FIXME: Eventually properties should be a gobject and this
+        # should be caught by a signal.connect in the Review Widget.
+        self.reviewView.update_hash()
+
+
+    def __check_readiness(self):
+        """Checks whether an SRPM is loaded or not.
+
+        This should be called everytime property.SRPM changes.
+        """
+        if self.properties.SRPM:
+            self.startLabel.hide()
+            self.listPane.show()
+            self.grabBar.show()
+            if self.grabArrow.get_property('arrow-type') == gtk.ARROW_RIGHT:
+                self.reviewScroll.show()
+        else:
+            if self.grabArrow.get_property('arrow-type') == gtk.ARROW_RIGHT:
+                self.reviewScroll.hide()
+            self.grabBar.hide()
+            self.listPane.hide()
+            self.startLabel.show()
+
+    def __translate_option_mode(self, column, cell, model, iter):
         """Translate from header/item value to mode type.
 
         Keyword -- arguments:
@@ -261,9 +310,15 @@ class QAReviewer(gnomeglade.GnomeApp):
         """Publish a review to a file."""
         
         # File select dialog for use in file selecting callbacks.
-        fileSelect = gtk.FileSelection(title='Select a file to save the review into')
+        fileSelect = gtk.FileSelection(title='Select a file to publish the review into')
+        if (os.path.isdir(self.properties.lastSRPMDir) and
+                os.access(self.properties.lastSRPMDir, os.R_OK|os.X_OK)):
+            fileSelect.set_filename(self.properties.lastReviewDir)
         response = fileSelect.run()
         if response == gtk.RESPONSE_OK:
+            filename = fileSelect.get_filename()
+            print filename
+            self.properties.lastReviewDir = os.path.dirname(filename)+'/'
             self.reviewView.publish(fileSelect.get_filename())
         fileSelect.destroy()
         del fileSelect
@@ -306,15 +361,26 @@ class QAReviewer(gnomeglade.GnomeApp):
         about.set_property('version', __version__)
         about.show()
         
-    ### FIXME: Features we want to implement but haven't had the time yet:
     def on_menu_new_srpm_activate(self, *extra):
         """Open a new review based on the user selected SRPM"""
-        msg = """Create a new review based on an SRPM downloaded to the system.
-        
-Relative priority: ASAP.  This plus publish to file functionality are needed for minimal usability."""
-        self.not_yet_implemented(msg)
-        pass
 
+        fileSelect = gtk.FileSelection(title='Select an SRPM to load')
+        if (os.path.isdir(self.properties.lastSRPMDir) and
+                os.access(self.properties.lastSRPMDir, os.R_OK|os.X_OK)):
+            fileSelect.set_filename(self.properties.lastSRPMDir)
+
+        fileSelect.hide_fileop_buttons()
+        response = fileSelect.run()
+        try:
+            if response == gtk.RESPONSE_OK:
+                filename = fileSelect.get_filename()
+                self.properties.lastSRPMDir = os.path.dirname(filename)+'/'
+                self.__SRPM_into_properties(filename)
+        finally:
+            fileSelect.destroy()
+            del fileSelect
+
+    ### FIXME: Features we want to implement but haven't had the time yet:
     def on_menu_submit_activate(self, *extra):
         """Submit a review to bugzilla."""
         msg = """Submits a review via Bugzilla XML-RPC.  Coolness factor, but Publish is a more important feature as it gives the user a greater ability to look review and modify the generated review.  When we get better editing features into the checklist this will be more important.
