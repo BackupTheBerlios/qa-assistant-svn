@@ -138,27 +138,25 @@ class SaveFile:
         del saveCheck
         
         saveProperties = root.xpathEval2('/qasave/properties/property')
+        ### FIXME: I think the future
+        # is to merge both properties and savefile into checklist so
+        # this is going to disappear.
         for property in saveProperties:
-            ### FIXME: Properties needs to supply a set interface that
-            # discards illegal values.
-
             # Set properties through the interface.
-            try:
-                self.properties.set(property.prop('name'), property.content)
-            except AttributeError, id:
-                if id == 1:
-                    # save property.prop(name) and .content into a hash.
-                    # When we are done with the loop, check the hash.
-                    # If there are values in it, popup a warning dialog
-                    # that the save file had invalid entries that will be
-                    # discarded.
-                    pass
-            except:
-                ### FIXME: I haven't written the properties interface yet so
-                # this is going to generate an exception.  I think the future
-                # is to merge both properties and savefile into checklist so
-                # this is going to disappear.
-                pass
+            if property.prop('name') == "SRPM":
+                self.properties.load_SRPM(property.content)
+            else:
+                try:
+                    self.properties.set(property.prop('name'), property.content)
+                except AttributeError, id:
+                    if id == 1:
+                        ### FIXME: need to do this:
+                        # save property.prop(name) and .content into a hash.
+                        # When we are done with the loop, check the hash.
+                        # If there are values in it, popup a warning dialog
+                        # that the save file had invalid entries that will be
+                        # discarded.
+                        pass
         del saveProperties
         
         saveEntries = root.xpathEval2('/qasave/entries/entry')

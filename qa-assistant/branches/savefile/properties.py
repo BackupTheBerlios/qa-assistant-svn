@@ -68,3 +68,10 @@ class Properties:
         except SRPM.SecurityError:
             excName, exc = sys.exc_info()[:2]
             raise self.SecurityError, (exc.id, exc.filename, exc.message)
+
+    def set(name, property):
+        """Set a property from the program. """
+        if hasattr(name):
+            setattr(name, property)
+        else:
+            raise AttributeError (1)

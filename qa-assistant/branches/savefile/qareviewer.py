@@ -113,9 +113,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.grabBar.add(self.grabArrow)
         self.grabArrow.show()
 
-        self.reviewView = Review(self.checklist.tree, self.properties)
-        self.reviewView.show()
-        self.reviewPane.add(self.reviewView)
         self.reviewScroll.hide()
 
         dtdFile = os.path.join('data', 'qasave.dtd')
@@ -171,7 +168,7 @@ class QAReviewer(gnomeglade.GnomeApp):
                 checkFile = checkFile[0]
         if checkFile == None:
             ### FIXME: When we can select checklists via property, we need to
-            # print error and recover.
+            # :rint error and recover.
             sys.stderr.write("Unable to find checklist: %s\n" % (filename))
             sys.exit(1)
         try:
@@ -192,6 +189,15 @@ class QAReviewer(gnomeglade.GnomeApp):
             qamenu = GenericQA(self)
         self.QAMenuItem.set_submenu(qamenu)
         qamenu.show_all()
+        try:
+            self.reviewView.destroy()
+        except AttributeError:
+            # No problems as long as reviewView doesn't exist
+            pass
+        self.reviewView = Review(self.checklist.tree, self.properties)
+        self.reviewView.update_hash()
+        self.reviewView.show()
+        self.reviewPane.add(self.reviewView)
 
     def SRPM_into_properties(self, filename):
         '''Add an SRPM file into our properties structure.
@@ -378,7 +384,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         value = self.checklist.tree.get_value(iter, checklist.DISPLAY)
 
         if value:
-            self.checklist.tree.set(iter, checklist.DISPLAY, False) 
+            self.checklist.tree.set(iter, checklist.DISPLAY, False)
         else:
             self.checklist.tree.set(iter, checklist.DISPLAY, True)
 
@@ -413,6 +419,11 @@ class QAReviewer(gnomeglade.GnomeApp):
                 pass
 
             self.checklist = newList
+            ### FIXME: The following is copied from SRPM_into_properties
+            # It needs to be refactored to just have one copy somewhere.
+            self.__check_readiness()
+            ### End of SRPM into properties
+            
             ### FIXME: This is copied from __load_checklist().
             # __load_checklist needs to be split to have this method...
             # sync_checklist which will perform this sync of checklistView to
@@ -428,6 +439,11 @@ class QAReviewer(gnomeglade.GnomeApp):
                 qamenu = GenericQA(self)
             self.QAMenuItem.set_submenu(qamenu)
             qamenu.show_all()
+            self.reviewView.destroy()
+            self.reviewView = Review(self.checklist.tree, self.properties)
+            self.reviewView.update_hash()
+            self.reviewView.show()
+            self.reviewPane.add(self.reviewView)
             ### End of __load_checklist copy.
 
     def on_menu_save_activate(self, *extra):
@@ -541,12 +557,14 @@ class QAReviewer(gnomeglade.GnomeApp):
         # an unsigned int type
         # This hack munges current_event_time to match what event.time
         # provides but it's less than ideal.
+        # -- This has been fixed in 2.2.0 have to require that?
+        """
         time = gtk.get_current_event_time()
         offset = time - int(0x7FFFFFFF)
         if offset > 0:
             time = int(-2147483648 + offset)
-
-        self.new1_menu.popup(None, None, None, 0, time)
+        """
+        self.new1_menu.popup(None, None, None, 0, gtk.get_current_event_time())
         
     def on_menu_new_srpm_activate(self, *extra):
         """Open a new review based on the user selected SRPM"""
@@ -568,7 +586,10 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         if filename:
             self.properties.lastSRPMDir = os.path.dirname(filename)+'/'
+
+            # load the checklist data (Associates itself with checkView)
             self.SRPM_into_properties(filename)
+            self.__load_checklist()
 
     ### FIXME: Features we want to implement but haven't had the time yet:
     def on_menu_submit_activate(self, *extra):

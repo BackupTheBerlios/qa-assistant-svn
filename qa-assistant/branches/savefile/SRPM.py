@@ -73,14 +73,15 @@ class SRPM:
         del transSet
 
         self.compressMethod = self.hdr[rpm.RPMTAG_PAYLOADCOMPRESSOR] or 'gzip'
-        self.NVR = (self.hdr[rpm.RPMTAG_NAME] + '-' + 
+        self.NVR = (self.hdr[rpm.RPMTAG_NAME] + '-' +
                 self.hdr[rpm.RPMTAG_VERSION] + '-' +
                 self.hdr[rpm.RPMTAG_RELEASE])
         self.__calc_hashes()
 
     def hashes(self):
-        """Returns the MD5 hashes of the files in the SRPM."""
-        return self.srpmHash, self.fileHashes
+        """Returns a copy of the MD5 hashes of the files in the SRPM.  Always
+        returns the SRPM's hash first."""
+        return self.srpmHash.copy(), self.fileHashes.copy()
 
     def expand(self, rootDir=None):
         """Moves the files from the RPM Payload into a directory
