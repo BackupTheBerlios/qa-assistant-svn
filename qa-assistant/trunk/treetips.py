@@ -19,6 +19,8 @@ class TreeTips(gtk.Widget):
     have one treetip.
     """ 
     # The amount of hover time before a treetip pops up (milliseconds)
+
+    ### FIXME: make this a settable gproperty
     DELAY = 500
 
     def __init__(self, treeview, column):
@@ -124,9 +126,11 @@ class TreeTips(gtk.Widget):
 
     def enable(self):
         """Enable showing of tooltips"""
+        ### FIXME: Enable tooltip display
         pass
 
     def disable(self):
         """Disable showing tooltips"""
+        ### FIXME: Disable tooltip display
         pass
         

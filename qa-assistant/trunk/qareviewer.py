@@ -187,7 +187,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         Sets our properties to use the specified SRPM file for the checklist.
         '''
         
-        msg = "Please select 'New => From SRPM'\nor 'New => From Bugzilla' to start the QA process."
+        msg = 'Please select "QA Action => From SRPM"\nor "QA Action => From Bugzilla" to start the QA process.'
         try:
             self.properties.load_SRPM(filename)
         except Properties.FileError, message:
@@ -606,7 +606,18 @@ Relative Priority: _Low_.  Developers are going to use this, not end-users so a 
         return self.on_menu_view_toggle_preview_activate(self, *extra)
 
     def not_yet_implemented(self, msg = ""):
-        NYI = gtk.glade.XML('glade/qa-assistant.glade', 'NYIDialog')
+
+        gladeFile = self._GnomeApp__uninstalled_file('glade/qa-assistant.glade')
+        if gladeFile == None:
+            filename = os.path.join(__programName__, 'glade/qa-assistant.glade')
+            gladeFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    filename)
+            if gladeFile == []:
+                raise Exception("Unable to locate glade file %s" % (filename))
+            else:
+                gladeFile = gladeFile[0]
+
+        NYI = gtk.glade.XML(gladeFile, 'NYIDialog')
         NYIDialog = NYI.get_widget('NYIDialog')
         NYIDialog.connect('response', lambda dialog, response: dialog.destroy())
         if msg:
