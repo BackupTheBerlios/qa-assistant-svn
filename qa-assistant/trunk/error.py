@@ -13,10 +13,14 @@ class Error(Exception):
     '''Base class for Exceptions in QA Assistant.'''
     pass
     
-class duplicateItem(Error):
+class DuplicateItem(Error):
     '''An item duplicates a value already present.'''
     pass
     
-class invalidChecklist(Error):
+class InvalidChecklist(Error):
     '''The given checklist is invalid for some reason.'''
+    pass
+    
+class InvalidSaveFile(Error):
+    '''The given savefile is invalid for some reason.'''
     pass
