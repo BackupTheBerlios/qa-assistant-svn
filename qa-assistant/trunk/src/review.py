@@ -95,11 +95,16 @@ class Review(gtk.VBox):
         ### FIXME: This is probably going to change in favor of a checklist
         # header method.  As it currently stands, it still needs to be
         # translated into PUBLISH +1, NEEDSWORK, etc.
-        outBuf = self.checklist.resolution + '\n'
+        if self.checklist.resolution == 'Pass':
+            outBuf = 'PUBLISH +1\n\n'
+        elif self.checklist.resolution == 'Fail':
+            outBuf = 'NEEDSWORK\n\n'
+        else:
+            outBuf = self.checklist.resolution + '\n\n'
         # Loop through the review areas:
         for box in ('Pass', 'Fail', 'Non-Blocker', 'Notes'):
             reviewBox = self.reviewBoxes[box]
-            tempOutBuf = ''
+            tempOutBuf = '\n'
             # Add items from this review category to the output buffer.
             for entryLabel in reviewBox.get_children():
                 value = entryLabel.get_text()
@@ -107,7 +112,7 @@ class Review(gtk.VBox):
                     value = self.checklist.unpangoize_output(value)
                     tempOutBuf += self.textwrap.fill(value) + '\n'
             if tempOutBuf:
-                outBuf += self.reviewTitles[box].get_text() + '\n' + tempOutBuf
+                outBuf += self.reviewTitles[box].get_text() + tempOutBuf + '\n'
 
         # Sign the review if the user has decided to
         key = GCONFPREFIX + '/user/use-gpg'

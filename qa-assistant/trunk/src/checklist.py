@@ -374,14 +374,24 @@ class CheckList (gtk.TreeStore):
             item = True
         if display == None:
             display = True
-        resolution = resolution or 'Needs-Reviewing'
         output = output or ''
         desc = desc or None
         resList = resList or ['Needs-Reviewing', 'Pass', 'Fail', 'Non-Blocker', 'Not-Applicable']
+        resolution = resolution or resList[0]
+        if resolution not in resList:
+            raise error.InvalidResolution, ('%s is not a resolution from the resolution List' % (resolution))
+
+        # Make sure the outputList matches with the resList
         if not outputList:
+            outputList = {}
             for res in resList:
                 outputList[res] = ''
-            outputList[resolution] = output
+        else:
+            outKeysList = outputList.keys()
+            for res in resList:
+                if res not in outKeysList:
+                    outputList[res] = ''
+        outputList[resolution] = output
        
         if self.customItemsIter:
             newItem = self.append(self.customItemsIter)
