@@ -18,7 +18,6 @@ class GenericQA(gtk.Menu):
     def __init__(self, app):
         gtk.Menu.__init__(self)
         self.app = app
-        self.customItemsPath = None
         addItem = gtk.MenuItem('Add Check_list Item')
         addItem.connect('activate', self.add_item_to_checklist_callback)
         self.append(addItem)
@@ -102,7 +101,7 @@ class GenericQA(gtk.Menu):
         newItemDialog.vbox.add(table)
         newItemDialog.show_all()
 
-        while 1:
+        while True:
             response = newItemDialog.run()
             if response == gtk.RESPONSE_OK:
                 # Check that the summary entry is okay.
@@ -117,17 +116,6 @@ class GenericQA(gtk.Menu):
                     response = msgDialog.run()
                     msgDialog.destroy()
                     continue
-                if self.app.checklist.entries.has_key(summary):
-                    msgDialog = gtk.MessageDialog(self.app.ReviewerWindow,
-                            gtk.DIALOG_DESTROY_WITH_PARENT,
-                            gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
-                            'The Summary must not be the same as any other existing entry.  Please consider renaming the new checklist item or using the existing entry for this review.')
-                    msgDialog.set_title('Invalid summary')
-                    msgDialog.set_default_response(gtk.RESPONSE_CLOSE)
-                    response = msgDialog.run()
-                    msgDialog.destroy()
-                    continue
-
                 res = resEntry.get_history()
                 if res == 0:
                     res = 'Pass'
@@ -137,42 +125,29 @@ class GenericQA(gtk.Menu):
                     res = 'Non-Blocker'
                 output = outputEntry.get_text()
                 output = self.app.checklist.colorize_output(res, output)
-                break
+                try:
+                    self.app.checklist.add_entry(summary, desc=None,
+                    item=True,
+                    display=True,
+                    resolution=res,
+                    output=output,
+                    resList=resList,
+                    outputList=outputList)
+                except:
+                    msgDialog = gtk.MessageDialog(self.app.ReviewerWindow,
+                            gtk.DIALOG_DESTROY_WITH_PARENT,
+                            gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
+                            'The Summary must not be the same as any other existing entry.  Please consider renaming the new checklist item or using the existing entry for this review.')
+                    msgDialog.set_title('Invalid summary')
+                    msgDialog.set_default_response(gtk.RESPONSE_CLOSE)
+                    response = msgDialog.run()
+                    msgDialog.destroy()
+                    continue
+                else:
+                    self.app.resolution_changed(None, res, newItem)
+                    break
             else:
                 # User decided not to write a new entry
-                newItemDialog.destroy()
-                return
+                break
 
         newItemDialog.destroy()
-        if self.customItemsPath:
-            iter = self.app.checklist.tree.get_iter(self.customItemsPath)
-        else:
-            # Create the 'Custom Checklist Items' category
-            iter = self.app.checklist.tree.append(None)
-            self.app.checklist.tree.set(iter,
-                    checklist.SUMMARY, 'Custom Checklist Items',
-                    checklist.ISITEM, False,
-                    checklist.RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
-                    checklist.RESOLUTION, 'Needs-Reviewing',
-                    checklist.OUTPUT, None,
-                    checklist.OUTPUTLIST, {'Needs-Reviewing':None,
-                                           'Pass':None, 'Fail':None},
-                    checklist.DESC, '''Review items that you have comments on even though they aren't on the standard checklist.''')
-            self.customItemsPath = self.app.checklist.tree.get_path(iter)
-        
-        resList = ['Needs-Reviewing', 'Pass', 'Fail', 'Non-Blocker', 'Not-Applicable']
-        outputList = {}
-        for name in resList:
-            outputList[name] = None
-        outputList[res] = output
-        newItem = self.app.checklist.tree.append(iter)
-        self.app.checklist.tree.set(newItem,
-                checklist.DESC, None,
-                checklist.ISITEM, True,
-                checklist.DISPLAY, True,
-                checklist.SUMMARY, summary,
-                checklist.RESOLUTION, res,
-                checklist.OUTPUT, output,
-                checklist.RESLIST, resList,
-                checklist.OUTPUTLIST, outputList)
-        self.app.resolution_changed(None, res, newItem)

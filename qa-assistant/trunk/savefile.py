@@ -162,13 +162,19 @@ class SaveFile:
         saveEntries = root.xpathEval2('/qasave/entries/entry')
         for node in saveEntries:
             entry = self.__xml_to_entry(node, newList)
-            iter = newList.entries[entry.name]
-            if not iter:
-                #   Create the Custom Entries area and get an iter referencing a
-                #   new value there.  Add entry.prop('name') into the iter.
-                #   Add None for checklist.DESC
-                pass
-            newList.tree.set(iter, checklist.ISITEM, entry.item,
+            try:
+                iter = newList.entries[entry.name]
+            except KeyError:
+                print entry.name
+                newList.add_entry(entry.name,
+                        item=entry.item,
+                        display=entry.display,
+                        resolution=entry.res,
+                        output=entry.out,
+                        resList=entry.reslist,
+                        outputList=entry.outlist)
+            else:
+                newList.tree.set(iter, checklist.ISITEM, entry.item,
                     checklist.DISPLAY, entry.display,
                     checklist.MODIFIED, True,
                     checklist.SUMMARY, entry.name,

@@ -43,7 +43,8 @@ class CheckList:
         """Private class.  Holds entry information until ready to output."""
 
     def __init__(self, path, props):
-       
+
+        self.customItemsPath = None
         self.props = props
         self.addPaths = {}
         libxml2.registerErrorHandler(self.__no_display_parse_error, None)
@@ -92,7 +93,7 @@ class CheckList:
                           RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
                           RESOLUTION, 'Needs-Reviewing',
                           OUTPUT, None,
-                          OUTPUTLIST, {'Needs-Reviewing':None, 
+                          OUTPUTLIST, {'Needs-Reviewing':None,
                                        'Pass':None, 'Fail':None},
                           SUMMARY, category.prop('name'))
             self.entries[category.prop('name')] = iter
@@ -143,8 +144,92 @@ class CheckList:
         self.tree.connect('row-inserted', self.__added_row)
         self.tree.connect('row-changed', self.__modified_row)
 
+    def add_entry(self, summary, item=None, display=None,
+            desc=None, resolution=None, output=None,
+            resList=None, outputList=None):
+        '''Adds new items to the checklist.
+        
+        Arguments:
+        summary -- Summary of problem (also its key.)
+        
+        Keyword arguments:
+        item -- entry is an item rather than a category. (default True)
+        display -- display the entry in output review. (default True)
+        desc -- long description about how to determine if the item
+                item has passed or failed. (default None)
+        resolution -- state that the entry is in. (default Needs-Reviewing)
+        output -- output string for the entry. (default None)
+        resList -- list of valid resolutions. (default Needs-Reviewing, Pass,
+                   Fail, Non-Blocker, Not-Applicable)
+        outputList -- dict of output strings for each resList item. (default
+                      None for each resolution in resList)
+
+        Caveats:
+        * outputList[resolution] is set to output even if it already has a
+          value.
+        '''
+
+        # Make sure this entry isn't already listed.
+        if self.entries.has_key(summary):
+            raise duplicateItemError
+
+        # Set up all the default values.
+        item = item or True
+        display = display or True
+        resolution = resolution or 'Needs-Reviewing'
+        output = output or None
+        desc = desc or None
+        resList = resList or ['Needs-Reviewing', 'Pass', 'Fail', 'Non-Blocker', 'Not-Applicable']
+        if outputList:
+            outputList = outputList
+        else:
+            for res in resList:
+                outputList[res] = None
+            outputList[resolution] = output
+       
+        if self.customItemsPath:
+            iter = self.tree.get_iter(self.customItemsPath)
+            newItem = self.tree.append(iter)
+        else:
+            iter = self.tree.append(None)
+            if summary == 'Custom Checklist Items':
+                self.customItemsPath = self.tree.get_path(iter)
+                newItem = iter
+            else:
+                print summary
+                # Create the 'Custom Checklist Items' category
+                self.tree.set(iter,
+                    SUMMARY, 'Custom Checklist Items',
+                    MODIFIED, True,
+                    ISITEM, False,
+                    RESLIST, ['Needs-Reviewing', 'Pass', 'Fail'],
+                    RESOLUTION, 'Needs-Reviewing',
+                    OUTPUT, None,
+                    OUTPUTLIST, {'Needs-Reviewing':None,
+                                           'Pass':None, 'Fail':None},
+                    DESC, '''Review items that you have comments on even though they aren't on the standard checklist.''')
+                self.customItemsPath = self.tree.get_path(iter)
+                newItem = self.tree.append(iter)
+        
+        # Set up the new item
+        self.tree.set(newItem,
+                SUMMARY, summary,
+                DESC, desc,
+                ISITEM, item,
+                DISPLAY, display,
+                MODIFIED, True,
+                RESOLUTION, resolution,
+                OUTPUT, output,
+                RESLIST, resList,
+                OUTPUTLIST, outputList)
+        
     def colorize_output(self, resolution, output):
-        """Colorize the output based on the resolution"""
+        """Colorize the output based on the resolution.
+        
+        Arguments:
+        resolution -- state of review that the output string applies to.
+        output -- the output string to colorize.
+        """
         ### FIXME:
         # escaping really goes one level up but there are currently several
         # external functions that call colorize output.  In the future we need
