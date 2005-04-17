@@ -91,6 +91,9 @@ class NewDruid(gtk.Window):
             # Coming back from propertiesPage has to determine whether it came
             # from selectorPage or loadPage.
             self.propertiesPage.connect('back', self.properties_back)
+            # Properties can only be left if all required properties are
+            # entered.
+            self.propertiesPage.connect('next', self.properties_next)
 
     #
     # Page creation methods
@@ -321,11 +324,37 @@ class NewDruid(gtk.Window):
     #
     
     def properties_back(self, page, druid):
-        '''
+        '''Decides whether we came from a loader page or new checklist page.
 
         '''
         druid.set_page(self.propBackPage)
         return True
+
+    def properties_next(self, page, druid):
+        '''Check that all required properties are filled in.
+
+       Some properties are required so that we can finish the checklist.  This
+       function checks that all required properties are filled in before
+       proceeding.
+        '''
+        if self.newList.properties.requirementsMet:
+            # All required properties are set, let the druid go to the next
+            # page.
+            return False
+        else:
+            # Popup a dialog to finish entering properties
+            requireDialog = gtk.MessageDialog(self,
+                    gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_WARNING,
+                    gtk.BUTTONS_CLOSE,
+                    'There are several properties in this checklist that are'
+                    ' required.  Please be sure you have entered each item'
+                    ' which is displayed in italics and press Next again.')
+            requireDialog.set_title('Enter All Required Properties')
+            requireDialog.set_default_response(gtk.RESPONSE_CLOSE)
+            response = requireDialog.run()
+            requireDialog.destroy()
+            return True
 
     def loader_next(self, page, druid):
         '''Check that the filename we get from the user is a valid checklist.

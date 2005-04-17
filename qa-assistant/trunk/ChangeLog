@@ -1,3 +1,24 @@
+2005-04-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r179    
+    * src/properties.py:
+      - Rename __sortedKeys to _sortedKeys.
+      - Add _requirementsMet that caches whether all required properties have
+        been entered.
+      - __setitem__(): When adding a value, check whether it means we don't
+        have all required properties anymore.
+      - _requires(): New method to check that all requirements have been met.
+      - requirementsMet: property linked to _requires() for reading whether
+        all required properties have been entered.
+    * src/qa-convert.pyin: Add #! line so it's executable by python.
+    * src/propview.py: Remove message to check for required properties.
+      Properties handles this.
+    * src/checkload.py: Remove PROPERTIES as a page to start the druid from.
+    * tests/propertiestest.py: Test that we properly return whether a set of
+      properties has all required values set.
+    * TODO: Note to revamp the Druid as only Druid on new.
+    
+2005-03-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r178    
+    * ChangeLog: Update to (r177)
+    
 2005-03-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r177    
     * qa-assistant.spec.in: Rework scriptlets to handle gconf upgrade case.
     

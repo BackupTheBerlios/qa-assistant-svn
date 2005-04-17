@@ -18,8 +18,6 @@ class PropertiesView(gtk.HBox):
     '''
     # What things are we going to do to the model?
     # We need to create a widget that allows setting of the properties.
-    #  - The widget must have a callback that checks if it has all required
-    #    entries.
     #  - Automatic properties must be notified when their dependents are
     #    modified so they can auto update.
     #
@@ -47,12 +45,10 @@ class PropertiesView(gtk.HBox):
         self.propDisplays = {}
 
         for propName in props.keys():
-            label = gtk.Label(propName)
-            self.labels.add(label)
-            label.show()
             if props[propName].propType == 'automatic':
                 value = props[propName].value or '<No value>'
                 self.propDisplays[propName] = gtk.Label(value)
+                outPropName = None
             else:
                 value = props[propName].value or ''
                 entry = gtk.Entry()
@@ -60,6 +56,17 @@ class PropertiesView(gtk.HBox):
                 entry.connect('focus-out-event', self._change_property,
                         propName)
                 self.propDisplays[propName] = entry
+                if props[propName].propType == 'onload':
+                    outPropName = '<i>' + propName + '</i>'
+                else:
+                    outPropName = None
+            label = gtk.Label()
+            if outPropName:
+                label.set_markup(outPropName)
+            else:
+                label.set_text(propName)
+            self.labels.add(label)
+            label.show()
             self.propDisplays[propName].show()
             self.entries.add(self.propDisplays[propName])
 
@@ -136,7 +143,20 @@ class PropertiesDialog(gtk.Window):
     def _ok_button_cb(self, *extra):
         '''Close the properties window.
         '''
-        self.destroy()
+        if self.propView.model.requirementsMet:
+            self.destroy()
+        else:
+            requireDialog = gtk.MessageDialog(self,
+                    gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_WARNING,
+                    gtk.BUTTONS_CLOSE,
+                    'There are several properties on this dialog that are'
+                    ' required.  Please be sure you have entered each item'
+                    ' which is displayed in italics and press OK again.')
+            requireDialog.set_title('Enter All Required Properties')
+            requireDialog.set_default_response(gtk.RESPONSE_CLOSE)
+            response = requireDialog.run()
+            requireDialog.destroy()
 
     def _help_button_cb(self, *extra):
         '''Open a help window.

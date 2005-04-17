@@ -89,6 +89,23 @@ class Review(gtk.VBox):
         Write the review out to a file.
         '''
 
+        if not self.checklist.properties.requirementsMet:
+            # Popup a dialog to finish entering properties
+            requireDialog = gtk.MessageDialog(None,
+                    gtk.DIALOG_DESTROY_WITH_PARENT,
+                    gtk.MESSAGE_WARNING,
+                    gtk.BUTTONS_CLOSE,
+                    'There are several properties in this checklist that are'
+                    ' required.  A review cannot be printed until those'
+                    ' entries are filled in.  Please be sure you have entered'
+                    ' each property which is displayed in italics in the'
+                    ' Edit::Properties menu and then try to publish again.')
+            requireDialog.set_title('Enter All Required Properties')
+            requireDialog.set_default_response(gtk.RESPONSE_CLOSE)
+            response = requireDialog.run()
+            requireDialog.destroy()
+            return
+        
         ## FIXME: Get header information from the checklist
         # I want to make these available through some sort of header method
         # on the checklist but I haven't designed that yet.
