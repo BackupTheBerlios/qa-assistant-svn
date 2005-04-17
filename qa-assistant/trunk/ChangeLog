@@ -1,3 +1,19 @@
+2005-04-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r180    
+    * src/review.py: publish(): Check that required properties are all entered
+      before printing a review.  If they aren't entered, popup a dialog
+      prompting the user to finish entering the information in
+      Edit::Properties before continuing.
+    * src/propview.py:
+      - PropertiesView: create_layout(): Italicize properties that must be
+        entered.
+      - PropertiesDialog: _ok_button_cb(): Check that required properties are
+        entered, otherwise popup a dialog to finish entering the required
+        properties.
+    * src/checkload.py: Check that all required properties have been entered
+      before leaving the property entry page.  If they haven't, keep the user
+      on that page.
+    * ChangeLog: Update to (r179)
+    
 2005-04-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r179    
     * src/properties.py:
       - Rename __sortedKeys to _sortedKeys.

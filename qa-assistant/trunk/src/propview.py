@@ -57,7 +57,8 @@ class PropertiesView(gtk.HBox):
                         propName)
                 self.propDisplays[propName] = entry
                 if props[propName].propType == 'onload':
-                    outPropName = '<i>' + propName + '</i>'
+                    outPropName = '<span foreground="red" style="italic">' \
+                            + propName + '</span>'
                 else:
                     outPropName = None
             label = gtk.Label()

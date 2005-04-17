@@ -16,7 +16,7 @@ Druid
 The druid itself has been created.  Some work still needs to be done -- mostly
 to the supporting widgets:
 
-* Check that all required properties are entered.
+* Check that all required properties are entered. [check]
 * When loading a savefile from the menus, use the Druid as we have to force
   users to confront the Properties as well.
 * Use the file selector widget instead of the Browse button type file selector
@@ -29,11 +29,11 @@ Properties
 ----------
 There are three consumers of Properties:
 1) CheckList: Which loads what Properties are valid and saves the Properties
-   back into a file.
+   back into a file. [check]
 2) PropertiesWidget which converts the data into a display of labels and entry
-   boxes for setting and displaying the values.
-3) Functions which use values from indiiual properties to set other properties,
-   run tests, or output headers for the Review.
+   boxes for setting and displaying the values. [check]
+3) Functions which use values from individual properties to set other
+   properties, run tests, or output headers for the Review.
 
 (These are properties we want to set on the fedora.us checklist)
 * MD5Sums

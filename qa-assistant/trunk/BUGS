@@ -23,8 +23,6 @@ Programming Errors
 ------------------
 * Use gtk.TreeStore.set instead of self.set in checklist wherever possible.
   Significant performance boost.
-* Need to hook the properties into the checklist.  Right now things are just
-  one step beyond a placeholder.
 * The new CheckView Code is not interacting with qareviewer quite right.
   When loading a saved file it is not displaying itself.  This is because the
   CheckView is not setup to load an SRPM.  We need to decide how the new model
