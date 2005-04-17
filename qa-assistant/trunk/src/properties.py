@@ -51,8 +51,9 @@ class Properties(dict):
         '''Create a new Properties object.
         '''
         dict.__init__(self)
-        self.__sortedKeys = []
-    
+        self._sortedKeys = []
+        self._requirementsMet = False
+        
     #
     # Set Property values
     #
@@ -64,13 +65,15 @@ class Properties(dict):
     def __setitem__(self, key, value):
         '''Set a property to a value.
 
-        Override the default method so that we only set the property if it
-        already exists.  If it doesn't exist, and you want to be able to set
-        it, you need to first add it via the add method.
+        Override the default method so that we create new values when
+        passed an entire PropEntry.  If we are only passed a value for the
+        PropEntry, set the indicated Property's value if it exists.
+        If it doesn't exist, and you want to be able to set it, you need to
+        first add it by passing in a complete PropEntry struct.
         '''
         if isinstance(value, PropEntry):
             dict.__setitem__(self, key, value)
-            self.__sortedKeys.append(key)
+            self._sortedKeys.append(key)
         else:
             try:
                 attrib = self[key]
@@ -78,6 +81,9 @@ class Properties(dict):
                 raise KeyError, (
                         'This checklist has no %s Property' % (key))
             attrib.value = value
+        if self._requirementsMet and self[key].propType == 'onload' and not (
+                self[key].value or self[key].value == 0):
+            self._requirementsMet = False
 
     def keys(self):
         '''Return a sorted list of keys.
@@ -86,4 +92,19 @@ class Properties(dict):
         array.  This gives the checklist author the ability to redefine the
         order in which properties are displayed to the user.
         '''
-        return self.__sortedKeys
+        return self._sortedKeys
+
+    def _requires(self):
+        '''Tell us if all the properties that need entering have been.
+        '''
+        if self._requirementsMet:
+            return True
+        for prop in self.keys():
+            if self[prop].propType == 'onload' and not (self[prop].value
+                    or self[prop].value == 0):
+                return False
+        self._requirementsMet = True
+        return True
+
+    requirementsMet = property(_requires,
+            doc = '''Whether required properties been filled in''')

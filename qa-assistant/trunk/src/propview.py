@@ -75,9 +75,6 @@ class PropertiesView(gtk.HBox):
         '''
         self.model[propName] = entry.get_text()
         
-    ### FIXME: Method to tell us if all onload Properties have been satisfied
-    # Does it belong here or in the properties function?
-
     def set_model(self, model):
         '''Change the Properties that this PropWidget is displaying,
 

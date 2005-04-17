@@ -57,6 +57,13 @@ Extra GNOME Functionality:
 
 Programming:
 ============
+* Revamp Druid.  On start, QA-Assistant will display a blank page.  If the
+  user selects New they will be taken into the Druid.  The Druid will only
+  follow the path for new Reviews.  Load functionality will just use the file
+  chooser.  Properties checking (for entry of required values) is done by the
+  Properties themselves.  Druid on new, PropDialog, and Review:Publish will
+  utilize these checks.  Load will not as Outputting the Review will take care
+  of this.
 * GenericQA needs to provide a menu item to toggle treetip display
 * Command line argument parsing
 

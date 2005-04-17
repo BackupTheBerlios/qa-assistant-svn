@@ -146,6 +146,52 @@ class TestProperties(unittest.TestCase):
     
         self.assert_(self.prop.keys() == [self.name, 'one', 'two', 'three'])
 
+    def test_PropertiesRequirements(self):
+        '''Check Properties correctly returns whether all requirements are set.
+
+        Test that we correctly update whether all required properties have been
+        entered when we add or set Properties.
+        '''
+        self.assert_(self.prop.requirementsMet,
+                'FAIL: One property with value but reported requirements unmet')
+        
+        propEntry = properties.PropEntry()
+        propEntry.valueType = 'string'
+        propEntry.propType = 'onload'
+        self.prop['one'] = propEntry
+        self.failIf(self.prop.requirementsMet,
+                'FAIL: Added a property without value but reported'
+                ' requirements satisfied')
+        
+        self.prop['one'] = 'Test case'
+        self.assert_(self.prop.requirementsMet,
+                'FAIL: Set the property of a required option but it still'
+                ' reports requirements unmet')
+        
+        self.prop['one'] = ''
+        self.failIf(self.prop.requirementsMet,
+                'FAIL: removed the value from a required property but it'
+                ' reports requirements met.')
+       
+        self.prop['one'] = 'Test'
+
+        propEntry = properties.PropEntry()
+        propEntry.valueType = 'int'
+        propEntry.propType = 'optional'
+        self.prop['two'] = propEntry
+        self.assert_(self.prop.requirementsMet,
+                'FAIL: Added an optional requirement but it reports'
+                ' requirements unmet')
+
+        propEntry = properties.PropEntry()
+        propEntry.valueType = 'int'
+        propEntry.propType = 'onload'
+        self.prop['three'] = propEntry
+        self.prop['three'] = 0
+        self.assert_(self.prop.requirementsMet,
+                'FAIL: Changed a requirement to 0 but it reports'
+                ' requirements unmet')
+        
     def tearDown(self):
         pass
 

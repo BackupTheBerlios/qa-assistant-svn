@@ -26,7 +26,6 @@ from propview import PropertiesView
 START = 1   # Druid to display on startup
 NEW = 2     # Druid to help when creating a new review
 LOAD = 3    # Druid to use when loading a review
-PROPERTIES = 4 # Druid to use when changing properties
 
 class NewDruid(gtk.Window):
     '''Druid to walk through starting a new review
@@ -87,10 +86,6 @@ class NewDruid(gtk.Window):
             self.druidWidget.set_buttons_sensitive(False, True, True, True)
             self.propertiesPage.connect('back', self.disable_back,
                     self.selectorPage)
-        elif mode == PROPERTIES:
-            self.set_title('QA Assistant - Set Properties')
-            self.druidWidget.set_buttons_sensitive(False, True, True, True)
-            self.druidWidget.set_finish()
         else:
             self.set_title('QA Assistant - Starting a QA Review')
             # Coming back from propertiesPage has to determine whether it came
