@@ -55,5 +55,7 @@ tests/Makefile
 src/Makefile
 qa-assistant.spec
 src/qaconst.py
+src/qa-assistant.pyin
+src/qa-convert.pyin
 ])
 AC_OUTPUT

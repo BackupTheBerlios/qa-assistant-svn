@@ -1,3 +1,10 @@
+2005-04-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r181    
+    * src/propview.py: Change the labels for the properties to be red as well
+      as italic.
+    * ChangeLog: Update to r180
+    * BUGS, PREFERENCES: Note the pieces of the Properties infrastructure that
+      have been completed.
+    
 2005-04-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r180    
     * src/review.py: publish(): Check that required properties are all entered
       before printing a review.  If they aren't entered, popup a dialog
