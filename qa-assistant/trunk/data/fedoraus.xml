@@ -9,32 +9,23 @@
     <property name="SRPMfile" type="file">
       <require type="onload">
         <arg>ticketURL</arg>
-        <function type="propset">srpm_from_ticket</function>
+        <function>srpm_from_ticket</function>
       </require>
     </property>
     <property name="SRPMMD5sum" type="md5sum">
       <require type="automatic">
         <arg>SRPMfile</arg>
-        <function type="propset">srpm_md5</function>
+        <function>srpm_md5</function>
       </require>
     </property>
     <property name="fileMD5s" type="string">
       <require type="automatic">
         <arg>SRPMfile</arg>
-        <function type="propset">srpm_internal_md5s</function>
+        <function>srpm_internal_md5s</function>
       </require>
     </property>
   </properties>
-  <functions>
-    <function type="header">srpm_header</function>
-    <function type="user">from_srpm</function>
-    <function type="user">from_ticket</function>
-    <function type="user">separator</function>
-    <function type="user">add_item</function>
-    <function type="user">separator</function>
-    <function type="user">publish</function>
-    <function type="user">submit_ticket</function>
-  </functions>
+  <functions hash='6faa39e148d4438f05b0be5b80fc76e143fbac40' hashtype='sha1'>fedoraus.py</functions>
   <category name="Security of the build system">
     <description>Although many of the checklist items relate to security, the
       ones listed in this section are important to check before you proceed

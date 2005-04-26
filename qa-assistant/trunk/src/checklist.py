@@ -18,7 +18,7 @@ import gtk
 import gobject
 import gconf
 
-from qaconst import *
+from qaglobals import *
 import error
 import properties
 
@@ -216,7 +216,6 @@ class CheckList (gtk.TreeStore):
                             propEntry.args.append(requireChild.content)
                         elif requireChild.name == 'function':
                             propEntry.function = requireChild.content
-                            propEntry.functionType = requireChild.prop('type')
                         requireChild = requireChild.next
                 elif propChild.name == 'value':
                     propEntry.value = propChild.content
@@ -463,7 +462,6 @@ class CheckList (gtk.TreeStore):
                 if prop.function:
                     function = require.newTextChild(None, 'function',
                             prop.function)
-                    function.setProp('type', prop.functionType)
                 if prop.value:
                     node.newTextChild(None, 'value', prop.value)
 

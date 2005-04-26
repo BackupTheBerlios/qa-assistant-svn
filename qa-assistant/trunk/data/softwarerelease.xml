@@ -13,11 +13,6 @@
       <require type="onload"/>
     </property>
   </properties>
-  <functions>
-    <function type="user">add_item</function>
-    <function type="user">separator</function>
-    <function type="user">publish</function>
-  </functions>
   <category name="Automated steps">
     <description>Much of the release of a new software package can be
       automated.  The following entries each have code to make the job of

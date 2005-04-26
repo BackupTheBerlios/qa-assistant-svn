@@ -24,21 +24,18 @@ class PropEntry(object):
     entry.valueType = 'url'
     entry.propType = 'onload'
     entry.function = 'srpm_from_ticket'
-    entry.functionType = 'propset'
     entry.args = ['ticketURL',]
     props = Properties()
     props['SRPMfile'] = entry
     
     '''
-    __slots__ = ('value', 'valueType', 'propType', 'function',
-            'functionType', 'args')
+    __slots__ = ('value', 'valueType', 'propType', 'function', 'args')
 
     def __init__(self):
         self.value = None
         self.valueType = None
         self.propType = None
         self.function = None
-        self.functionType = None
         self.args = []
 
 class Properties(dict):

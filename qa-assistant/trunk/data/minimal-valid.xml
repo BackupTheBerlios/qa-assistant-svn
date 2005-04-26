@@ -2,11 +2,6 @@
 <!DOCTYPE checklist PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.3//EN" "http://qa-assistant.sf.net/dtds/checklist/0.3/checklist.dtd">
 <checklist version="0.3" name="Little Do Nothing" revision="0.1">
   <summary>Test for crashing with no values</summary>
-  <functions>
-    <function type="user">add_item</function>
-    <function type="user">separator</function>
-    <function type="user">publish</function>
-  </functions>
   <category name="Minimal one item category">
     <description>
     </description>

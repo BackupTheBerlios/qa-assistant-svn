@@ -27,11 +27,6 @@
   '(string|file|url|number|md5sum|sha1sum)'
 >
 
-<!-- types available for functions.  Determines the applications use. -->
-<!ENTITY % FunctionType
-  '(header|footer|propset|user)'
->
-
 <!-- Requirement types for properties.  All properties need to be set to one
      of these.  The requirement types allow us to know if the property is
      needed and if so, when.
@@ -52,15 +47,22 @@
   '(onload|onpublish|automatic|optional)'
 >
 
+<!-- Types of cryptographic hashes to use when summing checklist functions.
+  :sha1: A sha1 type hash
+  :md5: A traditional md5 hash
+  -->
+<!ENTITY % HashType
+  '(sha1|md5)'
+>
+
 <!-- Top level element
 
      Attributes:
      version: Version of the checklist DTD
      name: Name of this checklist
      revision: Revision of this checklist
-     type: Type of this checklist
   -->
-<!ELEMENT checklist (summary, base?, properties?, functions, category+)>
+<!ELEMENT checklist (summary, base?, properties?, functions?, category+)>
   <!ATTLIST checklist
     version CDATA #FIXED '0.3'
     name CDATA #REQUIRED
@@ -124,29 +126,25 @@
              Contents: The name of the property.
           -->
         <!ELEMENT arg (#PCDATA)>
+	<!-- Function to be run to get a value for this property.
+	
+	     Contents: The name of the function.
+	  -->
+	<!ELEMENT function (#PCDATA)>
 
       <!ELEMENT value (#PCDATA)>
         
-  <!-- List of functions this checklist requests from the checklist -->
-  <!ELEMENT functions (function+)>
-
-    <!-- Function requested by the program.
-
-         Attributes:
-         :type: How the application should use the requested functions.
-                user is a function invoked by the user (presented as a menu)
-                propset is a function to set a property.
-                header is a function to generate a header.
-                footer is a function to generate a footer.
-         Content: The name of the function.  It's possible that we should
-                    create a list of values that this can be.  But I don't
-                    believe it's possible to effectively use such a list in
-                    a DTD.  XML Schemas might allow this, though.
-      -->
-    <!ELEMENT function (#PCDATA)>
-      <!ATTLIST function
-        type %FunctionType; #REQUIRED
-      >
+  <!-- Function requested by the program.
+       Attributes:
+       :hash: A cryptographic hash of the file.
+       :hashtype: The type of hash this is.
+       Content: The name of the file in which the functions reside.
+    -->
+  <!ELEMENT functions (#PCDATA)>
+    <!ATTLIST functions
+      hash CDATA #REQUIRED
+      hashtype %HashType; 'sha1'
+    >
   <!-- Metainfo for a group of entries.
     
         Attributes:
