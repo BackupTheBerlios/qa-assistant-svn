@@ -15,7 +15,7 @@ import gtk
 import gobject
 import gnome.ui
 
-from qaconst import *
+from qaglobals import *
 import error
 from checklist import CheckList
 from propview import PropertiesView

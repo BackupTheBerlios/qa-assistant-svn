@@ -9,7 +9,7 @@ bin_SCRIPTS = qa-assistant qa-convert
 
 qa-convert: qa-assistant
 qa-assistant: paths.py \
-	qaconst.py
+	qaglobals.py
 
 qa_assistantdir = $(datadir)/qa-assistant
 
@@ -34,13 +34,15 @@ qa_assistant_PYTHON = \
 # Generated program files
 nodist_qa_assistantdir = $(datadir)/qa-assistant
 nodist_qa_assistant_PYTHON = paths.py \
-			     qaconst.py
+			     qa-assistant.pyin \
+			     qa-convert.pyin \
+			     qaglobals.py
 
 EXTRA_DIST = \
-	qa-assistant.pyin \
-	qa-convert.pyin \
 	paths.py.pyin \
-	qaconst.py.in
+	qa-assistant.pyin.in \
+	qa-convert.pyin.in \
+	qaglobals.py.in
 
 CLEANFILES= \
 	   $(nodist_qa_assistant_PYTHON) \

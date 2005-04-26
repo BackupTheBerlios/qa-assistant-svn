@@ -42,7 +42,10 @@ dnl so we can drop my optionrenderer hack in favor of gtk.CellRendererCombo.
 PKG_CHECK_MODULES(PYGTK, pygtk-2.0 >= 2.4.0)
 AC_SUBST(PYGTK_CFLAGS)
 AC_SUBST(PYGTK_LIBS)
-PKG_CHECK_MODULES(PYGNOME, gnome-python-2.0)
+dnl gnome-python 2.6 for the new gnome.program_init interface.  Plan on going
+dnl to 2.10 so I can drop my locate_file() hack in favor of
+dnl gnome.Program.locate_file()
+PKG_CHECK_MODULES(PYGNOME, gnome-python-2.0 >= 2.6.0)
 AC_SUBST(PYGNOME_CFLAGS)
 AC_SUBST(PYGNOME_LIBS)
 PKG_CHECK_MODULES(LIBXML, libxml-2.0 >= 2.5.0)
@@ -54,7 +57,7 @@ Makefile
 tests/Makefile
 src/Makefile
 qa-assistant.spec
-src/qaconst.py
+src/qaglobals.py
 src/qa-assistant.pyin
 src/qa-convert.pyin
 ])

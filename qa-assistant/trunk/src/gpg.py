@@ -15,7 +15,6 @@ __revision__ = '$Rev$'
 import os
 import string
 
-from qaconst import *
 import error
 
 # With gpgme, this function remains as the get passphrase callback.

@@ -13,7 +13,7 @@ import gconf
 import gobject
 
 import gnomeglade
-from qaconst import *
+from qaglobals import *
 import error
 
 import gpg

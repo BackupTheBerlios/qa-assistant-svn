@@ -50,8 +50,8 @@ Requirements
 * pygtk_ version 2.4.0 or higher (For the file selector widget)
   (Plan to move to 2.6 for the CellRenderers)
 * `gnome-python-gconf`__ 2.0.0 or higher.
-* `gnome-python`__ version 2.0.0 or higher.
-  (Plan to move to 2.10 for the new gnome.program_init() and locate_file())
+* `gnome-python`__ version 2.6.0 or higher (For properties in program_init).
+  (Plan to move to 2.10 for  gnome.Program.locate_file())
 * `python-rpm`_
 * Unix system to run on.
 

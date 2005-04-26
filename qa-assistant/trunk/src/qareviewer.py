@@ -19,7 +19,7 @@ import gtk
 import gtk.glade
 import gnome
 
-from qaconst import *
+from qaglobals import *
 import gnomeglade
 import error
 import checkload
@@ -44,9 +44,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         # Load the interface
         gladefile = 'glade/qa-assistant.glade'
         gnomeglade.GnomeApp.__init__(self, PROGRAMNAME, __version__,
-                gladefile, 'ReviewerWindow')
-        self.program.set_property(gnome.PARAM_HUMAN_READABLE_NAME,
-                HUMANPROGRAMNAME)
+                HUMANPROGRAMNAME, gladefile, 'ReviewerWindow')
        
         #
         # Create additional interface components
@@ -86,9 +84,10 @@ class QAReviewer(gnomeglade.GnomeApp):
                 'PRIMARY')
 
         # Set default paths for File Dialogs to look in
-        self.lastSRPMDir = './'
         self.lastSaveFileDir = './'
         self.lastReviewDir = './'
+        ### FIXME: This should be set by the module that consumes it.
+        #self.lastSRPMDir = './'
 
         #
         # Command line initialization

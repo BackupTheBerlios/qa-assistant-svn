@@ -121,27 +121,29 @@ class GnomeApp(GtkApp):
     """A convenience base class for apps created in glade.
     """
 
-    def __init__(self, name, version, file, root):
+    def __init__(self, name, version, humanName, gladeFile, root):
         """Initialise program 'name' and version from 'file' containing root node 'root'.
         """
-        self.program = gnome.program_init(name, version)
-        self.program.set_property(gnome.PARAM_APP_DATADIR, paths.datadir)
-        self.program.set_property(gnome.PARAM_APP_LIBDIR, paths.libdir)
-        self.program.set_property(gnome.PARAM_APP_PREFIX, paths.prefix)
-        self.program.set_property(gnome.PARAM_APP_SYSCONFDIR, paths.sysconfdir)
+        props = {gnome.PARAM_HUMAN_READABLE_NAME : humanName,
+            gnome.PARAM_APP_DATADIR : paths.datadir,
+            gnome.PARAM_APP_LIBDIR : paths.datadir,
+            gnome.PARAM_APP_PREFIX : paths.prefix,
+            gnome.PARAM_APP_SYSCONFDIR : paths.sysconfdir}
+            
+        self.program = gnome.program_init(name, version, properties=props)
 
-        gladeFile = uninstalled_file(file)
-        if gladeFile == None:
-            filename = os.path.join(name, file)
-            gladeFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+        gladeXML = uninstalled_file(gladeFile)
+        if gladeXML == None:
+            filename = os.path.join(name, gladeFile)
+            gladeXML = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
                                     filename)
-            if gladeFile == []:
+            if gladeXML == []:
                 ### FIXME: Need to use something less generic than this
                 raise Exception("Unable to locate %s" % (filename))
             else:
-                gladeFile = gladeFile[0]
+                gladeXML = gladeXML[0]
 
-        GtkApp.__init__(self, gladeFile, root)
+        GtkApp.__init__(self, gladeXML, root)
 
         if 0:
             self.client = gnome.ui.Client()
@@ -164,6 +166,7 @@ class GnomeApp(GtkApp):
 
         gnome_program_locate_file hasn't been bound into pygtk so do it here.
 
+        2.10 has locate file.
         Returns: a list of potential files.  The list will be empty if none are
         found
         """

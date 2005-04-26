@@ -12,7 +12,7 @@ import gtk
 import gconf
 import gobject
 
-from qaconst import *
+from qaglobals import *
 from optionrenderer import OptionCellRenderer
 from treetips import TreeTips
 import checklist

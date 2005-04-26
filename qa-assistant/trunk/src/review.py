@@ -19,7 +19,7 @@ except ImportError:
     except ImportError:
         from optparse import textwrap
 
-from qaconst import *
+from qaglobals import *
 import checklist
 import gpg
 import error
