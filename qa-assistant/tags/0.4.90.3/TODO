@@ -1,0 +1,127 @@
+=================
+QA Assistant TODO
+=================
+
+:Author: Toshio Kuratomi
+:Contact: toshio-tiki-lounge.com
+:Date: $Date$
+:Revision: $Rev$
+
+.. contents::
+
+glade/GUI:
+==========
+* Create a logo to go along with the icon.  Think up some other small pixmaps
+  for the menu/toolbar: toggle Preview, new from bugzilla, new from SRPM,
+  Publish Report, Submit Report
+* When the reviewer really should add additional information, how should we
+  make it happen?  A field in the XML file under state?  And that causes
+  qa-assistant to pop up a textEntry dialog when the item enters that state?
+
+Functions:
+==========
+Everything in this list requires rethinking because of the new Functions and
+Properties structure.
+
+* These require integration with the Functions features
+
+  - Publish Button should be added to toolbar
+  - Submit Button should be added to toolbar
+
+    + Pressing Submit will build the review and submit upstream and down.
+
+  - Add a New dialog to take input about bugzilla
+
+    + If new then make sure we have both a bugzilla # and an SRPM
+
+  - Disable pieces of the QA Action menu when there is no SRPM being reviewed
+
+    + Will be taken care of in the merge with checklist.  Now have functions
+      listed in the checklist that should make this happen.
+
+  - Accelerators for QA Action items
+
+Extra GNOME Functionality:
+==========================
+* Update to pygtk-2.4.
+  
+  - Embed the 2.4 file selector widget in the druid..
+  - Change gobjects to use the new chained calls.
+  - Switch to the 2.6 ComboBox Renderer instead of optionrenderer.
+
+* Update to gnome-python-2.10.
+
+  - Utilize new properties setting on gnome.program_init() so we don't get
+    warnings trying to set them after initialization.
+  - Use gnome.program.locate_file() instead of our locate_file() function.
+
+Programming:
+============
+* GenericQA needs to provide a menu item to toggle treetip display
+* Command line argument parsing
+
+  - If a savefile is given, open that
+  - Use optparse/optik
+
+* Enhance tracking entries into the editor.  We want
+  people to be able to shift text around from Needswork and Non-blocker, and
+  to add to them but we want to keep track of what entry is associated with
+  what entry id.
+* Automate some review tasks
+
+  - checkheader
+  - checksig
+  - verify source against spec file/canonical URL
+  - look at the new fedora-startqa for more ideas.  Perhaps we can coordinate
+    and use fedora-startqa in the backend.  (Look through their SRPM stuff --
+    it might be better code than I have... If we can put it into a SRPM class
+    like I have, then it could be callable from either my script or theirs.)
+    
+* Update to the fedora QAFormat output style
+* XML stuff to conform better with libxml2's guidelines document:
+  file:///usr/share/doc/libxml2-devel-2.6.6/guidelines.html
+  (Namespace, URL, Make sure I follow recommendations for element/attribute)
+* Create a common XML save format/checklist with Erik LaBianca for the
+  checklist.  This will involve integrating XML with test infrastructure.
+* Write a proper check that we can use a file (os.access doesn't work for
+  this purpose.  [How does review.py work?])
+  
+  - For both review.py and savefile we could use try: except IOERROR: to trap
+    failure to write the file.
+    
+* Fix the uninstalled_file lookups
+
+  - DTDs have to be selected correctly when the program isn't installed.
+    This can be done by setting a libxml environment variable
+    XML_CATALOG_FILES.  May also be possible to use xmlCatalogAddLocal() to
+    do this.
+    Also look into: xmlCatalogResolve(),xmlCatalogLocalResolve() Family of
+    functions.
+    Setting XML_DEBUG_CATALOG will allow us to debug what's going on.
+    http://www.xmlsoft.org/catalog.html
+  - Program should use uninstalled files only when it is uninstalled.  If it is
+    installed but happens to be run in a build directory, it needs to
+    recognize that.  Also, there is currently a small period where the
+    program searches for uninstalled files when it is installed.  This needs
+    to be changed so installation removes this penalty.
+  - DTDs and the Druid would both have to be special-cased now to make things
+    work uninstalled.  The DTDs could work if the user is connected to a
+    network or if I can get libxml2 to recognize a private xmlcatalog.  The
+    Druid and the rest of the current consumers of uninstalled_files might be
+    better served by creating an uninstalled version of paths.py that lists
+    the directories inside the source instead of directories in the system.
+    Currently paths.py is built from paths.pyin at build time.  We'd need to
+    create one paths.py at build time and a separate one at install time to
+    make this work.
+
+    + This looks like the way to go.  The new objective is to set all
+      information in the paths.py and have minimal setup processing and no
+      special processing in the main body of the program.
+
+* Finish writing unittests for the program.  We've barely scratched the
+  surface of this.  When completed it should allow one to quickly figure
+  out what's working and what's broken in the package.
+
+  - Basically need a set of unittests for each object defined in the program.
+    Don't yet know how to unittest the widgets.  The model objects and the
+    program object should work much better, though.

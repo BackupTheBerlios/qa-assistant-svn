@@ -1,0 +1,75 @@
+==================
+List of Known Bugs
+==================
+
+:Author: Toshio Kuratomi
+:Contact: toshio-tiki-lounge.com
+:Date: $Date$
+:Revision: $Rev$
+
+.. contents::
+
+Packaging Errors
+----------------
+* Before release we need to check that our files match with what's in
+  Makefile.am.  We've changed savefile.py to qa-convert.pyin.  Created new
+  files error.py and checkview.py.  Removed files SRPM.py, genericqa.py,
+  srpmqa.py, and properties.py.  Need to make sure these are all taken care of
+  as well as other problems that may not show up until later.
+* Need to clear my gconf cache of any keys created during testing that aren't
+  going to be distributed to guard against error.
+  
+Programming Errors
+------------------
+* Use gtk.TreeStore.set instead of self.set in checklist wherever possible.
+  Significant performance boost.
+* Need to hook the properties into the checklist.  Right now things are just
+  one step beyond a placeholder.
+* The new CheckView Code is not interacting with qareviewer quite right.
+  When loading a saved file it is not displaying itself.  This is because the
+  CheckView is not setup to load an SRPM.  We need to decide how the new model
+  is going to load and store SRPM information.
+  
+  + On start, we load checkView and Review and start a Druid for the user to
+    select load savefile (Can also be commandline) or start from checklist.
+
+      If savefile:
+      
+        Load a saved checklist and all its properties.  Do we also need to run
+        initiation on the checklist/SRPM?
+	
+      If checklist:
+
+        Then we load the checklist but display a screen telling the user what
+	to use to start a review. (This can be a msg or None)
+
+          For SRPM Reviews this is a msg to specify the SRPM to load.
+
+* For tests somethings have to be preconfigured for certain tests to be
+  performed.  In fedora.us some tests may need the network.  Others may need
+  the SRPM to be available (or the network).  Others may need to have the
+  unarchived rpm available.
+
+  - In the softwarerelease checklist we need to have the network to check the
+    svn repository.  The repository or a tarball needs to be accessbile to run
+    make dist-check, et al.
+
+* There's something wrong with directories and saving/loading the reviews.
+  After saving the review, I'm unable to reload just by putting in the name
+  without any path information.
+
+Working: Need to test
+---------------------
+* Creation of Custom checklist items is not being displayed in the CheckView
+  even though it is being created in the checklist.
+* Change of state in the Checklist is not being reflected in the Review.
+* Need to set the category state from checklist.py
+* No longer need the checklist to connect to the row-inserted and row-changed
+  signals as we do not track modifications to rows anymore and all adds go
+  through add_entry so we can perform the add to self.entries there instead.
+* Need to migrate code to set the category state into checklist.py.
+* When checking for duplicates we probably want to treat things in a case
+  insensitive manner.  having "Upstream GPG Checked" and "upstream gpg checked"
+  probably doesn't make sense.
+* We don't need to create a checklist on program start anymore.  Wait until
+  we have data (A savefile load or SRPM load) to instantiate.

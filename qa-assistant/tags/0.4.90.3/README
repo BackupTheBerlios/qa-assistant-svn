@@ -1,0 +1,87 @@
+============
+QA Assistant
+============
+
+Gnome Quality Assurance Checklist
+=================================
+
+:Author: Toshio Kuratomi
+:Contact: toshio-tiki-lounge.com
+:Date: $Date$
+
+.. contents::
+
+QA Assistant is a Gnome-Python application that assists a reviewer in
+performing Quality Assurance.  It displays a checklist that the reviewer fills
+in.  When the checklist is filled, the application outputs a review to a file
+for the reviewer to submit.
+
+Quick Install
+-------------
+::
+
+  Download from sourceforge http://www.sourceforge.net/projects/qa-assistant
+  $ tar -xzvf qa-assistant-VERSION.tar.gz
+  $ cd qa-assistant-VERSION
+  $ ./configure
+  $ make
+  $ su
+  Password:
+  # make install
+  # exit
+  $ qa-assistant
+
+Features
+--------
+* Graphical GNOME Checklist Application
+* Uses an XML definition of it's checklist for extensibility
+* Included checklist targets Fedora.us/Fedora Extras Quality Assurance Process
+  for verifying SRPM Packages
+* A few automated tasks associated with SRPM QA
+* Outputs a review suitable for publishing on fedora.us
+* Adding of custom checklist items to a review
+* Save and load functions
+* Informational popup tips for filling in the checklist
+
+Requirements
+------------
+* python_ 2.3 (pygtk-2.4.0 needs python 2.3 or higher)
+* python bindings for libxml2_ version 2.5 or higher (For xmlTextReader)
+* pygtk_ version 2.4.0 or higher (For the file selector widget)
+  (Plan to move to 2.6 for the CellRenderers)
+* `gnome-python-gconf`__ 2.0.0 or higher.
+* `gnome-python`__ version 2.0.0 or higher.
+  (Plan to move to 2.10 for the new gnome.program_init() and locate_file())
+* `python-rpm`_
+* Unix system to run on.
+
+.. _python: http://www.python.org
+.. _libxml2: http://wwww.xmlsoft.org
+.. _pygtk: http://www.pygtk.org
+__ pygtk_
+__ pygtk_
+.. _python-rpm: http://www.rpm.org
+
+Getting the Code
+----------------
+
+The current code includes a checklist that works with the Quality Assurance
+process of Fedora.us, the contributed packages section of the Fedora Linux
+Distribution.  As the code matures, more attention will be given to
+creating modules for other QA situations.
+
+qa-assistant is hosted at sourceforge:
+  http://sourceforge.net/projects/qa-assistant
+
+Until sourceforge hosts subversion repositories the development source code
+is available from my home system:
+
+  http://springer.homelinux.com:8080/svn/fedora/qa-assistant/trunk
+
+The currently implemented checklist is to aid Quality Assurance of SRPMS for
+the Fedora Extras Project:
+
+  http://www.fedora.us
+    The Project Home Page.
+  http://www.fedora.us/wiki/QAChecklist
+    The checklist.
