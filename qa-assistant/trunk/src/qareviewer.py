@@ -106,8 +106,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         #
         
         if self.checklist:
-            ### FIXME: Decide if there's additional properties that must be
-            # filled out.
             self.ReviewerWindow.show()
         else:
             ### FIXME: While the Druid is onscreen, set everything in the
@@ -166,30 +164,13 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
             sys.exit(1)
 
-        ### FIXME: We need to assemble the qamenu from the list of requested
-        # checklist.functions instead of from the type variable.  Currently
-        # breaking it totally by making it always pretend to have a SRPM.
-        #
-        # I think we'll have a module qamenu that takes a checklist as its
-        # model.  The qamenu will instantiate a gtk.Menu suitable for calling
-        # self.QAMenuItem.set_submenu() on.  The QAMenu will change when the
-        # checklist model changes.
-        #if self.checklist.type == 'SRPM':
-        if True:
-            from srpmqa import SRPMQA
-            qamenu = SRPMQA(self)
-        else:
-            from genericqa import GenericQA
-            qamenu = GenericQA(self)
+        qamenu = self.checklist.functions.get_menu()
         self.QAMenuItem.set_submenu(qamenu)
         qamenu.show_all()
         self.reviewView.set_model(self.checklist)
-        ### FIXME: This must be replaced with a header method in the checklist.
-        #self.reviewView.update_hash()
         self.reviewView.show()
         self.checkView.set_model(self.checklist)
         self.checkView.show()
-
 
     #
     # Menu/Toolbar callbacks

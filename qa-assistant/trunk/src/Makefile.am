@@ -19,13 +19,13 @@ qa_assistant_PYTHON = \
 		checkload.py \
 		checkview.py \
 		error.py \
-		genericqa.py \
 		gnomeglade.py \
 		gpg.py \
 		optionrenderer.py \
 		preferences.py \
 		properties.py \
 		propview.py \
+		qaapp.py \
 		qareviewer.py \
 		review.py \
 		srpmqa.py \
@@ -34,10 +34,10 @@ qa_assistant_PYTHON = \
 # Generated program files
 nodist_qa_assistantdir = $(datadir)/qa-assistant
 nodist_qa_assistant_PYTHON = paths.py \
-			     qa-assistant.pyin \
-			     qa-convert.pyin \
 			     qaglobals.py
 
+noinst_PYTHON = qa-assistant.pyin \
+		qa-convert.pyin
 EXTRA_DIST = \
 	paths.py.pyin \
 	qa-assistant.pyin.in \

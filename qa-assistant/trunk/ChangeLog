@@ -1,3 +1,72 @@
+2005-04-26 Toshio Kuratomi <toshio@tiki-lounge.com> - r185    
+    * src/properties.py: Remove functionType from PropEntry.
+    * src/genericqa.py: Moved to functions.py
+    * src/functions.py: Significant rewrite of genericqa.py.  The new
+      architecture creates functions.BaseQAFunctions which may either be
+      used as the default functions for a checklist or inherited by function
+      modules specific to the checklist.
+      - header(), footer(): Output headers and footers for a review.
+      - add_item_to_checklist_callback(): renamed add_item_cb().
+      - publish_callback(): renamed publish_cb().
+      - Convert resEntry from gtk.OptionMenu to gtk.ComboBox.
+      - Begin work on implementing the Qa Menu as a separate class.
+    * src/checklist.py:
+      - import qaglobals instead of qaconst.
+      - Remove functionType from the checklist load and save code.
+    * data/minimal-valid.xml: Remove the functions entry as it's now optional.
+    * data/checklist.dtd:
+      - Remove functionType.  Only one type is now listed within the checklist.
+      - Add a HashType for sha1 or md5.
+      - Make functions an optional element of checklist.
+      - If a functions element is present, it now has a filename to use to load
+        checklist functions from.  It also contains a cryptographic hash of the
+        file so we can eventually trace where checklist functions come from.
+        (Will also have to implement signed checklists.)
+    * data/fedoraus.xml:
+      - Remove functionType information.
+      - Remove the list of functions and replace with a hash of fedoraus.py.
+    * data/softwarerelease.xml: Remove functions as they only list the generic
+      ones.
+    
+2005-04-26 Toshio Kuratomi <toshio@tiki-lounge.com> - r184    
+    * src/gnomeglade.py:
+      - Add properties to the Gnome Program via gnome.program_init() rather than
+        after the fact.  This was added to gnome-python in 2.6.x.
+      - Rename file variable to gladeFile and gladeFile to gladeXML so we don't
+        rebind the python builtin file object.
+    * src/qaconst.py.in: Renamed to src/qaglobals.py.in.
+    * src/preferences.py, src/review.py, src/checkview.py, src/checkload.py:
+      - import qaglobals instead of qaconst
+    * src/qareviewer.py:
+      - Send HUMANPROGRAMNAME to the GnomeApp __init__() to set as part of
+        gnome.program_init() instead of trying to set it ourselves after the
+        program is created.
+      - Do not set lastSRPMDir.  This must be done by the srpmqa functions
+        module.
+      - import qaglobals instead of qaconst.
+    * src/qa-assistant.pyin.in: Remove executable permissions.
+    * src/gpg.py: Remove import of qaconst.  This module doesn't use it.
+    * src/Makefile.am:
+      - Rename qaconst.py/qaconst.py.in to qaglobals.py/qaglobals.py.in.
+      - Add qa-assistant.pyin and qa-convert.pyin to the nodist target.
+      - Add qa-assistant.pyin.in and qa-convert.pyin.in to EXTRA_DIST.
+    * README: Note we plan to move to gnome-python 2.10 for locate_file()
+    * configure.ac: Change qaconst.py to qaglobals.py.
+    
+2005-04-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r183    
+    * Rename qa-assistant.pyin qa-assistant.pyin.in and qa-convert.pyin to
+      qa-convert.pyin.in because the files are now processed first by the
+      configure script.
+    
+2005-04-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r182    
+    * qa-assistant.desktop.in: Add a generic name field
+    * ChangeLog: Update to r181
+    * src/qa-assistant.pyin: Change to replace the python interpreter from
+      the configure script.
+    * src/qa-convert.pyin: Change to replace the python interpreter from the
+      configure script.
+    * configure.ac: Add generation of qa-convert.pyin and qa-assistant.pyin.
+    
 2005-04-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r181    
     * src/propview.py: Change the labels for the properties to be red as well
       as italic.

@@ -26,13 +26,12 @@ import sys
 
 sys.path.append('@#pkgdatadir#@')
 
-from qareviewer import QAReviewer
+import qaapp
 
 if __name__ == '__main__':
     # libxml2 Memory Debugging
     # libxml2.debugMemory(1)
-    application = QAReviewer(sys.argv);
-    application.mainloop()
+    qaapp.app.mainloop()
     # libxml2 Memory Debugging
     #libxml2.cleanupParser()
     #if libxml2.debugMemory(1) == 0:

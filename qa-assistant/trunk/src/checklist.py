@@ -12,15 +12,19 @@ Class file to load a description of a checklist into python structures.
 
 import string
 import re
+import os
+import sys
 
 import libxml2
 import gtk
+import gnome
 import gobject
 import gconf
 
 from qaglobals import *
 import error
 import properties
+from functions import *
 
 # TreeStore entries displayed on the screen
 ISITEM=0     # Entry is an item as opposed to category
@@ -116,7 +120,9 @@ class CheckList (gtk.TreeStore):
         '''
         self.filename = path # Filename of the checklist we're implementing
         self.resolution = 'Needs-Reviewing' # Resolution of the checklist
-        self.functions = [] # List of functions available on the checklist
+        self.functionHash = None # Hash of the functions file
+        self.functionHashType = None # Type of the hash (sha1, md5, etc)
+        self.functionFile = None # File containing the functions
         # Properties available on the checklist
         self.properties = properties.Properties()
         self.customItemsIter = None # Iter to the custom items category
@@ -224,10 +230,16 @@ class CheckList (gtk.TreeStore):
             self.properties[p.prop('name')] = propEntry
 
         # Extract functions for the QA menu
-        functions = root.xpathEval2('/checklist/functions/function')
-        for function in functions:
-            self.functions.append((function.content, function.prop('type')))
-
+        functions = root.xpathEval2('/checklist/functions')
+        if functions:
+            self.functionHash = functions.prop('hash')
+            self.functionHashType = functions.prop('hashtype')
+            self.functionFile = functions.content
+            self.functions = self._load_functions()
+        else:
+            self.functions = BaseQAFunctions(self.properties)
+        del functions
+        
         # Record each category as a toplevel in the tree
         categories = root.xpathEval2('/checklist/category')
         self.entries = {}
@@ -466,10 +478,10 @@ class CheckList (gtk.TreeStore):
                     node.newTextChild(None, 'value', prop.value)
 
         # Output functions
-        functions = root.newChild(None, 'functions', None)
-        for func in self.functions:
-            node = functions.newTextChild(None, 'function', func[0])
-            node.setProp('type', func[1])
+        if self.functionFile:
+            functions = root.newTextChild(None, 'functions', self.functionFile)
+            functions.setProp('hash', self.functionHash)
+            functions.setProp('hashtype', self.functionHashType)
         
         # Output entries
         self.foreach(self.__create_entry, root)
@@ -706,6 +718,38 @@ class CheckList (gtk.TreeStore):
         else:
             self.resolution = newValue
             self.emit('resolution-changed', newValue)
+
+    def _load_functions(self):
+        app = gnome.program_get()
+        filename = app.locate_file(gnome.FILE_DOMAIN_DATADIR,
+                os.path.join(PROGRAMNAME, data, self.functionFile))
+        try:
+            functionFile = file(filename[0])
+        except:
+            if filename:
+                raise error.InvalidFunctions, ('Unable to open the functions'
+                        ' file %s.' % (filename))
+            else:
+                raise error.InvalidFunctions, ('Functions file %s does not'
+                        ' exist.' % (self.functionFile))
+        # Make sure functionFile matches the hash.
+        if self.functionHashType == 'sha':
+            import sha1 as thehash
+        elif self.functionHashType == 'md5':
+            import md5 as thehash
+        else:
+            raise error.UnknownHashType, ('The checklist says the functions'
+                    ' file has hash %s of type %s which is an unknown type' %
+                    (self.functionHash, self.functionHashType))
+        hasher = thehash.new(functionFile.readlines())
+        if hasher.hexdigest() != self.functionHash:
+            raise error.InvalidFunctions, ('Function file %s does not match'
+                    ' recorded hash' % (self.functionHash))
+
+        # If so, load the file
+        sys.path.append(os.path.dirname(filename))
+        exec ('import ' + self.functionHash + ' as functions')
+        return functions.QAFunctions(self.properties)
     #
     # Helpers to read a checklist
     #

@@ -308,14 +308,13 @@ class NewDruid(gtk.Window):
         self.app.checkView.set_model(self.app.checklist)
         self.app.checkView.show()
 
-        ### FIXME: Need to substitute checklist.function loading instead.
-        from srpmqa import SRPMQA
-        qamenu = SRPMQA(self.app)
+        qamenu = self.app.checklist.functions.get_menu()
         self.app.QAMenuItem.set_submenu(qamenu)
         qamenu.show_all()
 
         self.app.reviewView.set_model(self.app.checklist)
         self.app.reviewView.show()
+        ### End section that should be removed to qareviewer.
 
         self.destroy()
 
@@ -337,6 +336,11 @@ class NewDruid(gtk.Window):
        function checks that all required properties are filled in before
        proceeding.
         '''
+        # If the <Alt>F Mnemonic was used to invoke the Forward functionality,
+        # the focus may not have left the last property entry box.  Setting
+        # focus away from the last entry manually sets the last entry.
+        druid.child_focus(gtk.DIR_TAB_FORWARD)
+        
         if self.newList.properties.requirementsMet:
             # All required properties are set, let the druid go to the next
             # page.

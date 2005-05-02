@@ -26,6 +26,7 @@ qasavedtd_DATA = data/qasave.dtd
 
 datafilesdir = $(qa_assistantdir)/data
 datafiles_DATA = data/fedoraus.xml \
+		 data/fedoraus.py \
 		 data/softwarerelease.xml
 
 noinst_DATA = data/minimal-valid.xml
