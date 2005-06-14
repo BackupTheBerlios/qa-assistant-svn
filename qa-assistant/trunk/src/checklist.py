@@ -748,6 +748,8 @@ class CheckList (gtk.TreeStore):
             import sha as thehash
         elif self.functionHashType == 'md5':
             import md5 as thehash
+        elif self.functionHashType == 'nullhash':
+            thehash = NullHash()
         else:
             raise error.UnknownHashType, ('The checklist says the functions'
                     ' file has hash %s of type %s which is an unknown type' %
@@ -756,7 +758,6 @@ class CheckList (gtk.TreeStore):
         if hasher.hexdigest() != self.functionHash:
             raise error.InvalidFunctions, ('Function file %s does not match'
                     ' recorded hash' % (self.functionFile))
-
         # If so, load the file
         sys.path.append(os.path.dirname(filename))
         exec ('import ' + self.functionFile[0:-3] + ' as functions')
@@ -913,3 +914,11 @@ gobject.signal_new('resolution-changed', CheckList,
         gobject.SIGNAL_RUN_LAST, gobject.TYPE_BOOLEAN,
         (gobject.TYPE_STRING,))
 gobject.type_register(CheckList)
+
+class NullHash:
+    def __init__(self):
+        pass
+    def new(self, *extra):
+        return self
+    def hexdigest(self, *extra):
+        return '@@hash@@'
