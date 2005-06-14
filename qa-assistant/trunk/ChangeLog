@@ -1,3 +1,71 @@
+2005-06-13  Toshio Kuratomi <toshio@tiki-lounge.com> - r188
+    * ChangeLog: Update to r186
+    * src/error.py: New exception UnknownHashType when a checklist specifies
+      a hash that we don't recognize.
+    * src/treetips.py: Wrap some long lines in the code.
+    * src/review.py:
+      - Docstring for the Review widget.
+      - Do not save the value returned from a message dialog if we don't use it.
+      - Use the checklist functions to output the header of the review.
+    * src/gnomeglade.py: Remove locate_file() as we now use the standard one
+      provided by gnome-python-2.6.
+    * src/functions.py:
+      - __init__(): Take a checklist instead of properties as subfunctions may
+        need the full data available in the checklist.
+      - header(): Return the checklist.resolution by default.
+      - add_item_cb(): The gtk.combo_box does not need to add entries via
+        append_text() so get rid of that call.
+      - Switch away from qaapp to self.checklist.  qaapp is a bad solution and
+        I'm trying to phase it back out.
+    * src/checklist.py:
+      - Add a __revision__ variable.
+      - import functions with namespace to match the rest of my local imports.
+      - Assign the enum-like types showing position in the TreeStore via
+        a range function to be easier to add more items to.
+      - __init__(): Rename variable functions to funcs to not conflict with
+        import functions namespace.
+      - Convert from using the string join() function to string join() method.
+      - Wrap lines of code that are over 80 columns.
+      - _load_functions():
+        + Write a docstring to tell how it works.
+        + Fix bug where we were constructing a path with a data variable
+          instead of a 'data' string.
+        + Convert to use the gnome.locate_file() function.
+        + Fix typo in import of sha module.
+        + Output the functionFile instead of the Hash in error messages.
+        + import the functionFile instead of attempting to import the
+          functionHash.
+      - __no_display_parse_error(): Convert str to strng to not conflict with
+        str keyword.
+    * src/qareviewer.py:
+      - Start to define the Menu and toolbar as a uimanager format.
+      - Create but don't actually use the uimanager.
+      - Convert to gnome.program.locate_file().
+    * src/propview.py: Remove note to create a widget to set properties as it
+      has been completed.
+    * src/checkload.py:
+      - Change a generic exception to a more specific libxml2.treeError check.
+      - build_properties(), build_end(), properties_create(), finish(),
+        close_druid(): doctring documentation.
+      - Wrap lines longer than 80 columns.
+    * src/gpg.py:
+      - Migrate from using string functions to string methods.
+      - Docstring documentation for all functions.
+    * src/Makefile.am: Add functions.py.
+    * README, configure.ac: Update dependencies to gnome-python version 2.10.
+    * TODO:
+      - Add section on checklist/checklist-function security.
+      - Remove gnome-python section as it is merged.
+    * data/fedoraus.py:
+      - Import functions instead of qaconst.
+      - Switch to string assignment from list appending as it's faster and
+        more legible for the small stuff that we're working with.
+      - Temporarily comment out the code to get MD5Sum information as the data
+        isn't available for extraction.
+    * data/fedoraus.xml: New hash value for fedoraus.py.  Need to implement a
+      NULL hash that will always match for testing new checklists and change the
+      hash at build time.
+
 2005-05-01  Toshio Kuratomi <toshio@tiki-lounge.com> - r186
     * src/error.py:
       - Make CannotAccessFile subclass IOError.

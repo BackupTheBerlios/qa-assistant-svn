@@ -730,7 +730,7 @@ class CheckList (gtk.TreeStore):
         the function object.
         '''
         app = gnome.program_get()
-        filename = app.locate_file(gnome.FILE_DOMAIN_DATADIR,
+        filename = app.program.locate_file(gnome.FILE_DOMAIN_DATADIR,
                 os.path.join(PROGRAMNAME, 'data', self.functionFile), True)
         try:
             filename = filename[0]

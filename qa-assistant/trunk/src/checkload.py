@@ -55,8 +55,8 @@ class NewDruid(gtk.Window):
             checklistDirName = os.path.join(PROGRAMNAME, 'data')
             ### FIXME: Expand qaDataDir to include checklists in user
             # directories
-            qaDataDir = app.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
-                    checklistDirName)
+            qaDataDir = app.program.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    checklistDirName, True)
             checklists = []
             for directory in qaDataDir:
                 files = os.listdir(directory)
