@@ -13,7 +13,6 @@ python is a glue language anyhow....
 __revision__ = '$Rev$'
 
 import os
-import string
 
 import error
 
@@ -23,6 +22,12 @@ import gtk
 
 def get_passphrase(gpgId, badPass):
     '''Retrieve a passphrase from the user.
+
+    Arguments:
+    :gpgId: Id to send to gpg as the user requesting the signature
+    :badPass: True if this is a repeat request for the password
+
+    Return: The passphrase entered by the user.
     '''
     passDialog = gtk.Dialog('Enter Passphrase', None,
             gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -57,23 +62,36 @@ def get_passphrase(gpgId, badPass):
 
 def list_secret_keys(pathToGpg):
     ''' List the secret key identities available for the user.
+
+    Arguments
+    :pathToGpg: Path to the gpg program binary.
+
+    Returns: A list of the secret keys suitable for signing with.
     '''
     if not (os.path.isfile(pathToGpg) and os.access(pathToGpg, os.X_OK)):
         raise error.NotGPGCompatible, 'The specified program does not exist.'
     secretKeyList = []
     cmd = pathToGpg + ' --list-secret-keys --with-colons'
-    GPG = os.popen(cmd)
-    for record in GPG.readlines():
-        recordArray = string.split(record, ':')
+    gpgCmd = os.popen(cmd)
+    for record in gpgCmd.readlines():
+        recordArray = record.split(':')
         if recordArray[0] == 'sec':
             secretKeyList.append(recordArray[9])
-    if GPG.close():
+    if gpgCmd.close():
         raise error.NotGPGCompatible, ('The signing program selected in the'
             ' Preferences is not command line compatible with gpg.')
     return secretKeyList
 
 def sign_buffer(buf, gpgID, pathToGpg, passphrase):
     '''Sign an in-memory buffer.
+
+    Arguments:
+    :buf: Buffer to sign.
+    :gpgID: Person whose key we are going to sign with.
+    :pathToGpg: Path to the gpg program.
+    :passphrase: The passphrase to unlock the gpg key.
+
+    Returns: The signed buffer.
     '''
     if not (os.path.isfile(pathToGpg) and os.access(pathToGpg, os.X_OK)):
         raise error.NotGPGCompatible, 'The specified program does not exist.'

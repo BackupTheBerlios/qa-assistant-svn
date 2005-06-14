@@ -41,6 +41,15 @@ Properties structure.
 
   - Accelerators for QA Action items
 
+* Security:  We need to fill in two pieces here: 1) The checklist needs to be
+  gpg signed.  2) We have to check that byte-compiled function files are valid
+  If we can set the interpreter to always byte compile the functions then that
+  should work.
+
+  - Add a "nullhash" that can be used to test out new function files instead
+    of copying the new hash into the xml file on every iteration when designing
+    a new checklist functions file.
+
 Extra GNOME Functionality:
 ==========================
 * Update to pygtk-2.4.
@@ -48,12 +57,6 @@ Extra GNOME Functionality:
   - Embed the 2.4 file selector widget in the druid..
   - Change gobjects to use the new chained calls.
   - Switch to the 2.6 ComboBox Renderer instead of optionrenderer.
-
-* Update to gnome-python-2.10.
-
-  - Utilize new properties setting on gnome.program_init() so we don't get
-    warnings trying to set them after initialization.
-  - Use gnome.program.locate_file() instead of our locate_file() function.
 
 Programming:
 ============

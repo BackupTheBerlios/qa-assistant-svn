@@ -19,6 +19,7 @@ qa_assistant_PYTHON = \
 		checkload.py \
 		checkview.py \
 		error.py \
+		functions.py \
 		gnomeglade.py \
 		gpg.py \
 		optionrenderer.py \

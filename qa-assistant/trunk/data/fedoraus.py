@@ -8,7 +8,7 @@
 '''
 __revision__ = '$Rev$'
 
-from qaconst import *
+from functions import *
 
 class QAFunctions(BaseQAFunctions):
     '''
@@ -22,21 +22,19 @@ class QAFunctions(BaseQAFunctions):
         or NEEDSWORK.  This is followed by a list of the MD5Sums of
         package files involved.
         '''
-        buf = []
         # Extract the resolution from the checklist
         if self.checklist.resolution == 'Pass':
-            buf.append('PUBLISH +1\n\n')
+            buf = 'PUBLISH +1\n\n'
         elif self.checklist.resolution == 'Fail':
-            buf.append('NEEDSWORK\n\n')
+            buf = 'NEEDSWORK\n\n'
         else:
-            buf.append(self.checklist.resolution)
-            buf.append('\n\n')
+            buf = self.checklist.resolution + '\n\n'
             
-        buf.append('MD5Sums:\n')
-        buf.append(self.checklist.properties['SRPMMD5sum'])
-        for hashSum in self.checklist.properties['fileMD5s']:
-            buf.append(hashSum)
-        return ''.join(buf)
+        buf += 'MD5Sums:\n'
+        #buf += self.checklist.properties['SRPMMD5sum'].value
+        #for hashSum in self.checklist.properties['fileMD5s'].value:
+        #    buf += hashSum
+        return buf
     
     def footer(self):
         return ''

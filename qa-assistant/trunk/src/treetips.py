@@ -33,7 +33,8 @@ class TreeTips(gtk.Widget):
                 gobject.PARAM_READABLE),
         'delay' : (gobject.TYPE_INT,
                 'MSecs before displaying the tooltip.',
-                'The delay between the mouse pausing over the widget and the display of the tooltip in msec.',
+                'The delay between the mouse pausing over the widget and the'
+                ' display of the tooltip in msec.',
                 0, 60000, 500,
                 gobject.PARAM_READWRITE),
         'enabled' : (gobject.TYPE_BOOLEAN,
@@ -47,7 +48,8 @@ class TreeTips(gtk.Widget):
                 gobject.PARAM_READWRITE),
         'column' : (gobject.TYPE_INT,
                 'Column from the gtk.TreeView that holds tip data.',
-                'The tip data for each row is held by a column in the row.  This specifies which column that data is in.',
+                'The tip data for each row is held by a column in the row.'
+                '  This specifies which column that data is in.',
                 0, 32000, 0,
                 gobject.PARAM_READWRITE)
     }
@@ -64,7 +66,8 @@ class TreeTips(gtk.Widget):
         if treeview:
             try:
                 treeview.connect('leave-notify-event', self.__tree_leave_notify)
-                treeview.connect('motion-notify-event', self.__tree_motion_notify)
+                treeview.connect('motion-notify-event',
+                        self.__tree_motion_notify)
             except (AttributeError, TypeError):
                 raise TypeError, ('The value of view must be an object that'
                         'implements leave-notify-event and motion-notify-event '
@@ -183,7 +186,8 @@ class TreeTips(gtk.Widget):
             self.tip_window.resize(x, y)
             windowWidth, windowHeight = self.tip_window.get_size()
             cellInfo = tree.get_cell_area(self.path, pathReturn[1])
-            x, y = self.__compute_tooltip_position(cellInfo, windowWidth, windowHeight)
+            x, y = self.__compute_tooltip_position(cellInfo, windowWidth,
+                    windowHeight)
             self.tip_window.move(int(x), int(y))
             self.tip_window.show_all()
 

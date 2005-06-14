@@ -16,8 +16,7 @@ class PropertiesView(gtk.HBox):
 
     PropertiesView displays and sets properties on the model.
     '''
-    # What things are we going to do to the model?
-    # We need to create a widget that allows setting of the properties.
+    ### FIXME: 
     #  - Automatic properties must be notified when their dependents are
     #    modified so they can auto update.
     #

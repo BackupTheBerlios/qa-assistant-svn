@@ -135,8 +135,8 @@ class GnomeApp(GtkApp):
         gladeXML = uninstalled_file(gladeFile)
         if gladeXML == None:
             filename = os.path.join(name, gladeFile)
-            gladeXML = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
-                                    filename)
+            gladeXML = self.program.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                                    filename, True)
             if gladeXML == []:
                 ### FIXME: Need to use something less generic than this
                 raise Exception("Unable to locate %s" % (filename))
@@ -160,81 +160,6 @@ class GnomeApp(GtkApp):
             self.client.connect("save-yourself", cb("SAVE"))
             self.client.connect("shutdown-cancelled", cb("CAN"))
             self.client.connect_to_session_manager()
-
-    def locate_file(self, fileDomain, name):
-        """Mimic the functionality of gnome_program_locate_file.
-
-        gnome_program_locate_file hasn't been bound into pygtk so do it here.
-
-        2.10 has locate file.
-        Returns: a list of potential files.  The list will be empty if none are
-        found
-        """
-        
-        if self.program == None:
-            ### FIXME: Need to have a less generic Exception
-            raise Exception("GnomeApp must be instantiated before using this method")
-
-        fileList = []
-        if name == None or name == "":
-            return fileList
-        
-        if name == os.path.isabs(name):
-            if (os.access(name, os.F_OK | os.R_OK)):
-                fileList.append(name)
-        
-        if fileDomain == gnome.FILE_DOMAIN_LIBDIR:
-            attrName = gnome.PARAM_GNOME_LIBDIR
-            attrRel = ""
-        elif fileDomain == gnome.FILE_DOMAIN_DATADIR:
-            attrName = gnome.PARAM_GNOME_DATADIR
-            attrRel = ""
-        elif fileDomain == gnome.FILE_DOMAIN_SOUND:
-            attrName = gnome.PARAM_GNOME_DATADIR
-            attrRel = "sounds"
-        elif fileDomain == gnome.FILE_DOMAIN_PIXMAP:
-            attrName = gnome.PARAM_GNOME_DATADIR
-            attrRel = "pixmaps"
-        elif fileDomain == gnome.FILE_DOMAIN_CONFIG:
-            attrName = gnome.PARAM_GNOME_SYSCONFDIR
-            attrRel = ""
-        elif fileDomain == gnome.FILE_DOMAIN_HELP:
-            attrName = gnome.PARAM_GNOME_DATADIR
-            attrRel = "gnome/help"
-        elif fileDomain == gnome.FILE_DOMAIN_APP_LIBDIR:
-            attrName = gnome.PARAM_APP_LIBDIR
-            attrRel = ""
-        elif fileDomain == gnome.FILE_DOMAIN_APP_DATADIR:
-            attrName = gnome.PARAM_APP_DATADIR
-            attrRel = ""
-        elif fileDomain == gnome.FILE_DOMAIN_APP_SOUND:
-            attrName = gnome.PARAM_APP_DATADIR
-            attrRel = "sounds"
-        elif fileDomain == gnome.FILE_DOMAIN_APP_PIXMAP:
-            attrName = gnome.PARAM_APP_DATADIR
-            attrRel = "pixmaps"
-        elif fileDomain == gnome.FILE_DOMAIN_APP_CONFIG:
-            attrName = gnome.PARAM_APP_SYSCONFDIR
-            attrRel = ""
-        elif fileDomain == gnome.FILE_DOMAIN_APP_HELP:
-            attrName = gnome.PARAM_APP_DATADIR
-            attrRel = os.path.join("gnome/help",
-                    self.program.get_property(gnome.PARAM_APP_ID))
-        else:
-            ### FIXME: Need a less generic exception
-            raise Exception("unknown file domain %d" %(fileDomain))
-
-        if (attrName != None):
-            directory = self.program.get_property(attrName)
-            if (directory == None):
-                ### FIXME: Need a less generic exception.
-                raise Exception("Directory properties not set correctly.  Cannot locate application specific files.")
-
-            filename = os.path.join(directory, attrRel, name)
-            if (os.access(filename, os.F_OK | os.R_OK)):
-                fileList.append(filename)
-
-        return fileList
 
 #
 # Utility Functions

@@ -10,7 +10,8 @@
 Class file to load a description of a checklist into python structures.
 '''
 
-import string
+__revision__ = '$Rev$'
+
 import re
 import os
 import sys
@@ -24,18 +25,19 @@ import gconf
 from qaglobals import *
 import error
 import properties
-from functions import *
+import functions
 
 # TreeStore entries displayed on the screen
-ISITEM=0     # Entry is an item as opposed to category
-DISPLAY=1    # Write the output to the review
-SUMMARY=2    # Unique title for the entry
-DESC=3       # Long description of what to do to verify the entry
-RESOLUTION=4 # Current resolution
-OUTPUT=5     # Current resolution's output
-RESLIST=6    # Python list of possible resolutions
-OUTPUTLIST=7 # Python hash of outputs keyed to resolution
-TEST=8       # Python class that holds any automated test information
+(ISITEM,     # Entry is an item as oppoed to a category
+ DISPLAY,    # Write the output to the review
+ SUMMARY,    # Unique title for the entry
+ DESC,       # Long description of what to do to verify the entry
+ RESOLUTION, # Current resolution
+ OUTPUT,     # Current resolution's output
+ RESLIST,    # Python list of possible resolutions
+ OUTPUTLIST, # Python hash of outputs keyed to resolution
+ TEST        # Python class that holds any automated test information
+ ) = range(9)
 
 class CheckList (gtk.TreeStore):
     '''Holds the data associated with the checklist.
@@ -81,7 +83,7 @@ class CheckList (gtk.TreeStore):
     '''
 
     # checklist identifying strings
-    formatVersion='0.3'
+    formatVersion = '0.3'
 
     publicID = '-//BaderWare//DTD QA Assistant Checklist File ' \
             + formatVersion + '//EN'
@@ -102,7 +104,7 @@ class CheckList (gtk.TreeStore):
         If this is not the case, this class may become public and outside code
         may use its interface directly.
         '''
-        def run():
+        def run(self):
             '''
     
             Returns: Tuple of Resolution string and Output for the string.  The
@@ -230,15 +232,15 @@ class CheckList (gtk.TreeStore):
             self.properties[p.prop('name')] = propEntry
 
         # Extract functions for the QA menu
-        functions = root.xpathEval2('/checklist/functions')
-        if functions:
-            self.functionHash = functions.prop('hash')
-            self.functionHashType = functions.prop('hashtype')
-            self.functionFile = functions.content
+        funcs = root.xpathEval2('/checklist/functions')
+        if funcs:
+            self.functionHash = funcs[0].prop('hash')
+            self.functionHashType = funcs[0].prop('hashtype')
+            self.functionFile = funcs[0].content
             self.functions = self._load_functions()
         else:
-            self.functions = BaseQAFunctions(self.properties)
-        del functions
+            self.functions = functions.BaseQAFunctions(self)
+        del funcs
         
         # Record each category as a toplevel in the tree
         categories = root.xpathEval2('/checklist/category')
@@ -261,11 +263,11 @@ class CheckList (gtk.TreeStore):
             while node:
                 if node.name == 'description':
                     # Set DESCRIPTION of the heading
-                    desc = string.join(string.split(node.content))
+                    desc = ' '.join(node.content.split())
                     gtk.TreeStore.set(self, newCat, DESC, desc)
                 elif node.name == 'entry':
                     entry = self.__xml_to_entry(node)
-                    entryIter=self.append(newCat)
+                    entryIter = self.append(newCat)
                     gtk.TreeStore.set(self, entryIter,
                             ISITEM, True,
                             DISPLAY, entry.display,
@@ -275,8 +277,8 @@ class CheckList (gtk.TreeStore):
                     self.entries[entry.name.lower()] = entryIter
                     
                     # Construct the resolution from multiple states
-                    outputList={'Needs-Reviewing': ''}
-                    resolutionList=['Needs-Reviewing']
+                    outputList = {'Needs-Reviewing': ''}
+                    resolutionList = ['Needs-Reviewing']
                     for i in range(len(entry.states)):
                         name = entry.states[i]['name']
                         # Order is important: We pangoize as things enter
@@ -364,7 +366,8 @@ class CheckList (gtk.TreeStore):
         # Make sure this entry isn't already listed.
         sumLow = summary.lower()
         if self.entries.has_key(sumLow):
-            raise error.DuplicateItem, ('%s is already present in the checklist.' % (self.entries[sumLow]))
+            raise error.DuplicateItem, ('%s is already present in the'
+                    ' checklist.' % (self.entries[sumLow]))
 
         # Set up all the default values.
         if item == None:
@@ -373,10 +376,12 @@ class CheckList (gtk.TreeStore):
             display = True
         output = output or ''
         desc = desc or None
-        resList = resList or ['Needs-Reviewing', 'Pass', 'Fail', 'Non-Blocker', 'Not-Applicable']
+        resList = resList or ['Needs-Reviewing', 'Pass', 'Fail',
+            'Non-Blocker', 'Not-Applicable']
         resolution = resolution or resList[0]
         if resolution not in resList:
-            raise error.InvalidResolution, ('%s is not a resolution from the resolution List' % (resolution))
+            raise error.InvalidResolution, ('%s is not a resolution from the'
+                    ' resolution List' % (resolution))
 
         # Make sure the outputList matches with the resList
         if not outputList:
@@ -472,16 +477,15 @@ class CheckList (gtk.TreeStore):
                 for arg in prop.args:
                     require.newTextChild(None, 'arg', arg)
                 if prop.function:
-                    function = require.newTextChild(None, 'function',
-                            prop.function)
+                    require.newTextChild(None, 'function', prop.function)
                 if prop.value:
                     node.newTextChild(None, 'value', prop.value)
 
         # Output functions
         if self.functionFile:
-            functions = root.newTextChild(None, 'functions', self.functionFile)
-            functions.setProp('hash', self.functionHash)
-            functions.setProp('hashtype', self.functionHashType)
+            funcs = root.newTextChild(None, 'functions', self.functionFile)
+            funcs.setProp('hash', self.functionHash)
+            funcs.setProp('hashtype', self.functionHashType)
         
         # Output entries
         self.foreach(self.__create_entry, root)
@@ -506,9 +510,9 @@ class CheckList (gtk.TreeStore):
         # Remove the span tags
         output = self.__unspan.match(output).expand(r'\g<1>\g<3>\g<5>')
         # Unescape special chars
-        output = string.replace(output, '&amp;', '&')
-        output = string.replace(output, '&lt;', '<')
-        output = string.replace(output, '&gt;', '>')
+        output = output.replace('&amp;', '&')
+        output = output.replace('&lt;', '<')
+        output = output.replace('&gt;', '>')
 
         return output
 
@@ -522,9 +526,9 @@ class CheckList (gtk.TreeStore):
         Returns: the modified output string.
         '''
 
-        output = string.replace(output, '&', '&amp;')
-        output = string.replace(output, '<', '&lt;')
-        output = string.replace(output, '>', '&gt;')
+        output = output.replace('&', '&amp;')
+        output = output.replace('<', '&lt;')
+        output = output.replace('>', '&gt;')
 
         if resolution == 'Fail':
             color = self.colors['/display/fail-color']
@@ -720,41 +724,48 @@ class CheckList (gtk.TreeStore):
             self.emit('resolution-changed', newValue)
 
     def _load_functions(self):
+        '''Load functions file if it's valid.
+
+        Check that the functions file is valid.  If so, import it and return
+        the function object.
+        '''
         app = gnome.program_get()
         filename = app.locate_file(gnome.FILE_DOMAIN_DATADIR,
-                os.path.join(PROGRAMNAME, data, self.functionFile))
+                os.path.join(PROGRAMNAME, 'data', self.functionFile), True)
         try:
-            functionFile = file(filename[0])
-        except:
-            if filename:
-                raise error.InvalidFunctions, ('Unable to open the functions'
-                        ' file %s.' % (filename))
-            else:
-                raise error.InvalidFunctions, ('Functions file %s does not'
-                        ' exist.' % (self.functionFile))
+            filename = filename[0]
+        except IndexError:
+            raise error.InvalidFunctions, ('Functions file %s does not'
+                    ' exist.' % (self.functionFile))
+        try:
+            functionFile = file(filename)
+        except IOError:
+            raise error.InvalidFunctions, ('Unable to open the functions'
+                    ' file %s.' % (filename))
+
         # Make sure functionFile matches the hash.
-        if self.functionHashType == 'sha':
-            import sha1 as thehash
+        if self.functionHashType == 'sha1':
+            import sha as thehash
         elif self.functionHashType == 'md5':
             import md5 as thehash
         else:
             raise error.UnknownHashType, ('The checklist says the functions'
                     ' file has hash %s of type %s which is an unknown type' %
                     (self.functionHash, self.functionHashType))
-        hasher = thehash.new(functionFile.readlines())
+        hasher = thehash.new(''.join(functionFile.readlines()))
         if hasher.hexdigest() != self.functionHash:
             raise error.InvalidFunctions, ('Function file %s does not match'
-                    ' recorded hash' % (self.functionHash))
+                    ' recorded hash' % (self.functionFile))
 
         # If so, load the file
         sys.path.append(os.path.dirname(filename))
-        exec ('import ' + self.functionHash + ' as functions')
-        return functions.QAFunctions(self.properties)
+        exec ('import ' + self.functionFile[0:-3] + ' as functions')
+        return functions.QAFunctions(self)
     #
     # Helpers to read a checklist
     #
     
-    def __no_display_parse_error(self, ctx, str):
+    def __no_display_parse_error(self, ctx, string):
         """Disable Displaying parser errors."""
         pass
 
@@ -766,7 +777,7 @@ class CheckList (gtk.TreeStore):
 
         Returns: an entry data structure.
         """
-        entry=self.__Entry()
+        entry = self.__Entry()
         entry.test = None
 
         entry.name = node.prop('name')
@@ -780,22 +791,23 @@ class CheckList (gtk.TreeStore):
             if fields.name == 'states':
                 state = fields.children
                 n = 0
-                entry.states=[]
+                entry.states = []
                 while state:
                     if state.name == 'state':
                         entry.states.append({'name' : state.prop('name')})
-                        output = string.join(string.split(state.content))
+                        output = ' '.join(state.content.split())
                         entry.states[n]['output'] = output
                         if entry.states[n]['output'].strip() == '':
-                            entry.states[n]['output'] = entry.name + ': ' + state.prop('name')
+                            entry.states[n]['output'] = (entry.name + ': ' 
+                                    + state.prop('name'))
                         n += 1
                     else:
                         # DTD validation should catch things that aren't
                         # supposed to end up here.
                         pass
-                    state=state.next
+                    state = state.next
             elif fields.name == 'description':
-                desc = string.join(string.split(fields.content))
+                desc = ' '.join(fields.content.split())
                 entry.desc = desc
             elif fields.name == 'test':
                 testFields = fields.children
@@ -835,7 +847,7 @@ sys.exit(4)
                 # DTD validation should prevent anything uwanted from
                 # ending up here.
                 pass
-            fields=fields.next
+            fields = fields.next
 
         return entry
     

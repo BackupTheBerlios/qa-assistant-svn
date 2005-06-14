@@ -25,6 +25,11 @@ import gpg
 import error
 
 class Review(gtk.VBox):
+    '''Widget to display and print a checklist.
+    
+    The review widget takes a checklist and displays it on the screen in the
+    form it will be printed as.  Also can print the checklist.
+    '''
 
     def __init__(self, treeStore=None):
         ''' Create a new Review object. 
@@ -102,23 +107,11 @@ class Review(gtk.VBox):
                     ' Edit::Properties menu and then try to publish again.')
             requireDialog.set_title('Enter All Required Properties')
             requireDialog.set_default_response(gtk.RESPONSE_CLOSE)
-            response = requireDialog.run()
+            requireDialog.run()
             requireDialog.destroy()
             return
         
-        ## FIXME: Get header information from the checklist
-        # I want to make these available through some sort of header method
-        # on the checklist but I haven't designed that yet.
-
-        ### FIXME: This is probably going to change in favor of a checklist
-        # header method.  As it currently stands, it still needs to be
-        # translated into PUBLISH +1, NEEDSWORK, etc.
-        if self.checklist.resolution == 'Pass':
-            outBuf = 'PUBLISH +1\n\n'
-        elif self.checklist.resolution == 'Fail':
-            outBuf = 'NEEDSWORK\n\n'
-        else:
-            outBuf = self.checklist.resolution + '\n\n'
+        outBuf = self.checklist.functions.header()
         # Loop through the review areas:
         for box in ('Pass', 'Fail', 'Non-Blocker', 'Notes'):
             reviewBox = self.reviewBoxes[box]

@@ -29,13 +29,13 @@ class BaseQAFunctions(object):
     </ui>
     '''
     # Functions that are created by the checklist.
-    def __init__(self, properties):
-        self.properties = properties
+    def __init__(self, checklist):
+        self.checklist = checklist
         self.QAMenu = None
         
     # Output functions
     def header(self):
-        return ''
+        return self.checklist.resolution
     
     def footer(self):
         return ('Created in ' 
@@ -71,7 +71,6 @@ class BaseQAFunctions(object):
         table.attach(gtk.Label('Output:'), 0,1, 2,3)
         summaryEntry = gtk.Entry()
         resEntry = gtk.combo_box_new_text()
-        resEntry.append_text()
         resList = ('Pass', 'Fail', 'Non-Blocker')
         outputList = {}
         for res in resList:
@@ -107,7 +106,7 @@ class BaseQAFunctions(object):
                 outputList[res] = output
 
                 try:
-                    qaapp.app.checklist.add_entry(summary, desc=None,
+                    self.checklist.add_entry(summary, desc=None,
                             item=True,
                             display=True,
                             resolution=res,
@@ -137,7 +136,7 @@ class BaseQAFunctions(object):
     def publish_cb(self, callbackMenu):
         '''Publish a review to a file.'''
         # Check that the review is in a completed state
-        if qaapp.app.checklist.resolution == 'Needs-Reviewing':
+        if self.checklist.resolution == 'Needs-Reviewing':
             msgDialog = gtk.MessageDialog(qaapp.app.ReviewerWindow,
                     gtk.DIALOG_DESTROY_WITH_PARENT,
                     gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
@@ -169,7 +168,7 @@ class BaseQAFunctions(object):
             del fileSelect
 
         if filename:
-            qaapp.app.lastReviewDir = os.path.dirname(filename)+'/'
+            qaapp.app.lastReviewDir = os.path.dirname(filename) + os.path.sep
             try:
                 qaapp.app.reviewView.publish(filename)
             except IOError, msg:

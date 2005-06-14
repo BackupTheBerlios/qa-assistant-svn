@@ -17,7 +17,7 @@ import gnome.ui
 
 from qaglobals import *
 import error
-from checklist import CheckList
+import checklist
 from propview import PropertiesView
 
 #
@@ -166,7 +166,7 @@ class NewDruid(gtk.Window):
             # Set up a stream reader for the checklist file.
             try:
                 checkReader = libxml2.newTextReaderFilename(filename)
-            except:
+            except libxml2.treeError:
                 print '%s was not a CheckList file' % (filename)
                 continue
             
@@ -206,7 +206,7 @@ class NewDruid(gtk.Window):
         checkList.append_column(column)
 
         selectorGroup.add(checkList)
-        selectorPage.append_item('',selectorGroup,'')
+        selectorPage.append_item('', selectorGroup, '')
 
         selectorPage.connect('next', self.selector_next)
 
@@ -240,7 +240,7 @@ class NewDruid(gtk.Window):
         browseBar.add(browseEntry)
         browseBar.add(browseButton)
         loadGroup.add(browseBar)
-        loaderPage.append_item('',loadGroup,'')
+        loaderPage.append_item('', loadGroup, '')
 
         # Clicking the browse button pops up the FileSelect dialog.
         browseButton.connect('clicked', self.popup_file_selector)
@@ -253,8 +253,10 @@ class NewDruid(gtk.Window):
         self.druidWidget.add(loaderPage)
        
     def build_properties(self):
-        '''
+        '''Create a properties page.
 
+        The properties page is created from a PropertiesView widget that we
+        create here.
         '''
         propertiesPage = gnome.ui.DruidPageStandard()
         self.propertiesPage =  propertiesPage
@@ -271,8 +273,12 @@ class NewDruid(gtk.Window):
         propertiesPage.connect('prepare', self.properties_create, propForm)
 
     def build_end(self):
+        '''Create a page to display the end of the druid
+
+        Summarise the checklisttype we're loading and the properties we've
+        entered before turning the user loose.
         '''
-        '''
+        ### FIXME: Summary information or remove this end page.
         endPage = gnome.ui.DruidPageEdge(gnome.ui.EDGE_FINISH)
         endPage.set_title('Ready to Begin')
         endPage.set_logo(self.app.logo)
@@ -282,15 +288,20 @@ class NewDruid(gtk.Window):
         endPage.connect('finish', self.finish)
 
     def properties_create(self, page, druid, propForm):
-        '''
-
+        '''Reload the view of the properties.
+        
+        We have to reset the PropertiesView widget to look at the new
+        properties before we display the page because the properties are
+        associated with the specific checklist we are loading.
         '''
         propForm.set_model(self.newList.properties)
         propForm.show()
 
     def finish(self, page, druid):
-        '''
+        '''Commit the new CheckList to the QAReviewer.
 
+        Target the QAReviewer program object to the new CheckList we've just
+        loaded.
         '''
         try:
             self.app.checklist.destroy()
@@ -368,7 +379,7 @@ class NewDruid(gtk.Window):
         :druid: Druid widget.
         '''
         try:
-            self.newList = CheckList(self.browseEntry.get_text())
+            self.newList = checklist.CheckList(self.browseEntry.get_text())
         except error.InvalidChecklist, ex_instance:
             errorDialog = gtk.MessageDialog(self.app.ReviewerWindow,
                     gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -400,7 +411,7 @@ class NewDruid(gtk.Window):
         try:
             if not selectedRow:
                 raise error.InvalidChecklist, 'No checklist file was selected.'
-            self.newList = CheckList(model.get_value(selectedRow,
+            self.newList = checklist.CheckList(model.get_value(selectedRow,
                 self.__FILENAME))
         except error.InvalidChecklist, ex_instance:
             errorDialog = gtk.MessageDialog(self.app.ReviewerWindow,
@@ -468,7 +479,8 @@ class NewDruid(gtk.Window):
         Arguments:
         :button: The button which was clicked to bring up this dialog.
         '''
-        fileSelect = gtk.FileSelection(title='Select the checklist file to load.')
+        fileSelect = gtk.FileSelection(
+                title = 'Select the checklist file to load.')
         if (os.path.isdir(self.app.lastSaveFileDir) and
                 os.access(self.app.lastSaveFileDir, os.R_OK|os.X_OK)):
             fileSelect.set_filename(self.app.lastSaveFileDir)
@@ -487,4 +499,5 @@ class NewDruid(gtk.Window):
             self.browseEntry.set_text(filename)
 
     def close_druid(self, druidObject):
+        '''Close the Druid window.'''
         druidObject.get_parent_window().destroy()

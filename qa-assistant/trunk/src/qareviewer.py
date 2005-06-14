@@ -24,7 +24,7 @@ import gnomeglade
 import error
 import checkload
 from review import Review
-from checklist import CheckList
+import checklist
 from checkview import CheckView
 from preferences import Preferences
 from propview import PropertiesDialog
@@ -41,7 +41,48 @@ class QAReviewer(gnomeglade.GnomeApp):
         Keyword -- arguments:
         arguments: A commandline to process when setting up the environment
         """
-        # Load the interface
+        # Menu and toolbar definition
+        uiElements = '''<ui>
+          <menubar name="MainMenu">
+            <menu action="File">
+              <menuitem action="New"/>
+              <menuitem action="Open"/>
+              <menuitem action="Save"/>
+              <menuitem action="Save As"/>
+              <separator/>
+              <menuitem action="Quit"/>
+            </menu>
+            <menu action="Edit">
+              <menuitem action="Cut"/>
+              <menuitem action="Copy"/>
+              <menuitem action="Paste"/>
+              <separator/>
+              <menuitem action="Properties"/>
+              <separator/>
+              <menuitem action="Preferences"/>
+              <placeholder />
+            </menu>
+            <placeholder name="QAActions"/>
+            <menu action="View">
+              <menuitem action="Toggle Preview"/>
+              <placeholder />
+            </menu>
+            <menu action="Help">
+              <menuitem action="Contents"/>
+              <placeholder name="CheckListSpecificHelp"/>
+              <menuitem action="About"/>
+            </menu>
+          </menubar>
+          <toolbar name="MainToolBar">
+            <toolitem action="New"/>
+            <toolitem action="Open"/>
+            <toolitem action="Save"/>
+            <separator/>
+          </toolbar>
+        </ui>
+        '''
+
+        # Load the main part of the interface
         gladefile = 'glade/qa-assistant.glade'
         gnomeglade.GnomeApp.__init__(self, PROGRAMNAME, __version__,
                 HUMANPROGRAMNAME, gladefile, 'ReviewerWindow')
@@ -50,10 +91,20 @@ class QAReviewer(gnomeglade.GnomeApp):
         # Create additional interface components
         #
 
+        # Create a uimanager to handle the menus and toolbars
+        self.uiManager = gtk.UIManager()
+        accelGroup = self.uiManager.get_accel_group()
+        self.ReviewerWindow.add_accel_group(accelGroup)
+        #for group in self.create_action_groups():
+        #    self.uiManager.insert_action_group(group, pos=0)
+        #self.uiManager.add_ui_from_string(uiElements)
+        #menubar = uimanager.get_widget('/MainMenu')
+        #toolbar = uimanager.get_widget('/MainToolBar')
+
         iconFile = gnomeglade.uninstalled_file('pixmaps/qa-icon.png')
         if iconFile == None:
-            iconFile = self.locate_file(gnome.FILE_DOMAIN_APP_PIXMAP,
-                                        'qa-icon.png')
+            iconFile = self.program.locate_file(gnome.FILE_DOMAIN_APP_PIXMAP,
+                                        'qa-icon.png', True)
             if iconFile == []:
                 iconFile = None
             else:
@@ -68,9 +119,9 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.reviewView = Review()
         self.reviewPane.add(self.reviewView)
 
-        self.grabArrow=gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
+        self.grabArrow = gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
         self.grabArrow.set_size_request(4,4)
-        label=self.grabBar.get_child()
+        label = self.grabBar.get_child()
         self.grabBar.remove(label)
         self.grabBar.add(self.grabArrow)
         self.grabArrow.show()
@@ -145,8 +196,8 @@ class QAReviewer(gnomeglade.GnomeApp):
         checkFile = gnomeglade.uninstalled_file(filename)
         if checkFile == None:
             filename = os.path.join(PROGRAMNAME, filename)
-            checkFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
-                    filename)
+            checkFile = self.program.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    filename, True)
             if checkFile == []:
                 checkFile = None
             else:
@@ -157,7 +208,7 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.stderr.write("Unable to find checklist: %s\n" % (filename))
             sys.exit(1)
         try:
-            self.checklist = CheckList(checkFile)
+            self.checklist = checklist.CheckList(checkFile)
         except (libxml2.parserError, libxml2.treeError, error.InvalidChecklist), msg:
             ### FIXME: We can select checklists via property, we need to
             # print error and recover.
@@ -290,8 +341,8 @@ class QAReviewer(gnomeglade.GnomeApp):
         gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
         if gladeFile == None:
             filename = os.path.join(PROGRAMNAME, 'glade/qa-assistant.glade')
-            gladeFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
-                    filename)
+            gladeFile = self.program.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    filename, True)
             if gladeFile == []:
                 raise Exception("Unable to locate glade file %s" % (filename))
             else:
@@ -330,8 +381,8 @@ class QAReviewer(gnomeglade.GnomeApp):
         gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
         if gladeFile == None:
             filename = os.path.join(PROGRAMNAME, 'glade/qa-assistant.glade')
-            gladeFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
-                    filename)
+            gladeFile = self.program.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    filename, True)
             if gladeFile == []:
                 raise Exception("Unable to locate glade file %s" % (filename))
             else:
@@ -414,8 +465,8 @@ Relative Priority: Low.  There's too much programming to do for me to spend too 
         gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
         if gladeFile == None:
             filename = os.path.join(PROGRAMNAME, 'glade/qa-assistant.glade')
-            gladeFile = self.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
-                    filename)
+            gladeFile = self.program.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    filename, True)
             if gladeFile == []:
                 raise Exception("Unable to locate glade file %s" % (filename))
             else:
