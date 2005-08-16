@@ -30,7 +30,8 @@ qa_assistant_PYTHON = \
 		qareviewer.py \
 		review.py \
 		srpmqa.py \
-		treetips.py
+		treetips.py \
+		ui.py
 
 # Generated program files
 nodist_qa_assistantdir = $(datadir)/qa-assistant

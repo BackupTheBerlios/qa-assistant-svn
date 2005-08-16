@@ -13,20 +13,12 @@ import gtk
 import gnome
 
 import error
+from qaglobals import *
 import qaapp
 
 class BaseQAFunctions(object):
     '''
 
-    '''
-    uiElements = '''
-    <ui>
-    <menubar name="MainMenu">
-      <menu action="QA Actions">
-        <menuitem action="_Add Checklist Item" position="Top">
-        <separator>
-        <menuitem action="_Publish to File" position="Bottom">
-    </ui>
     '''
     # Functions that are created by the checklist.
     def __init__(self, checklist):
@@ -39,20 +31,40 @@ class BaseQAFunctions(object):
     
     def footer(self):
         return ('Created in ' 
-                + qaapp.app.get_property(gnome.PARAM_HUMAN_READABLE_NAME)
-                + ' ' + qaapp.app.get_property(gnome.PARAM_VERSION))
+                + HUMANPROGRAMNAME
+                + ' ' + VERSION)
         
     #
     # Menu functions
     #
-    def get_menu(self):
-        '''Returns a menu appropriate for this set of QA Functions.
+    def get_ui(self):
+        '''Returns a uimanager ui definition and actiongroup definition.
+        
+        The functions interface needs to return a uimanaged set of menus and
+        toolbars so the app can merge and unmerge them when new checklists are
+        opened.
         '''
-        if not self.QAMenu:
-            self.QAMenu = BaseQAFunctionsMenu(self)
-        return self.QAMenu
-            
-    def add_item_cb(self, callbackMenu):
+
+        uiElements = '''<ui>
+            <menubar name="MainMenu">
+              <menu action="QAActions">
+                <menuitem action="AddChecklistItem" position="top"/>
+                <separator/>
+                <menuitem action="PublishToFile" position="bot"/>
+              </menu>
+            </menubar>
+            </ui>
+            '''
+        uiActions = (
+                ('AddChecklistItem', None, '_Add Checklist Item', '<control>i',
+                    'Add a checklist item to fill in with extra notes',
+                    self.add_item_cb),
+                ('PublishToFile', None, '_Publish to file', '<control>u',
+                    'Publish the review from the checklist to a file',
+                    self.publish_cb))
+        return [(uiElements, uiActions)]
+
+    def add_item_cb(self, action, extra):
         '''Adds a checklist entry to the checklist.
         
         Sometimes there's something wrong with a product undergoing QA that
@@ -62,7 +74,8 @@ class BaseQAFunctions(object):
 
         # Dialog to prompt the user for the information
         newItemDialog = gtk.Dialog('New checklist item',
-                qaapp.app.ReviewerWindow, 0, ('Add item', gtk.RESPONSE_OK,
+                None, #qaapp.app.ReviewerWindow,
+                0, ('Add item', gtk.RESPONSE_OK,
                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         newItemDialog.set_default_response(gtk.RESPONSE_OK)
         table = gtk.Table(3, 2, False)
@@ -91,7 +104,8 @@ class BaseQAFunctions(object):
                 # Check that the summary entry is okay.
                 summary = summaryEntry.get_text().strip()
                 if len(summary) <= 0:
-                    msgDialog = gtk.MessageDialog(qaapp.app.ReviewerWindow,
+                    msgDialog = gtk.MessageDialog(None,
+                            #qaapp.app.ReviewerWindow,
                             gtk.DIALOG_DESTROY_WITH_PARENT,
                             gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
                             'You must enter a value for the Summary')
@@ -114,7 +128,8 @@ class BaseQAFunctions(object):
                             resList=resList,
                             outputList=outputList)
                 except error.DuplicateItem:
-                    msgDialog = gtk.MessageDialog(qaapp.app.ReviewerWindow,
+                    msgDialog = gtk.MessageDialog(None,
+                            #qaapp.app.ReviewerWindow,
                             gtk.DIALOG_DESTROY_WITH_PARENT,
                             gtk.MESSAGE_ERROR, gtk.BUTTONS_CLOSE,
                             'The Summary must not be the same as any other'
@@ -133,11 +148,12 @@ class BaseQAFunctions(object):
                 break
         newItemDialog.destroy()
 
-    def publish_cb(self, callbackMenu):
+    def publish_cb(self, action, extra):
         '''Publish a review to a file.'''
         # Check that the review is in a completed state
         if self.checklist.resolution == 'Needs-Reviewing':
-            msgDialog = gtk.MessageDialog(qaapp.app.ReviewerWindow,
+            msgDialog = gtk.MessageDialog(None,
+                    #qaapp.app.ReviewerWindow,
                     gtk.DIALOG_DESTROY_WITH_PARENT,
                     gtk.MESSAGE_QUESTION, gtk.BUTTONS_YES_NO,
                     'You have not checked all items in the checklist so the'
@@ -185,21 +201,3 @@ class BaseQAFunctions(object):
                 response = msgDialog.run()
                 msgDialog.destroy()
                 return
-
-class BaseQAFunctionsMenu(gtk.Menu):
-    '''
-
-    '''
-    def __init__(self, functions):
-        gtk.Menu.__init__(self)
-        self.functions = functions
-        
-        addItem = gtk.MenuItem('_Add Checklist Item')
-        addItem.connect('activate', functions.add_item_cb)
-        self.append(addItem)
-
-        self.append(gtk.SeparatorMenuItem())
-
-        publishItem = gtk.MenuItem('_Publish to File')
-        publishItem.connect('activate', functions.publish_cb)
-        self.append(publishItem)

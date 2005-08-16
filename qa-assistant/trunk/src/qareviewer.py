@@ -21,6 +21,7 @@ import gnome
 
 from qaglobals import *
 import gnomeglade
+import ui
 import error
 import checkload
 from review import Review
@@ -41,46 +42,6 @@ class QAReviewer(gnomeglade.GnomeApp):
         Keyword -- arguments:
         arguments: A commandline to process when setting up the environment
         """
-        # Menu and toolbar definition
-        uiElements = '''<ui>
-          <menubar name="MainMenu">
-            <menu action="File">
-              <menuitem action="New"/>
-              <menuitem action="Open"/>
-              <menuitem action="Save"/>
-              <menuitem action="Save As"/>
-              <separator/>
-              <menuitem action="Quit"/>
-            </menu>
-            <menu action="Edit">
-              <menuitem action="Cut"/>
-              <menuitem action="Copy"/>
-              <menuitem action="Paste"/>
-              <separator/>
-              <menuitem action="Properties"/>
-              <separator/>
-              <menuitem action="Preferences"/>
-              <placeholder />
-            </menu>
-            <placeholder name="QAActions"/>
-            <menu action="View">
-              <menuitem action="Toggle Preview"/>
-              <placeholder />
-            </menu>
-            <menu action="Help">
-              <menuitem action="Contents"/>
-              <placeholder name="CheckListSpecificHelp"/>
-              <menuitem action="About"/>
-            </menu>
-          </menubar>
-          <toolbar name="MainToolBar">
-            <toolitem action="New"/>
-            <toolitem action="Open"/>
-            <toolitem action="Save"/>
-            <separator/>
-          </toolbar>
-        </ui>
-        '''
 
         # Load the main part of the interface
         gladefile = 'glade/qa-assistant.glade'
@@ -92,15 +53,14 @@ class QAReviewer(gnomeglade.GnomeApp):
         #
 
         # Create a uimanager to handle the menus and toolbars
-        self.uiManager = gtk.UIManager()
+        self.uiManager = ui.UI(self)
+        self.mergedMenus = []
         accelGroup = self.uiManager.get_accel_group()
         self.ReviewerWindow.add_accel_group(accelGroup)
-        #for group in self.create_action_groups():
-        #    self.uiManager.insert_action_group(group, pos=0)
-        #self.uiManager.add_ui_from_string(uiElements)
-        #menubar = uimanager.get_widget('/MainMenu')
-        #toolbar = uimanager.get_widget('/MainToolBar')
-
+        menubar = self.uiManager.get_widget('/MainMenu')
+        toolbar = self.uiManager.get_widget('/MainToolBar')
+        self.ReviewerWindow.set_menus(menubar)
+        self.ReviewerWindow.set_toolbar(toolbar)
         iconFile = gnomeglade.uninstalled_file('pixmaps/qa-icon.png')
         if iconFile == None:
             iconFile = self.program.locate_file(gnome.FILE_DOMAIN_APP_PIXMAP,
@@ -215,29 +175,156 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
             sys.exit(1)
 
-        qamenu = self.checklist.functions.get_menu()
-        self.QAMenuItem.set_submenu(qamenu)
-        qamenu.show_all()
+        qamenudata = self.checklist.functions.get_ui()
+        for menu in qamenudata:
+            actiongroup = gtk.ActionGroup('QA Menu')
+            actiongroup.add_actions(menu[1], self)
+            self.uiManager.insert_action_group(actiongroup, 1)
+            self.mergedMenus.append(self.uiManager.add_ui_from_string(menu[0]))
+            
         self.reviewView.set_model(self.checklist)
         self.reviewView.show()
         self.checkView.set_model(self.checklist)
         self.checkView.show()
 
     #
-    # Menu/Toolbar callbacks
+    # Base Action Callbacks
     #
-
-    def on_menu_new_activate(self, *extra):
+    def new_cb(self, action, extra):
         '''Start a new review.'''
         checkload.NewDruid(self, checkload.NEW).show_all()
 
-    def on_menu_open_activate(self, *extra):
+    def open_cb(self, action, extra):
         '''Open a saved review.'''
         checkload.NewDruid(self, checkload.LOAD).show_all()
 
-    def on_menu_save_activate(self, *extra):
-        """Save the current review to a file"""
+    def quit_cb(self, action, extra):
+        '''End the program.
 
+        Callback to end the program.
+        '''
+        ### FIXME: Check for unsaved files.
+        gtk.main_quit()
+
+    def preferences_cb(self, action, extra):
+        '''Sets program properties.'''
+        gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
+        if gladeFile == None:
+            filename = os.path.join(PROGRAMNAME, 'glade/qa-assistant.glade')
+            gladeFile = self.program.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    filename, True)
+            if gladeFile == []:
+                ### FIXME: Less generic exception here.
+                raise Exception("Unable to locate glade file %s" % (filename))
+            else:
+                gladeFile = gladeFile[0]
+
+        prefDialog = Preferences(gladeFile)
+        if self.logo:
+            prefDialog.PreferencesDialog.set_icon(self.logo)
+
+        prefDialog.PreferencesDialog.show()
+
+    def help_cb(self, action, extra):
+        '''Display program help.'''
+        msg = """There's currently no help file written so this is pretty useless.  When we write some documentation this will display the standard gnome help browser.
+        
+Relative Priority: Low.  The program is currently changing too fast to document well.  However, as features of the code near staility, I'll start adding documentation."""
+        self.not_yet_implemented(msg)
+        # gnome.help_display('qa-assistant')
+        pass
+
+    def about_cb(self, action, extra):
+        '''Show the about window.'''
+
+        ### FIXME: Should either put this in a separate glade file or
+        # implement it in code so we don't have to load the whole glade file.
+        gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
+        if gladeFile == None:
+            filename = os.path.join(PROGRAMNAME, 'glade/qa-assistant.glade')
+            gladeFile = self.program.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
+                    filename, True)
+            if gladeFile == []:
+                raise Exception("Unable to locate glade file %s" % (filename))
+            else:
+                gladeFile = gladeFile[0]
+
+        about = gtk.glade.XML(gladeFile, 'AboutWindow').get_widget('AboutWindow')
+        about.set_property('name', HUMANPROGRAMNAME)
+        about.set_property('version', __version__)
+        if self.logo:
+            about.set_property('icon', self.logo)
+            about.set_property('logo', self.logo)
+
+        about.show()
+        del(about)
+    
+    #
+    # Checklist Action Callbacks
+    #
+
+    def cut_cb(self, action, extra):
+        '''Cut some text'''
+        owner = self.clipPrimary.get_owner()
+        if owner:
+            if isinstance(owner, gtk.Editable):
+                owner.cut_clipboard()
+            else:
+                ### FIXME: Is this behaviour consistent?
+                # Or are apps supposed to fail if editing of the selection is
+                # not allowed?
+                selectionText = self.clipPrimary.wait_for_text()
+                if selectionText:
+                    self.clipboard.set_text(selectionText, -1)
+
+    def copy_cb(self, action, extra):
+        '''Copy from the current selection into the clipboard.'''
+        if self.clipPrimary.get_owner():
+            selectionText = self.clipPrimary.wait_for_text()
+            if selectionText:
+                self.clipboard.set_text(selectionText, -1)
+
+    def paste_cb(self, action, extra):
+        '''Copy from the clipboard into the selection.'''
+        entry = self.ReviewerWindow.focus_widget
+        if isinstance(entry, gtk.Editable):
+            entry.paste_clipboard()
+
+    def properties_cb(self, action, extra):
+        '''Pops up a dialog that allows us to set the CheckList properties.'''
+        propDialog = PropertiesDialog(self.checklist.properties)
+        if self.logo:
+            propDialog.set_icon(self.logo)
+
+        propDialog.show()
+
+    def toggle_preview_cb(self, action, extra):
+        '''Toggles between checklist view and output view.
+
+        Keyword -- arguments:
+        action: The action that invoked the callback.
+        extra: user data.  Unused.
+
+        We have two view modes at the moment.  One displays the output
+        in line with the checklist items.  The other displays the items
+        as they will appear in the QA Review.  This callback toggles between
+        the two sets.
+        '''
+        if self.grabArrow.get_property('arrow-type') == gtk.ARROW_LEFT:
+            self.grabArrow.set(gtk.ARROW_RIGHT, gtk.SHADOW_NONE)
+            self.checkView.display_output(False)
+            self.reviewScroll.show()
+        else:
+            self.grabArrow.set(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
+            self.checkView.display_output(True)
+            self.reviewScroll.hide()
+    
+    #
+    # Modified action group
+    #
+
+    def save_cb(self, action, extra):
+        '''Save the current review to a file.'''
         if self.checklist.filename:
             try:
                 self.checklist.publish()
@@ -255,10 +342,9 @@ class QAReviewer(gnomeglade.GnomeApp):
                 errorDialog.destroy()
         else:
             self.on_menu_save_as_activate(extra)
-        
-    def on_menu_save_as_activate(self, *extra):
-        """Save the current review to a file"""
-       
+
+    def save_as_cb(self, action, extra):
+        '''Save the current review to a file.'''
         fileSelect = gtk.FileSelection(title='Select the file to save the review into.')
         if (os.path.isdir(self.lastSaveFileDir) and
                 os.access(self.lastSaveFileDir, os.R_OK|os.X_OK)):
@@ -291,117 +377,12 @@ class QAReviewer(gnomeglade.GnomeApp):
                 errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
                 response = errorDialog.run()
                 errorDialog.destroy()
-                
-    def on_menu_quit_activate(self, *extra):
-        """End the program.
 
-        Callback to end the program.
-        """
 
-        ### FIXME: Check for unsaved files.
-        self.quit()
-       
-    def on_menu_cut_activate(self, *extra):
-        '''Cut some text'''
-        owner = self.clipPrimary.get_owner()
-        if owner:
-            if isinstance(owner, gtk.Editable):
-                owner.cut_clipboard()
-            else:
-                ### FIXME: Is this behaviour consistent?
-                # Or are apps supposed to fail if editing of the selection is
-                # not allowed?
-                selectionText = self.clipPrimary.wait_for_text()
-                if selectionText:
-                    self.clipboard.set_text(selectionText, -1)
+    #
+    # Menu/Toolbar callbacks
+    #
 
-    def on_menu_copy_activate(self, *extra):
-        '''Copy from the current selection into the clipboard.'''
-        if self.clipPrimary.get_owner():
-            selectionText = self.clipPrimary.wait_for_text()
-            if selectionText:
-                self.clipboard.set_text(selectionText, -1)
-
-    def on_menu_paste_activate(self, *extra):
-        '''Copy from the clipboard into the selection.'''
-        entry = self.ReviewerWindow.focus_widget
-        if isinstance(entry, gtk.Editable):
-            entry.paste_clipboard()
-
-    def on_menu_properties_activate(self, *extra):
-        """Pops up a dialog that allows us to set the CheckList properties."""
-        propDialog = PropertiesDialog(self.checklist.properties)
-        if self.logo:
-            propDialog.set_icon(self.logo)
-
-        propDialog.show()
-
-    def on_menu_preferences_activate(self, *extra):
-        """Sets program properties."""
-        gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
-        if gladeFile == None:
-            filename = os.path.join(PROGRAMNAME, 'glade/qa-assistant.glade')
-            gladeFile = self.program.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
-                    filename, True)
-            if gladeFile == []:
-                raise Exception("Unable to locate glade file %s" % (filename))
-            else:
-                gladeFile = gladeFile[0]
-
-        prefDialog = Preferences(gladeFile)
-        if self.logo:
-            prefDialog.PreferencesDialog.set_icon(self.logo)
-
-        prefDialog.PreferencesDialog.show()
-
-    def on_menu_view_toggle_preview_activate(self, *extra):
-        """Toggles between checklist view and output view.
-
-        Keyword -- arguments:
-        extra: user data.  Unused.
-
-        We have two view modes at the moment.  One displays the output
-        in line with the checklist items.  The other displays the items
-        as they will appear in the QA Review.  This callback toggles between
-        the two sets.
-        """
-
-        if self.grabArrow.get_property('arrow-type') == gtk.ARROW_LEFT:
-            self.grabArrow.set(gtk.ARROW_RIGHT, gtk.SHADOW_NONE)
-            self.checkView.display_output(False)
-            self.reviewScroll.show()
-        else:
-            self.grabArrow.set(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
-            self.checkView.display_output(True)
-            self.reviewScroll.hide()
-            
-    def on_menu_about_activate(self, *extra):
-        """Show the about window."""
-
-        gladeFile = gnomeglade.uninstalled_file('glade/qa-assistant.glade')
-        if gladeFile == None:
-            filename = os.path.join(PROGRAMNAME, 'glade/qa-assistant.glade')
-            gladeFile = self.program.locate_file(gnome.FILE_DOMAIN_APP_DATADIR,
-                    filename, True)
-            if gladeFile == []:
-                raise Exception("Unable to locate glade file %s" % (filename))
-            else:
-                gladeFile = gladeFile[0]
-
-        about = gtk.glade.XML(gladeFile, 'AboutWindow').get_widget('AboutWindow')
-        about.set_property('name', HUMANPROGRAMNAME)
-        about.set_property('version', __version__)
-        if self.logo:
-            about.set_property('icon', self.logo)
-            about.set_property('logo', self.logo)
-
-        about.show()
-        del(about)
-       
-    def on_toolbar_new_activate(self, button, *extra):
-        """Popup the menu to select a new review from bugzilla or SRPM"""
-        self.on_menu_new_activate()
-       
     ### FIXME: This is totally broken
     def on_menu_new_srpm_activate(self, *extra):
         """Open a new review based on the user selected SRPM"""
@@ -446,13 +427,6 @@ Relative priority: Enhancement sometime after new review from SRPM. (Rather low)
         self.not_yet_implemented(msg)
         pass
 
-    def on_menu_help_activate(self, *extra):
-        """Display program help."""
-        msg = """There's currently no help file written so this is pretty useless.  When we write some documentation this will display the standard gnome help browser.
-        
-Relative Priority: Low.  There's too much programming to do for me to spend too much time documenting it right now.  However, as features of the code near staility, I'll start adding documentation."""
-        self.not_yet_implemented(msg)
-        pass
         
     # 
     # Other GUI callbacks

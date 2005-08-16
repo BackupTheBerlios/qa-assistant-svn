@@ -111,7 +111,7 @@ class Review(gtk.VBox):
             requireDialog.destroy()
             return
         
-        outBuf = self.checklist.functions.header()
+        outBuf = self.checklist.functions.header() + '\n'
         # Loop through the review areas:
         for box in ('Pass', 'Fail', 'Non-Blocker', 'Notes'):
             reviewBox = self.reviewBoxes[box]

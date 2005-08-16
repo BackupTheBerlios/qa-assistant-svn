@@ -50,6 +50,8 @@
 <!-- Types of cryptographic hashes to use when summing checklist functions.
   :sha1: A sha1 type hash
   :md5: A traditional md5 hash
+  :nullhash: The hash will not be checked.  Useful when developing a new
+             checklist but should not be used when distributing files.
   -->
 <!ENTITY % HashType
   '(sha1|md5|nullhash)'

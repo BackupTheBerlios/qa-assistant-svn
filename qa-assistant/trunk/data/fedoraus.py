@@ -38,22 +38,23 @@ class QAFunctions(BaseQAFunctions):
     
     def footer(self):
         return ''
-    '''
-    <function type="header">srpm_header</function>
-    <function type="user">from_srpm</function>
-    <function type="user">from_ticket</function>
-    <function type="user">separator</function>
-    <function type="user">add_item</function>
-    <function type="user">separator</function>
-    <function type="user">publish</function>
-    <function type="user">submit_ticket</function>
-    '''
 
-class QAFunctionsMenu(BaseQAFunctionsMenu):
-    '''
+    def get_ui(self):
+        uiDef = BaseQAFunctions.get_ui(self)
+        uiElements = '''<ui>
+            <menubar name="MainMenu">
+              <menu action="QAActions">
+                <menuitem action="FromSRPM" position="top"/>
+                <separator/>
+              </menu>
+            </menubar>
+          </ui>
+          '''
+        uiActions = (('FromSRPM', None, 'Start from _SRPM', None,
+            'Load the properties for this review from an SRPM',
+            self.from_srpm_cb),)
+        uiDef.append((uiElements, uiActions))
+        return uiDef
 
-    '''
-    def __init__(self, functions):
-        BaseQAFunctionsMenu.__init__(self)
-        self.add('')
-        
+    def from_srpm_cb(self, action, extras):
+        pass

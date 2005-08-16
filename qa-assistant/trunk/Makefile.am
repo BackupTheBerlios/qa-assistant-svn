@@ -123,3 +123,8 @@ install-data-hook:
 			"http://qa-assistant.sf.net/dtds" \
 			"file://$(CATALOG)" $(DESTDIR)$(ROOTCATALOG); \
 	fi
+
+dist-hook:
+# The gen-hash.py script sums the distributed function files and
+# places the checksum into the xml checklist file.
+	./gen-hash.py

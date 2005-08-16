@@ -5,16 +5,9 @@
  */
 
 gchar *s = N_("QA Assistant");
-gchar *s = N_("_New");
-gchar *s = N_("Actions associated with this checklist");
-gchar *s = N_("QA _Actions");
-gchar *s = N_("_Toggle Preview");
-gchar *s = N_("_Contents");
-gchar *s = N_("Create a new QA report");
-gchar *s = N_("Open an existing QA report");
-gchar *s = N_("Save your QA report");
 gchar *s = N_("© 2004 Toshio Kuratomi");
 gchar *s = N_("A tool to help write QA reviews of RPM Packaged Contributed Software");
+gchar *s = N_("<No Current Translatoions>");
 gchar *s = N_("Not Yet Implemented");
 gchar *s = N_("<span weight='bold' size='larger'>Feature Not Yet Implemented</span>");
 gchar *s = N_("This feature is planned for the future but has not yet been implemented.  If you are interested in implementing this feature, please email the developers.");
@@ -51,11 +44,9 @@ gchar *s = N_("Path to GPG");
 gchar *s = N_("Identity to use");
 gchar *s = N_("Select the program to sign with");
 gchar *s = N_("Path to the GPG program used to sign the review");
-gchar *s = N_("*");
 gchar *s = N_("<span weight=\"bold\">Directories</span>");
 gchar *s = N_("     ");
 gchar *s = N_("State directory");
 gchar *s = N_("Select a User State Directory");
 gchar *s = N_("This is a directory where QA Assistant will save temporary files when performing automated actions on the checklist");
-gchar *s = N_("*");
 gchar *s = N_("Misc");

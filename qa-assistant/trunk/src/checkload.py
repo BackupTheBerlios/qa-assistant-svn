@@ -86,6 +86,9 @@ class NewDruid(gtk.Window):
             self.druidWidget.set_buttons_sensitive(False, True, True, True)
             self.propertiesPage.connect('back', self.disable_back,
                     self.selectorPage)
+            # Properties can only be left if all required properties are
+            # entered.
+            self.propertiesPage.connect('next', self.properties_next)
         else:
             self.set_title('QA Assistant - Starting a QA Review')
             # Coming back from propertiesPage has to determine whether it came
@@ -319,9 +322,15 @@ class NewDruid(gtk.Window):
         self.app.checkView.set_model(self.app.checklist)
         self.app.checkView.show()
 
-        qamenu = self.app.checklist.functions.get_menu()
-        self.app.QAMenuItem.set_submenu(qamenu)
-        qamenu.show_all()
+        self.app.uiManager.groups['checklist'].set_sensitive(True)
+
+        qamenudata = self.app.checklist.functions.get_ui()
+        for menu in qamenudata:
+            actiongroup = gtk.ActionGroup('QA Menu')
+            actiongroup.add_actions(menu[1], self.app)
+            self.app.uiManager.insert_action_group(actiongroup, 1)
+            mergeId = self.app.uiManager.add_ui_from_string(menu[0])
+            self.app.mergedMenus.append(mergeId)
 
         self.app.reviewView.set_model(self.app.checklist)
         self.app.reviewView.show()
@@ -351,7 +360,6 @@ class NewDruid(gtk.Window):
         # the focus may not have left the last property entry box.  Setting
         # focus away from the last entry manually sets the last entry.
         druid.child_focus(gtk.DIR_TAB_FORWARD)
-        
         if self.newList.properties.requirementsMet:
             # All required properties are set, let the druid go to the next
             # page.
@@ -395,7 +403,6 @@ class NewDruid(gtk.Window):
             #self.browseEntry.set_text('')
             druid.set_page(page)
             return True
-
         druid.set_page(self.propertiesPage)
         self.propBackPage = page
         return True
@@ -427,7 +434,6 @@ class NewDruid(gtk.Window):
             errorDialog.destroy()
             druid.set_page(page)
             return True
-
         druid.set_page(self.propertiesPage)
         self.propBackPage = page
         return True
