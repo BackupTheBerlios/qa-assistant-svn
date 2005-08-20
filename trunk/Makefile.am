@@ -56,6 +56,7 @@ EXTRA_DIST = \
 	TODO \
 	BUGS \
 	autogen.sh \
+	gen-hash.py \
 	qa-assistant.spec \
 	qa-assistant.spec.in \
 	$(datafiles_DATA) \
@@ -127,4 +128,4 @@ install-data-hook:
 dist-hook:
 # The gen-hash.py script sums the distributed function files and
 # places the checksum into the xml checklist file.
-	./gen-hash.py
+	$(top_srcdir)/gen-hash.py $(top_distdir)/data

@@ -17,3 +17,6 @@ HUMANPROGRAMNAME = 'QA Assistant'
 
 # Prefix for the gconf keys
 GCONFPREFIX = '/apps/qa-assistant'
+
+# Set default paths for File Dialogs to look in
+lastReviewDir = './'

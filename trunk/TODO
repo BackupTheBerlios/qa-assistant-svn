@@ -37,21 +37,21 @@ Properties structure.
 
 * These require integration with the Functions features
 
-  - Publish Button should be added to toolbar
-  - Submit Button should be added to toolbar
+  - Publish Button should be added to toolbar [Need icon]
 
-    + Pressing Submit will build the review and submit upstream and down.
+    + Pressing Submit will build the review and submit to bugzilla.
+    [Needs to have a function written and registered in fedoraus.py]
 
   - Add a New dialog to take input about bugzilla
 
     + If new then make sure we have both a bugzilla # and an SRPM
+    [Needs to be implemented via properties]
 
   - Disable pieces of the QA Action menu when there is no SRPM being reviewed
-
-    + Will be taken care of in the merge with checklist.  Now have functions
-      listed in the checklist that should make this happen.
-
+    [Done]
+    
   - Accelerators for QA Action items
+    [Done]
 
 * Security:  We need to fill in two pieces here: 1) The checklist needs to be
   gpg signed.  2) We have to check that byte-compiled function files are valid
@@ -63,7 +63,7 @@ Extra GNOME Functionality:
 * Update to pygtk-2.4.
   
   - Embed the 2.4 file selector widget in the druid..
-  - Change gobjects to use the new chained calls.
+  - Change gobjects to use the new chained calls. (pygtk 2.8?)
   - Switch to the 2.6 ComboBox Renderer instead of optionrenderer.
 
 Programming:
@@ -114,6 +114,7 @@ Build:
   and enter them into the relevant data/*.xml.  This will replace the nullhash
   with sha1 or md5 and enter the hash type into the function.  Should happen
   as a pre-autogen step.
+  [Currently implemented as part of make dist.  Check that it works.]
 * Fix the uninstalled_file lookups
 
   - DTDs have to be selected correctly when the program isn't installed.

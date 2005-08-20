@@ -94,9 +94,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.clipPrimary = gtk.Clipboard(gtk.gdk.display_get_default(),
                 'PRIMARY')
 
-        # Set default paths for File Dialogs to look in
         self.lastSaveFileDir = './'
-        self.lastReviewDir = './'
         ### FIXME: This should be set by the module that consumes it.
         #self.lastSRPMDir = './'
 
@@ -341,7 +339,7 @@ Relative Priority: Low.  The program is currently changing too fast to document 
                 response = errorDialog.run()
                 errorDialog.destroy()
         else:
-            self.on_menu_save_as_activate(extra)
+            self.save_as_cb(action, extra)
 
     def save_as_cb(self, action, extra):
         '''Save the current review to a file.'''
@@ -432,7 +430,7 @@ Relative priority: Enhancement sometime after new review from SRPM. (Rather low)
     # Other GUI callbacks
     # 
     def on_grabBar_clicked(self, *extra):
-        return self.on_menu_view_toggle_preview_activate(self, *extra)
+        return self.toggle_preview_cb(self, None, *extra)
 
     def not_yet_implemented(self, msg = ""):
 
@@ -462,4 +460,4 @@ Relative priority: Enhancement sometime after new review from SRPM. (Rather low)
     #
     def on_delete_event(self, *extra):
         """Delete a window."""
-        return self.on_menu_quit_activate()
+        return self.quit_cb(None, None)

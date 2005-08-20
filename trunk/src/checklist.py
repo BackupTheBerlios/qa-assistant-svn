@@ -121,6 +121,8 @@ class CheckList (gtk.TreeStore):
         Creates a new CheckList.
         '''
         self.filename = path # Filename of the checklist we're implementing
+        self.fileLoadDir = os.path.dirname(path) # Directory we loaded the 
+                                                 # checklist from
         self.resolution = 'Needs-Reviewing' # Resolution of the checklist
         self.functionHash = None # Hash of the functions file
         self.functionHashType = None # Type of the hash (sha1, md5, etc)
@@ -730,13 +732,23 @@ class CheckList (gtk.TreeStore):
         the function object.
         '''
         app = gnome.program_get()
-        filename = app.locate_file(gnome.FILE_DOMAIN_DATADIR,
-                os.path.join(PROGRAMNAME, 'data', self.functionFile), True)
         try:
-            filename = filename[0]
-        except IndexError:
-            raise error.InvalidFunctions, ('Functions file %s does not'
-                    ' exist.' % (self.functionFile))
+            filename = app.locate_file(gnome.FILE_DOMAIN_DATADIR,
+                    os.path.join(PROGRAMNAME, 'data', self.functionFile), True)
+        except AttributeError:
+            # We were unable to get a gnome program.  Try to find a
+            # functions file in the same directory as the checklist.
+            filename = os.path.join(self.fileLoadDir, self.functionFile)
+        else:
+            try:
+                filename = filename[0]
+            except IndexError:
+                ### FIXME: This pathway is untested.  Won't be tested until
+                # we support checklists in user defined locations.
+                # (ie: User specifies to load custom checklist from home
+                # directory.  Custom checklist has a function file in that
+                # directory.)
+                filename = os.path.join(self.fileLoadDir, self.functionFile)
         try:
             functionFile = file(filename)
         except IOError:

@@ -32,7 +32,7 @@ class TestCreation(unittest.TestCase):
         self.assert_(isinstance(checkview.CheckView(), checkview.CheckView))
     
     def test_CheckViewCreateWithChecklist(self):
-        check = checklist.CheckList(os.path.join(self.dataDir, 'fedoraus.xml'))
+        check = checklist.CheckList(os.path.join(self.dataDir, 'softwarerelease.xml'))
         self.assert_(isinstance(checkview.CheckView(check),
             checkview.CheckView))
        
@@ -45,7 +45,7 @@ class TestCreation(unittest.TestCase):
     # Review creation functions
     #
     def test_ReviewCreateSuccess(self):
-        check = checklist.CheckList(os.path.join(self.dataDir, 'fedoraus.xml'))
+        check = checklist.CheckList(os.path.join(self.dataDir, 'softwarerelease.xml'))
         self.assert_(isinstance(review.Review(check), review.Review))
 
     def test_ReviewCreateNotACheckList(self):

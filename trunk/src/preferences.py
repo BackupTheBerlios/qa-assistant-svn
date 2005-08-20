@@ -206,7 +206,7 @@ class Preferences(gnomeglade.Component):
             self.create_gpg_ids_list(entry.value.get_string())
         
     def toggle_desc_options(self, client, connectId, entry, extra):
-        '''Enable or disable settign the description options.
+        '''Enable or disable setting the description options.
 
         '''
         if entry.value and entry.value.type == gconf.VALUE_BOOL:

@@ -20,7 +20,7 @@ import libxml2
 class TestCheckList(unittest.TestCase):
     def setUp(self):
         self.checkFile = os.path.join(test.srcdir, '..', 'data',
-                'fedoraus.xml')
+                'softwarerelease.xml')
         self.checklist = checklist.CheckList(self.checkFile)
 
     def tearDown(self):
@@ -201,9 +201,19 @@ class TestCheckListCreation(unittest.TestCase):
         libxml2.debugMemory(0)
 
     def test_0CheckListCreateSuccess(self):
-        '''Create a CheckList
+        '''Create a minimal CheckList
 
         Create a checklist.  Make sure the returned object is a CheckList.
+        '''
+        checkFile = os.path.join(self.dataDir, 'minimal-valid.xml')
+        self.assert_(isinstance(checklist.CheckList(checkFile),
+            checklist.CheckList))
+
+    def test_0CheckListComplexCreateSuccess(self):
+        ''' Create a complex CheckList with all bells and whistles
+
+        Create a checklist with all of the features that we support (functions,
+        tests, multiple categories, etc)
         '''
         checkFile = os.path.join(self.dataDir, 'fedoraus.xml')
         self.assert_(isinstance(checklist.CheckList(checkFile),
@@ -231,9 +241,15 @@ class TestCheckListCreation(unittest.TestCase):
         '''Create a checklist with no memory leaks
 
         libxml2 requires special memory handling.  Check that we can create a
-        CheckList and destory it without any memory leaks from the libxml2
+        CheckList and destroy it without any memory leaks from the libxml2
         library.
         '''
+        self.checklist = checklist.CheckList(os.path.join(self.dataDir,
+            'minimal-valid.xml'))
+        libxml2.cleanupParser()
+        self.assert_(libxml2.debugMemory(1) == 0,
+                'FAIL: %d bytes leaked' % (libxml2.debugMemory(1)))
+        del self.checklist
         self.checklist = checklist.CheckList(os.path.join(self.dataDir,
             'fedoraus.xml'))
         libxml2.cleanupParser()

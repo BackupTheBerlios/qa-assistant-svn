@@ -59,9 +59,3 @@ CLEANFILES= \
 	    -e "s,@#prefix#@,$(prefix)," \
 	    -e "s,@#sysconfdir#@,$(sysconfdir)," \
 	    -e "s,@#pkgdatadir#@,$(pkgdatadir)," < $<  > $@
-	    
-install-data-hook:
-# automake's py_compile script compiles DESTDIR into the module's paths
-# which is not what we want.  (DESTDIR is a staging area so it
-# shouldn't be included in the built files.)  This takes care of it.
-	python -c "import compileall ; compileall.compile_dir('$(DESTDIR)$(qa_assistantdir)', None, '$(qa_assistantdir)', True)"

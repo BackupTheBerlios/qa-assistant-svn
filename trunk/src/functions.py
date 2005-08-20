@@ -14,7 +14,6 @@ import gnome
 
 import error
 from qaglobals import *
-import qaapp
 
 class BaseQAFunctions(object):
     '''
@@ -53,6 +52,9 @@ class BaseQAFunctions(object):
                 <menuitem action="PublishToFile" position="bot"/>
               </menu>
             </menubar>
+            <toolbar name="MainToolBar">
+              <toolitem action="PublishToFile"/>
+            </toolbar>
             </ui>
             '''
         uiActions = (
@@ -170,9 +172,9 @@ class BaseQAFunctions(object):
         # Select the file to publish a review into
         fileSelect = gtk.FileSelection(
                 title = 'Select a file to publish the review into')
-        if (os.path.isdir(qaapp.app.lastReviewDir) and
-                os.access(qaapp.app.lastReviewDir, os.R_OK|os.X_OK)):
-            fileSelect.set_filename(qaapp.app.lastReviewDir)
+        if (os.path.isdir(lastReviewDir) and
+                os.access(lastReviewDir, os.R_OK|os.X_OK)):
+            fileSelect.set_filename(lastReviewDir)
 
         filename = None
         response = fileSelect.run()
@@ -184,11 +186,13 @@ class BaseQAFunctions(object):
             del fileSelect
 
         if filename:
-            qaapp.app.lastReviewDir = os.path.dirname(filename) + os.path.sep
+            lastReviewDir = os.path.dirname(filename) + os.path.sep
             try:
+                ### FIXME: This won't work as qaapp has gone away.
                 qaapp.app.reviewView.publish(filename)
             except IOError, msg:
-                msgDialog = gtk.MessageDialog(qaapp.app.ReviewerWindow,
+                msgDialog = gtk.MessageDialog(None,
+                        #qaapp.app.ReviewerWindow,
                         gtk.DIALOG_DESTROY_WITH_PARENT,
                         gtk.MESSAGE_QUESTION, gtk.BUTTONS_CLOSE,
                         'The location you selected is not a valid place to'

@@ -29,6 +29,7 @@ to look at and more easily programmed against.  Most changes are aimed at
 making the checklists more extensible.
 
 * CheckList and SaveFile formats have been combined into the checklist 0.3 dtd.
+* Script qa-convert to convert savefiles to the new checklist format.
 * Preliminary support for automated tests embedded within the XML files.
 * Made the checklist code more generic.  We are no longer tied to Quality
   Assurance of SRPM files.
@@ -37,7 +38,7 @@ making the checklists more extensible.
 * A Druid to walk through starting a review.
 * CheckList Properties have been implemented and setting properties has been
   merged into the Druid and menu.
-* The Review widget is now much nicer to look at.
+* The Review widget is now better formatted.
 * CheckList is now a subclass of gtk.TreeStore.
 
 Version 0.4.1
