@@ -344,6 +344,8 @@ Relative Priority: Low.  The program is currently changing too fast to document 
                 errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
                 response = errorDialog.run()
                 errorDialog.destroy()
+            else:
+                self.uiManager.groups['modified'].set_sensitive(False)
         else:
             self.save_as_cb(action, extra)
 
@@ -381,6 +383,8 @@ Relative Priority: Low.  The program is currently changing too fast to document 
                 errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
                 response = errorDialog.run()
                 errorDialog.destroy()
+            else:
+                self.uiManager.groups['modified'].set_sensitive(False)
 
 
     #

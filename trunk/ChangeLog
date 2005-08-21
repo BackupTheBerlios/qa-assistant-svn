@@ -1,4 +1,76 @@
-2005-08-16  - r192    
+2005-08-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r198    
+    * src/qaapp.py: Remove this file.
+    * src/qa-assistant.pyin.in: Create a QAReviewer instance directly instead
+      of going through qaapp.
+    * src/Makefile.am: No longer provide qaapp.py.
+    
+2005-08-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r197    
+    * src/review.py: publish(): Utilize the checklist functions footer()
+      function.
+    * src/functions.py:
+      - get_ui():
+        + Pass the QAReviewer instance into this function so it can be
+          used as extra data for every callback.
+        + Create the gtk.ActionGroup here instead of returning the tuple for
+          the calling function to create.
+      - publish_cb(): Utilize the QAReviewer instance passed via the action's
+        parameters instead of getting it from qaapp.
+    * src/qareviewer.py:
+      - __init__(): Change mergedMenus into a dictionary.  We can hold both the
+       mergeId of the ui manager def and the actionGroup in this.
+      - __load_checklist(): Remove the old menu definitions before adding the
+       new one.
+    * src/checkload.py: Remove the old menu definition before adding the new
+      one.
+    * BUGS: Note that checkload.py has some code duplication with
+      qareviewer.py that needs to be fixed.  Remove Druid on New as that's
+      completed.
+    * TODO: Remve uimanager entry and automatic hashing of data files as those
+      are done.  Add a note to separate error dialogs from widgets and enable
+      the 'modified' actiongroup via change signal notification.
+    * data/fedoraus.py: Modify get_ui() to reflect the functions.get_ui()
+      usage.
+    * data/fedoraus.xml: Make hash="@@hash@@" again.  That way nullhash
+      works on he in progress copy.
+    
+2005-08-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r196    
+    * gen-hash.py: New script to generate hashes of the checklist function
+      files when creating the distribution tarball.
+    * src/preferences.py: Fix a typo.
+    * src/functions.py:
+      - Remove most references to qaapp.  This allows the unittests to run to
+        completion.  Unfortunately there is still a problem with publishing
+        the review.  This is broken in this revision.
+      - Add a toolbar item for Publishing the Review to a file.
+    * src/checklist.py: Check for a function file in the same directory as the
+      checklist if it is not found via gnome.program.locate_file().
+    * src/qaglobals.py.in: Add lastReviewDir() as a global variable.
+    * src/qareviewer.py: Rename callbacks from on_menu*activation to *_cb form
+      when invoking them from other callbacks.
+    * src/ui.py: Add keyword expansion.
+    * src/Makefile.am: Remove the install-data-hook that recompiles the python
+      files.  I've switched to an automake version that's been fixed.
+    * tests/checklisttest.py: Separate tests using minimal-valid.xml and
+      fedoraus.xml.  This allows us to test a minimal checklist as well as an
+      all bells and whistles one.
+    * tests/creationtest.py: Use softwarerelease.xml in this set of tests as
+      we test the checklist in checklisttest.py.  This one is just to test
+      the functioning of checkview.
+    * TODO: Note a whole slew of finished things.
+    * Makefile.am: Add gen-hash.py.  Use it in a dist hook so the distributed
+      function files get hashed.
+    * NEWS: Add qa-convert announcement to the list of 0.5 changes.
+    
+2005-08-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r195    
+    * Housecleaning: Move the qa-assistant/trunk directory to the toplevel.
+      Now have to svn switch my working copy to the new URL.  If all goes
+      as planned this should just be::
+      svn switch svn+ssh://svn.berlios.de/svnroot/repos/qa-assistant/trunk
+    
+2005-08-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r193    
+    * ChangeLog: Update ChangeLog to r192.
+    
+2005-08-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r192    
     * src/review.py: Add a newline to the end of the header.
     * src/functions.py:
       - Import global variables from qaglobals again.  This is a phase out of
