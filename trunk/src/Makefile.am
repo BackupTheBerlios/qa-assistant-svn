@@ -26,7 +26,6 @@ qa_assistant_PYTHON = \
 		preferences.py \
 		properties.py \
 		propview.py \
-		qaapp.py \
 		qareviewer.py \
 		review.py \
 		srpmqa.py \

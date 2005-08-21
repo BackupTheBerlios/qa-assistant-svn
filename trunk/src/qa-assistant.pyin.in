@@ -26,12 +26,13 @@ import sys
 
 sys.path.append('@#pkgdatadir#@')
 
-import qaapp
+import qareviewer
 
 if __name__ == '__main__':
     # libxml2 Memory Debugging
     # libxml2.debugMemory(1)
-    qaapp.app.mainloop()
+    app = qareviewer.QAReviewer(sys.argv)
+    app.mainloop()
     # libxml2 Memory Debugging
     #libxml2.cleanupParser()
     #if libxml2.debugMemory(1) == 0:
