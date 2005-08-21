@@ -124,6 +124,8 @@ class Review(gtk.VBox):
                     tempOutBuf += self.textwrap.fill(value) + '\n'
             if tempOutBuf:
                 outBuf += self.reviewTitles[box].get_text() + tempOutBuf + '\n'
+        # Add the footer
+        outBuf += self.checklist.functions.footer() + '\n'
 
         # Sign the review if the user has decided to
         key = GCONFPREFIX + '/user/use-gpg'

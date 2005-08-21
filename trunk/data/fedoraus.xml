@@ -25,7 +25,7 @@
       </require>
     </property>
   </properties>
-  <functions hash="4720b8010dfc319fffc583e28497ec5c404916b4" hashtype="nullhash">fedoraus.py</functions>
+  <functions hash="@@hash@@" hashtype="nullhash">fedoraus.py</functions>
   <category name="Security of the build system">
     <description>Although many of the checklist items relate to security, the
       ones listed in this section are important to check before you proceed

@@ -324,13 +324,18 @@ class NewDruid(gtk.Window):
 
         self.app.uiManager.groups['checklist'].set_sensitive(True)
 
-        qamenudata = self.app.checklist.functions.get_ui()
-        for menu in qamenudata:
-            actiongroup = gtk.ActionGroup('QA Menu')
-            actiongroup.add_actions(menu[1], self.app)
-            self.app.uiManager.insert_action_group(actiongroup, 1)
-            mergeId = self.app.uiManager.add_ui_from_string(menu[0])
-            self.app.mergedMenus.append(mergeId)
+        # Reset the checklist specific ui elements
+        for menu in self.app.mergedMenus.keys():
+            self.app.uiManager.remove_ui(menu)
+            self.app.uiManager.remove_action_group(self.app.mergedMenus[menu])
+        self.app.mergedMenus = {}
+
+        # Add the new ui elements
+        qamenudata = self.app.checklist.functions.get_ui(self.app)
+        for (actions, menus) in qamenudata:
+            self.app.uiManager.insert_action_group(actions, 50)
+            mergeId = self.app.uiManager.add_ui_from_string(menus)
+            self.app.mergedMenus[mergeId] = actions
 
         self.app.reviewView.set_model(self.app.checklist)
         self.app.reviewView.show()

@@ -54,7 +54,7 @@ class QAReviewer(gnomeglade.GnomeApp):
 
         # Create a uimanager to handle the menus and toolbars
         self.uiManager = ui.UI(self)
-        self.mergedMenus = []
+        self.mergedMenus = {}
         accelGroup = self.uiManager.get_accel_group()
         self.ReviewerWindow.add_accel_group(accelGroup)
         menubar = self.uiManager.get_widget('/MainMenu')
@@ -173,12 +173,18 @@ class QAReviewer(gnomeglade.GnomeApp):
             sys.stderr.write("Unable to parse the checklist: %s\n" % (msg))
             sys.exit(1)
 
-        qamenudata = self.checklist.functions.get_ui()
-        for menu in qamenudata:
-            actiongroup = gtk.ActionGroup('QA Menu')
-            actiongroup.add_actions(menu[1], self)
-            self.uiManager.insert_action_group(actiongroup, 1)
-            self.mergedMenus.append(self.uiManager.add_ui_from_string(menu[0]))
+        # Reset the checklist specific ui elements
+        for menu in self.mergedMenus.keys():
+            self.uiManager.remove_ui(menu)
+            self.uiManager.remove_action_group(self.mergedMenus[menu])
+        self.mergedMenus = {}
+
+        # Insert the new uiManager stuff
+        qamenudata = self.checklist.functions.get_ui(self)
+        for (actions, menus) in qamenudata:
+            self.uiManager.insert_action_group(actions, 50)
+            mergeId = self.uiManager.add_ui_from_string(menus)
+            self.mergedMenus[mergeId] = actions
             
         self.reviewView.set_model(self.checklist)
         self.reviewView.show()

@@ -14,21 +14,14 @@ glade/GUI:
 * Create a logo to go along with the icon.  Think up some other small pixmaps
   for the menu/toolbar: toggle Preview, new from bugzilla, new from SRPM,
   Publish Report, Submit Report
-* When the reviewer really should add additional information, how should we
-  make it happen?  A field in the XML file under state?  And that causes
-  qa-assistant to pop up a textEntry dialog when the item enters that state?
+* When the reviewer really should add additional information in a note, how
+  should we make it happen?  A field in the XML file under state?  And that
+  causes qa-assistant to pop up a textEntry dialog when the item enters that
+  state?
 * Add i18n support.
-* UIManager merging.
-  - The uimanger is in place for the main menu/toolbar.  But it needs to be
-    further adapted for adding on extra elements.  The functions modules
-    define a list of uimanager defintion strings and a list of actiongroups.
-    QAReviewer unmerges any former uimanager function module defs and the
-    associated actiongroups.  Then it merges the new definitions and action
-    groups, keeping a list of what has been added.
-  - Can merge in.  Need to unmerge.
-  - Need some way to clear actiongroups as well.
 * Need to enable the modified actiongroup whenever the checklist or
-  properties change.
+  properties change.  Think this is best done through a change signal being
+  emitted by the checklist or checklist.properties and caught by qareviewer.
     
 Functions:
 ==========
@@ -62,7 +55,8 @@ Extra GNOME Functionality:
 ==========================
 * Update to pygtk-2.4.
   
-  - Embed the 2.4 file selector widget in the druid..
+  - Embed the 2.4 file selector widget in the druid. [Loading may be
+    separated from the druid].
   - Change gobjects to use the new chained calls. (pygtk 2.8?)
   - Switch to the 2.6 ComboBox Renderer instead of optionrenderer.
 
@@ -107,14 +101,15 @@ Programming:
   - For both review.py and savefile we could use try: except IOERROR: to trap
     failure to write the file.
 
+* Separate error dialogs from the widgets.  Error dialogs should be created
+  by QAReviewer.  Subordinate widgets (like review) should raise an Exception
+  when the encounter an error and qareviewer should then display the error
+  dialog, allow the user to fix it, and rerun the subordinate widget's
+  function.
+
 Build:
 ======
 
-* When we build a distribution, create the checksums for the data/*.py files
-  and enter them into the relevant data/*.xml.  This will replace the nullhash
-  with sha1 or md5 and enter the hash type into the function.  Should happen
-  as a pre-autogen step.
-  [Currently implemented as part of make dist.  Check that it works.]
 * Fix the uninstalled_file lookups
 
   - DTDs have to be selected correctly when the program isn't installed.

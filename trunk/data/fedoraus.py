@@ -39,8 +39,8 @@ class QAFunctions(BaseQAFunctions):
     def footer(self):
         return ''
 
-    def get_ui(self):
-        uiDef = BaseQAFunctions.get_ui(self)
+    def get_ui(self, app):
+        uiDef = BaseQAFunctions.get_ui(self, app)
         uiElements = '''<ui>
             <menubar name="MainMenu">
               <menu action="QAActions">
@@ -53,8 +53,10 @@ class QAFunctions(BaseQAFunctions):
         uiActions = (('FromSRPM', None, 'Start from _SRPM', None,
             'Load the properties for this review from an SRPM',
             self.from_srpm_cb),)
-        uiDef.append((uiElements, uiActions))
+        actiongroup = gtk.ActionGroup('QA Menu')
+        actiongroup.add_actions(uiActions, app)
+        uiDef.append((actiongroup, uiElements))
         return uiDef
 
-    def from_srpm_cb(self, action, extras):
+    def from_srpm_cb(self, action, app, *extras):
         pass
