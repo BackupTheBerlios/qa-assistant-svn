@@ -57,8 +57,13 @@ Extra GNOME Functionality:
   
   - Embed the 2.4 file selector widget in the druid. [Loading may be
     separated from the druid].
-  - Change gobjects to use the new chained calls. (pygtk 2.8?)
   - Switch to the 2.6 ComboBox Renderer instead of optionrenderer.
+  - Convert from self.__gobject_init__()/gobject.GObject.__init__() to
+    gtk.CLASSNAME.__init__(self) since the changes to make this work are in 2.6
+    (May have gone into 2.4)
+    + optionrenderer
+    + treetips
+    + checklist
 
 Programming:
 ============

@@ -91,9 +91,11 @@ class UI(gtk.UIManager):
 
         # checklist actiongroup is activated whenever a checklist is present.
         self.groups['checklist'] = gtk.ActionGroup('checklist')
-        actions = (('QAActions', None, '_QA Actions'),
-                ('Cut', gtk.STOCK_CUT, None, None,
-            'Cut the highlighted text', app.cut_cb),
+        actions = (('Save As', gtk.STOCK_SAVE_AS, None, None,
+            'Save the checklist to a different file', app.save_as_cb),
+            ('QAActions', None, '_QA Actions'),
+            ('Cut', gtk.STOCK_CUT, None, None,
+                'Cut the highlighted text', app.cut_cb),
             ('Copy', gtk.STOCK_COPY, None, None,
                 'Copy the highlighted text to the clipboard', app.copy_cb),
             ('Paste', gtk.STOCK_PASTE, None, None,
@@ -110,8 +112,6 @@ class UI(gtk.UIManager):
         # Menu items active whenever a checklist is modified
         self.groups['modified'] = gtk.ActionGroup('modified')
         actions = (('Save', gtk.STOCK_SAVE, None, None,
-            'Save the checklist', app.save_cb),
-            ('Save As', gtk.STOCK_SAVE_AS, None, None,
-                'Save the checklist to a different file', app.save_as_cb))
+            'Save the checklist', app.save_cb),)
         self.groups['modified'].add_actions(actions, app)
         self.groups['modified'].set_sensitive(False)

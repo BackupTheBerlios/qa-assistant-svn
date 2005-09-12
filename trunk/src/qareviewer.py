@@ -185,11 +185,17 @@ class QAReviewer(gnomeglade.GnomeApp):
             self.uiManager.insert_action_group(actions, 50)
             mergeId = self.uiManager.add_ui_from_string(menus)
             self.mergedMenus[mergeId] = actions
-            
+
+        # Enable save type menus whenever the checklist changes
+        self.checklist.connect('changed', self._enable_modified_menus)
+
         self.reviewView.set_model(self.checklist)
         self.reviewView.show()
         self.checkView.set_model(self.checklist)
         self.checkView.show()
+
+    def _enable_modified_menus(self, *extra):
+        self.uiManager.groups['modified'].set_sensitive(True)
 
     #
     # Base Action Callbacks

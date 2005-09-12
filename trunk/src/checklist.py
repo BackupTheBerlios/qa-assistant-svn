@@ -82,6 +82,7 @@ class CheckList (gtk.TreeStore):
     to the checklist we're operating upon.
     '''
 
+    ### FIXME: These are ripe for becoming read-only gobject properties
     # checklist identifying strings
     formatVersion = '0.3'
 
@@ -89,6 +90,14 @@ class CheckList (gtk.TreeStore):
             + formatVersion + '//EN'
     canonicalURL = 'http://qa-assistant.sf.net/dtds/checklist/' \
             + formatVersion + '/checklist.dtd'
+
+    # Gobject signals
+    __gsignals__ = {
+        'resolution-changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_BOOLEAN,
+                (gobject.TYPE_STRING,)),
+        'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+                (gobject.TYPE_PYOBJECT,))
+    }
 
     class __Entry:
         '''Private class.  Holds entry information until ready to output.'''
@@ -335,11 +344,6 @@ class CheckList (gtk.TreeStore):
             category = self.iter_next(category)
         self.resolution = newRes
 
-    #def do_resolution_changed(self, newValue):
-        # If we needed to process resolution_changed requests somehow, it
-        # could be done here.  But there doesn't appear to be anything to do.
-        #pass
-
     def add_entry(self, summary, item=None, display=None,
             desc=None, resolution=None, output=None,
             resList=None, outputList=None):
@@ -578,6 +582,7 @@ class CheckList (gtk.TreeStore):
  
         # Set the new data
         gtk.TreeStore.set(self, row, *newValues)
+        self.emit('changed', row)
 
     #
     # Helpers to manage display of the checklist
@@ -595,7 +600,10 @@ class CheckList (gtk.TreeStore):
             self.noAutoDisplay = entry.value.get_bool()
         else:
             self.noAutoDisplay = False
-        
+       
+    ### FIXME: The three color functions really belong in the checkview
+    # Rather than here.  They involve seting and changing the colors for
+    # displaying the data....
     def __init_colors(self, colorKey):
         '''Initialize the colors from GConf.
 
@@ -922,9 +930,6 @@ sys.exit(4)
         entry.newTextChild(None, 'description',
                 tree.get_value(entryIter, DESC))
 
-gobject.signal_new('resolution-changed', CheckList,
-        gobject.SIGNAL_RUN_LAST, gobject.TYPE_BOOLEAN,
-        (gobject.TYPE_STRING,))
 gobject.type_register(CheckList)
 
 class NullHash:

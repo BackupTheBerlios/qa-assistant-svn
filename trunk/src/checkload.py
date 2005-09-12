@@ -337,6 +337,9 @@ class NewDruid(gtk.Window):
             mergeId = self.app.uiManager.add_ui_from_string(menus)
             self.app.mergedMenus[mergeId] = actions
 
+        # Enable save type menus whenever the checklist changes
+        self.app.checklist.connect('changed', self.app._enable_modified_menus)
+
         self.app.reviewView.set_model(self.app.checklist)
         self.app.reviewView.show()
         ### End section that should be removed to qareviewer.
