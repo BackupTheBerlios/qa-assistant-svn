@@ -1,3 +1,10 @@
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r206    
+    * ChangeLog: Update to (r204).
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r205    
+    * BUGS: Note to change configure.ac to detect pygtk as a python module
+      rather than the C headers for compiling an extension to pygtk.
+    
 2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r204    
     * qa-assistant.spec.in: Run the regression tests from a %check section.
     
