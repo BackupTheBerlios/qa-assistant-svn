@@ -18,7 +18,11 @@ Packaging Errors
   as well as other problems that may not show up until later.
 * Need to clear my gconf cache of any keys created during testing that aren't
   going to be distributed to guard against error.
-  
+* configure.ac should be modified to check for pygtk, gnome-python, etc as
+  python modules; not for the pygtk-devel C level interface.  We don't need
+  to build anything against pygtk-devel; we just need the pygtk module to
+  test and run.
+
 Programming Errors
 ------------------
 * src/checkload.py:  Need to take some code that's almost verbatim duplicated
