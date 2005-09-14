@@ -5,7 +5,7 @@
 # making and distribution of the whole program.
 # $Id$
 
-SUBDIRS = tests src
+SUBDIRS = src tests
 
 qa_assistantdir = $(datadir)/qa-assistant
 

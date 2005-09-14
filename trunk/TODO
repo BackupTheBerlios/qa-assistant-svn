@@ -19,9 +19,6 @@ glade/GUI:
   causes qa-assistant to pop up a textEntry dialog when the item enters that
   state?
 * Add i18n support.
-* Need to enable the modified actiongroup whenever the checklist or
-  properties change.  Think this is best done through a change signal being
-  emitted by the checklist or checklist.properties and caught by qareviewer.
     
 Functions:
 ==========
@@ -111,6 +108,8 @@ Programming:
   when the encounter an error and qareviewer should then display the error
   dialog, allow the user to fix it, and rerun the subordinate widget's
   function.
+
+  - May not apply to the Druid.
 
 Build:
 ======
