@@ -1,0 +1,163 @@
+<gconfschemafile>
+  <schemalist>
+    <schema>
+      <key>/schemas/apps/qa-assistant/user/use-gpg</key>
+      <applyto>/apps/qa-assistant/user/use-gpg</applyto>
+      <owner>qa-assistant</owner>
+      <type>bool</type>
+      <default>false</default>
+      <locale name="C">
+        <short>Whether to gpg sign a review</short>
+        <long>
+          A QA Review may be gpg signed.  Setting this value tells us the user
+          wants to sign their reviews.
+        </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/qa-assistant/user/gpg-identity</key>
+      <applyto>/apps/qa-assistant/user/gpg-identity</applyto>
+      <owner>qa-assistant</owner>
+      <type>string</type>
+      <locale name="C">
+        <short>Identifier for selecting a gpg signing key.</short>
+        <long>
+          Set this value to a string that can be used as a gpg ID to use
+          the proper key to sign the review.
+        </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/qa-assistant/display/no-auto-display</key>
+      <applyto>/apps/qa-assistant/display/no-auto-display</applyto>
+      <owner>qa-assistant</owner>
+      <type>bool</type>
+      <default>false</default>
+      <locale name="C">
+        <short>Do not auto display a negative item.</short>
+        <long>
+          When an item is reviewed negatively (Fail or Non-Blocker) it
+          usually makes sense to display the message in the Review.  Setting
+          this to false allows that to happen.  Setting it to true prevents
+          that.
+        </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/qa-assistant/display/fail-color</key>
+      <applyto>/apps/qa-assistant/display/fail-color</applyto>
+      <owner>qa-assistant</owner>
+      <type>string</type>
+      <default>#FF0000</default>
+      <locale name="C">
+        <short>Color of failed entries</short>
+        <long>
+          Color failed entries this color when we display them on the screen.
+        </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/qa-assistant/display/pass-color</key>
+      <applyto>/apps/qa-assistant/display/pass-color</applyto>
+      <owner>qa-assistant</owner>
+      <type>string</type>
+      <default>#006400</default>
+      <locale name="C">
+        <short>Color of passed entries</short>
+        <long>
+          Color passed entries this color when we display them on the screen.
+        </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/qa-assistant/display/minor-color</key>
+      <applyto>/apps/qa-assistant/display/minor-color</applyto>
+      <owner>qa-assistant</owner>
+      <type>string</type>
+      <default>#A020F0</default>
+      <locale name="C">
+        <short>Color of entries for minor problems</short>
+        <long>
+          Color minor problem entries this color when we display them on
+          the screen.
+        </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/qa-assistant/display/notes-color</key>
+      <applyto>/apps/qa-assistant/display/notes-color</applyto>
+      <owner>qa-assistant</owner>
+      <type>string</type>
+      <locale name="C">
+        <default>#000000</default>
+        <short>Color of entries that are just notes</short>
+        <long>
+          Color entries that are only informational this color when we
+          display them on the screen.
+        </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/qa-assistant/display/disable-checklist-descriptions</key>
+      <applyto>/apps/qa-assistant/display/disable-checklist-descriptions</applyto>
+      <owner>qa-assistant</owner>
+      <type>bool</type>
+      <default>false</default>
+      <locale name="C">
+        <short>Don't display checklist descriptions.</short>
+        <long>
+          Each checklist entry can have a long description associated with
+          it that explains what the entry is for.  It may also contain hints
+          for filling out the item.  Setting this to False enables display of
+          these descriptions.  A True setting disables it.
+        </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/qa-assistant/display/checklist-description-wait</key>
+      <applyto>/apps/qa-assistant/display/checklist-description-wait</applyto>
+      <owner>qa-assistant</owner>
+      <type>int</type>
+      <default>500</default>
+      <locale name="C">
+        <short>Time before displaying the description</short>
+        <long>
+          When the user leaves the mouse over the checklist items we will
+          wait this number of milliseconds before popping up a window to
+          display the description.
+        </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/qa-assistant/files/gpg-path</key>
+      <applyto>/apps/qa-assistant/files/gpg-path</applyto>
+      <owner>qa-assistant</owner>
+      <type>string</type>
+      <default>/usr/bin/gpg</default>
+      <locale name="C">
+        <short>Path to the gpg program</short>
+        <long>
+	  Set this value to the path to the gpg binary.  On most systems this
+	  is /usr/bin/gpg.
+        </long>
+      </locale>
+    </schema>
+    <schema>
+      <key>/schemas/apps/qa-assistant/files/user-state-dir</key>
+      <applyto>/apps/qa-assistant/files/user-state-dir</applyto>
+      <owner>qa-assistant</owner>
+      <type>string</type>
+      <default>~/qa-assistant</default>
+      <locale name="C">
+        <short>Directory for user state data</short>
+        <long>
+          Sometimes the program needs to create files for processing a
+          requested action on the checklist.  This can either be saved into
+          a per-user temporary directory or a per-user state directory.
+          Sometimes the program can use the results that are saved in this
+          directory between runs.
+        </long>
+      </locale>
+    </schema>
+  </schemalist>
+</gconfschemafile>

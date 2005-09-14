@@ -1,0 +1,162 @@
+=================
+QA Assistant TODO
+=================
+
+:Author: Toshio Kuratomi
+:Contact: toshio-tiki-lounge.com
+:Date: $Date$
+:Revision: $Rev$
+
+.. contents::
+
+glade/GUI:
+==========
+* Create a logo to go along with the icon.  Think up some other small pixmaps
+  for the menu/toolbar: toggle Preview, new from bugzilla, new from SRPM,
+  Publish Report, Submit Report
+* When the reviewer really should add additional information in a note, how
+  should we make it happen?  A field in the XML file under state?  And that
+  causes qa-assistant to pop up a textEntry dialog when the item enters that
+  state?
+* Add i18n support.
+    
+Functions:
+==========
+Everything in this list requires rethinking because of the new Functions and
+Properties structure.
+
+* These require integration with the Functions features
+
+  - Publish Button should be added to toolbar [Need icon]
+
+    + Pressing Submit will build the review and submit to bugzilla.
+    [Needs to have a function written and registered in fedoraus.py]
+
+  - Add a New dialog to take input about bugzilla
+
+    + If new then make sure we have both a bugzilla # and an SRPM
+    [Needs to be implemented via properties]
+
+  - Disable pieces of the QA Action menu when there is no SRPM being reviewed
+    [Done]
+    
+  - Accelerators for QA Action items
+    [Done]
+
+* Security:  We need to fill in two pieces here: 1) The checklist needs to be
+  gpg signed.  2) We have to check that byte-compiled function files are valid
+  If we can set the interpreter to always byte compile the functions then that
+  should work.
+
+Extra GNOME Functionality:
+==========================
+* Update to pygtk-2.4.
+  
+  - Embed the 2.4 file selector widget in the druid. [Loading may be
+    separated from the druid].
+  - Switch to the 2.6 ComboBox Renderer instead of optionrenderer.
+  - Convert from self.__gobject_init__()/gobject.GObject.__init__() to
+    gtk.CLASSNAME.__init__(self) since the changes to make this work are in 2.6
+    (May have gone into 2.4)
+    + optionrenderer
+    + treetips
+    + checklist
+
+Programming:
+============
+* Revamp Druid.  On start, QA-Assistant will display a blank page.  If the
+  user selects New they will be taken into the Druid.  The Druid will only
+  follow the path for new Reviews.  Load functionality will just use the file
+  chooser.  Properties checking (for entry of required values) is done by the
+  Properties themselves.  Druid on new, PropDialog, and Review:Publish will
+  utilize these checks.  Load will not as Outputting the Review will take care
+  of this.
+* GenericQA needs to provide a menu item to toggle treetip display
+* Command line argument parsing
+
+  - If a savefile is given, open that
+  - Use optparse/optik
+
+* Enhance tracking entries into the editor.  We want
+  people to be able to shift text around from Needswork and Non-blocker, and
+  to add to them but we want to keep track of what entry is associated with
+  what entry id.
+* Automate some review tasks
+
+  - checkheader
+  - checksig
+  - verify source against spec file/canonical URL
+  - look at the new fedora-startqa for more ideas.  Perhaps we can coordinate
+    and use fedora-startqa in the backend.  (Look through their SRPM stuff --
+    it might be better code than I have... If we can put it into a SRPM class
+    like I have, then it could be callable from either my script or theirs.)
+    
+* Update to the fedora QAFormat output style
+* XML stuff to conform better with libxml2's guidelines document:
+  file:///usr/share/doc/libxml2-devel-2.6.6/guidelines.html
+  (Namespace, URL, Make sure I follow recommendations for element/attribute)
+* Create a common XML save format/checklist with Erik LaBianca for the
+  checklist.  This will involve integrating XML with test infrastructure.
+* Write a proper check that we can use a file (os.access doesn't work for
+  this purpose.  [How does review.py work?])
+  
+  - For both review.py and savefile we could use try: except IOERROR: to trap
+    failure to write the file.
+
+* Separate error dialogs from the widgets.  Error dialogs should be created
+  by QAReviewer.  Subordinate widgets (like review) should raise an Exception
+  when the encounter an error and qareviewer should then display the error
+  dialog, allow the user to fix it, and rerun the subordinate widget's
+  function.
+
+  - May not apply to the Druid.
+
+Build:
+======
+
+* Fix the uninstalled_file lookups
+
+  - DTDs have to be selected correctly when the program isn't installed.
+    This can be done by setting a libxml environment variable
+    XML_CATALOG_FILES.  May also be possible to use xmlCatalogAddLocal() to
+    do this.
+    Also look into: xmlCatalogResolve(),xmlCatalogLocalResolve() Family of
+    functions.
+    Setting XML_DEBUG_CATALOG will allow us to debug what's going on.
+    http://www.xmlsoft.org/catalog.html
+  - Program should use uninstalled files only when it is uninstalled.  If it is
+    installed but happens to be run in a build directory, it needs to
+    recognize that.  Also, there is currently a small period where the
+    program searches for uninstalled files when it is installed.  This needs
+    to be changed so installation removes this penalty.
+  - DTDs and the Druid would both have to be special-cased now to make things
+    work uninstalled.  The DTDs could work if the user is connected to a
+    network or if I can get libxml2 to recognize a private xmlcatalog.  The
+    Druid and the rest of the current consumers of uninstalled_files might be
+    better served by creating an uninstalled version of paths.py that lists
+    the directories inside the source instead of directories in the system.
+    Currently paths.py is built from paths.pyin at build time.  We'd need to
+    create one paths.py at build time and a separate one at install time to
+    make this work.
+
+    + This looks like the way to go.  The new objective is to set all
+      information in the paths.py and have minimal setup processing and no
+      special processing in the main body of the program.
+
+* Finish writing unittests for the program.  We've barely scratched the
+  surface of this.  When completed it should allow one to quickly figure
+  out what's working and what's broken in the package.
+
+  - Basically need a set of unittests for each object defined in the program.
+    Don't yet know how to unittest the widgets.  The model objects and the
+    program object should work much better, though.
+
+Documentation
+=============
+
+I need to write documentation and take screenshots of using QA Assistant.  The
+programmatic interface for opening the documentation is pretty simple.  I've
+got it in and commented right now.  In order to create it, though, I need to
+write the docbook xml.  I've come to the conclusion that writing docbook
+currently lacks quite a bit.  I want to be able to write my content and then
+have something to output it.

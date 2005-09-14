@@ -1,0 +1,132 @@
+Preferences to Add Via GConf
+============================
+
+:Author: Toshio Kuratomi <toshio-tiki-lounge.com>
+:Date: $Date$
+
+.. contents::
+
+Preferences
+-----------
+All currently needed preferences have been implemented.
+Infrastructure exists and seems workable.  This seems to be all done.
+
+Druid
+-----
+The druid itself has been created.  Some work still needs to be done -- mostly
+to the supporting widgets:
+
+* Check that all required properties are entered. [check]
+* When loading a savefile from the menus, use the Druid as we have to force
+  users to confront the Properties as well.
+* Use the file selector widget instead of the Browse button type file selector
+  we have currently.
+* File chooser needs to use the directory we last used to save/load from.
+* On startup Druid should be started before a QA-Assistant main window is
+  shown.  (ie: No more Druid with empty window.)
+
+Properties
+----------
+There are three consumers of Properties:
+1) CheckList: Which loads what Properties are valid and saves the Properties
+   back into a file. [check]
+2) PropertiesWidget which converts the data into a display of labels and entry
+   boxes for setting and displaying the values. [check]
+3) Functions which use values from individual properties to set other
+   properties, run tests, or output headers for the Review.
+
+(These are properties we want to set on the fedora.us checklist)
+* MD5Sums
+* Bugzilla URL
+* SRPM to check
+
+Properties as Function Arguments
+++++++++++++++++++++++++++++++++
+
+We need the following types of attributes on functions:
+
+* automatic/userinput/useroverride
+* onLoad(Mandatory before we start)/onPublish(mandatory before we end)/optional
+
+The current checklist.dtd encapsulates these in the following ways.  As
+RequireTypes:
+
+* onLoad (start, user)
+* onPublish (end, user)
+* automatic (when its dependencies resolve, automatic)
+* optional (optional, user)
+
+overrides are implemented as an onLoad or onPublish that also has a function
+to set the value from other properties.
+
+Functions
+---------
+::
+  class Functions():
+    __init__(self, Properties):
+    clear()
+    add(name, args, type)
+    output(xmlNode)
+    menuFunctions()
+    do(string FuncName)
+
+  class FunctionsMenu():
+    __init__(self, model=None)
+    set_model()
+
+  class FedoraUSFunctions(Functions):
+    Functions.__init__(self, Properties)
+    SRPMReview()
+    
+
+Functions are tied into properties.  Both are declared by the checklist.
+Properties are defined in the checklist while functions are defined in code
+modules.  Functions can operate on Properties.  And they can take properties
+as arguments.
+
+So each Function module has to have access to the checklist's properties.
+How?
+
+Also, properties may be set from functions.  So we have the following
+dependence::
+
+  Func_foo (Prop_A) -> Prop_B
+  When Prop_A.set() -> Call Func_foo() Prop_B.set()
+  FunctionClass has a Properties.
+  Prop_A.set():
+  	function_list = Properties.propset[Prop_A]
+	for func in function_list:
+		Functions.invoke(func)
+  class SpecificFuncClass(FuncClass):
+  	def invoke(funcName):
+		eval('self.'+funcName)
+	def funcName():
+		set Prop_B = Prop_A
+  
+Most functions are selectable from a menu entry.  How does this affect
+things?  We need to create a menu from the functions and assign the
+functions as callbacks.  The functions in the menu need to have access to
+the properties.  They also need to use functions on the review (publish) and
+gconf things (Enable/disable treetips)
+
+Create a QAMenu class that takes the checklist as its model.  When the 
+
+Functions that are not in the menu are functions used by the properties
+themselves.  These functions often need to specify dependency information on
+other properties.
+
+Other things that get set depending on the checklist:
+
+* Application's title bar: app.set_title()
+* Appplication's status bar: app.mainWinAppBar.push()
+
+  - Ideas for statusbar info:
+
+    + The main identifier of the review (SRPM name)
+    + Number of pass/fail/needs-reviewing/etc
+
+* So we don't have to inline all our code, we probably want to have a method
+  to callout to other code.  Maybe there should be a certain set of standard
+  functions.  Then we can add per checklist functions in a separate file.  The
+  checklist can let us know which functions its using via a name/sha1sum pair.
+  They can then reference the functions in that external file.

@@ -1,0 +1,171 @@
+#! @PYTHON@ -tt
+# File: qa-convert
+# Author: Toshio Kuratomi <toshio@tiki-lounge.com>
+# Date: 5 Sep 2004
+# Copyright: Toshio Kuratomi
+# License: GPL
+# Id: $Id$
+'''Convert savefiles from version 0.1 to checklist 0.3.
+'''
+__revision__ = "$Rev$"
+
+import sys
+
+sys.path.append('@#pkgdatadir#@')
+
+import libxml2
+import os
+import paths
+import checklist
+
+_qaSaveFileVersion_ = '0.1'
+
+class QAConverter(checklist.CheckList):
+    '''A savefile object.
+
+    When we rewrite things, this needs to be merged into the checklist.
+    A savefile is a checkpoint in time of the base checklist.
+    '''
+
+    class __Entry:
+        '''Private class.  Holds entry information until the checklist data
+        structure is ready to hold it.
+        '''
+
+    publicID = '-//BadgerWare//DTD QA Assistant Save File ' + _qaSaveFileVersion_ + '//EN'
+    canonicalURL = 'http://qa-assistant.sf.net/dtds/qasave/' + _qaSaveFileVersion_ + '/qasave.dtd'
+    def __init__(self, filename):
+        '''Main program.
+        
+        args contains sys.argv
+        '''
+
+        self.filename = filename
+
+        # Parse the xml into a DOM
+        libxml2.registerErrorHandler(self.__no_display_parse_error, None)
+        ctxt = libxml2.newParserCtxt()
+        saveFile = ctxt.ctxtReadFile(self.filename, None, libxml2.XML_PARSE_DTDVALID)
+        if ctxt.isValid() == False:
+            ### FIXME create something less generic
+            raise Exception('Save file does not validate against the qasave DTD.')
+
+        root = saveFile.getRootElement()
+        if root.name != 'qasave':
+            ### FIXME create something less generic
+            raise Exception('File is not a valid qa save file.')
+        if root.prop('version') != _qaSaveFileVersion_:
+            ### FIXME create something less generic
+            raise Exception('Save file is of a different version than I understand.')
+        # Load the appropriate base checklist.
+        saveCheck = root.xpathEval2('/qasave/checklist')
+        filename = saveCheck[0].content
+        filename = os.path.join('data', filename)
+        checkFile = os.path.join (paths.datadir, 'qa-assistant', filename)
+        try:
+            checklist.CheckList.__init__(self, checkFile)
+        except:
+            raise Exception('Base CheckList was not found.')
+
+        # Check that the checklist is the appropriate version
+        if (self.name != saveCheck[0].prop('name')):
+            ### FIXME: Throw an exception to get out gracefully
+            sys.exit(1)
+        if (self.revision != saveCheck[0].prop('revision')):
+            sys.stderr.write(
+                    "Attempting to convert savefile from %s %s to %s %s"
+                    %  (saveCheck[0].prop('name'),
+                        saveCheck[0].prop('revision'),
+                        self.name, self.revision))
+        else:
+            # This should never happen as the qasave format should only have
+            # been created against older versions of checklist.
+            sys.exit(1)
+       
+        del saveCheck
+        
+        saveProperties = root.xpathEval2('/qasave/properties/property')
+        for property in saveProperties:
+            # Set properties through the interface.
+            if property.prop('name') == "SRPM":
+                self.properties['SRPMfile'] = property.content
+            else:
+                self.properties[property.prop('name')] = property.content
+        del saveProperties
+
+        ### FIXME: Make sure we're saving newstyle entries
+        saveEntries = root.xpathEval2('/qasave/entries/entry')
+        for node in saveEntries:
+            entry = self.__xml_to_entry(node)
+            try:
+                iter = self.entries[entry.name]
+            except KeyError:
+                newEntry = self.add_entry(entry.name,
+                        item=entry.item,
+                        display=entry.display,
+                        resolution=entry.res,
+                        output=entry.out,
+                        resList=entry.reslist,
+                        outputList=entry.outlist)
+                self.entries[entry.name] = newItem
+            else:
+                self.set(iter, checklist.ISITEM, entry.item,
+                    checklist.DISPLAY, entry.display,
+                    checklist.SUMMARY, entry.name,
+                    checklist.RESOLUTION, entry.res,
+                    checklist.OUTPUT, entry.out,
+                    checklist.RESLIST, entry.reslist,
+                    checklist.OUTPUTLIST, entry.outlist)
+            
+        del saveEntries
+
+        saveFile.freeDoc()
+
+    #
+    # Helper methods
+    #
+    def __xml_to_entry(self, node):
+        '''Reformats an XML node into an entry structure.'''
+        entry = self.__Entry()
+        entry.name = node.prop('name')
+        if node.prop('display') == 'true':
+            entry.display = True
+        else:
+            entry.display = False
+        if node.prop('item') == 'false':
+            entry.item = False
+        else:
+            entry.item = True
+        states = node.children
+        while states.name != 'states':
+            states = states.next
+        state = states.children
+
+        entry.res = node.prop('state')
+        entry.reslist = []
+        entry.outlist = {}
+        while state:
+            if state.name == 'state':
+                resName = state.prop('name')
+                entry.reslist.append(resName)
+                entry.outlist[resName] = self.pangoize_output(resName,
+                            state.content)
+                if resName == entry.res:
+                    entry.out = entry.outlist[resName]
+            state = state.next
+
+        return entry
+
+    def __no_display_parse_error(self, ctx, str):
+        """Disable Displaying parser errors."""
+        pass
+
+if __name__ == '__main__':
+    # Check for proper number of arguments
+    if len(sys.argv) != 3:
+        print __doc__
+        sys.exit(1)
+    
+    checklist = QAConverter(sys.argv[1])
+    checklist.publish(sys.argv[2])
+    sys.exit(0)
