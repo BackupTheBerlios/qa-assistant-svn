@@ -62,6 +62,8 @@ rm -rf $RPM_BUILD_ROOT/%{_sysconfdir}/xml
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%check || :
+make check
 
 %pre
 # For GConf apps
@@ -148,7 +150,8 @@ fi
 %changelog
 * Tue Sep 13 2005 Toshio Kuratomi <toshio-tiki-lounge.com> - 0.4.90.4-1
 - Update to development version 0.4.90.4.
-- Update pygtk2 requirement to 2.4.0; gnome-python to 2.10.0
+- Update pygtk2 requirement to 2.4.0; gnome-python to 2.10.0.
+- Add a %%check section to run the regression tests.
 
 * Mon Mar 14 2005 Toshio Kuratomi <toshio-tiki-lounge.com> - 0.4.90.3-1
 - Update to development version 0.4.90.3.
