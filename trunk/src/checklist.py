@@ -343,6 +343,10 @@ class CheckList (gtk.TreeStore):
                 newRes = 'Needs-Reviewing'
             category = self.iter_next(category)
         self.resolution = newRes
+        self.properties.connect('changed', self._prop_change)
+
+    def _prop_change(self, *extras):
+        self.emit('changed', extras)
 
     def add_entry(self, summary, item=None, display=None,
             desc=None, resolution=None, output=None,

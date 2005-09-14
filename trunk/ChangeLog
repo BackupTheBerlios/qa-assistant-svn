@@ -1,3 +1,31 @@
+2005-09-12 Toshio Kuratomi <toshio@tiki-lounge.com> - r200    
+    * src/checklist.py:
+      - Create a __gsignal__ dict in CheckList to handle gobject signals.  This
+        change was waiting on pygtk-2.4.  Can now also convert to using
+        __gproperty__ for attributes that make more sense as a gobject
+        property.
+      - Add a changed signal.  This is emitted whenever the checklist is
+        changed.  Still need to hook up a changed signal to properties and
+        catch it here for reemission.
+      - Note that the colorization functions really belong in the checkview,
+        not here.
+    * src/qareviewer.py: Enable the modified menus (Just save for now) when the
+      checklist hasa been modified.
+    * src/checkload.py: Enable the modified menus when the checklist has been
+      modified.  Now that we can use __gproperties__ without worries, we need
+      to move this block of functionality from checkload.finish() into
+      QAReviewer.
+    * src/ui.py: Move the Save As action from the modified group into the
+      checklist group as it can make sense to save a new copy of a checklist
+      even if it hasn't changed.
+    * TODO: Note to convert from __gobject_init__() to gtk.CLASS.__init__(self)
+      as this is working in pygtk-2.4.
+    
+2005-08-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r199    
+    * src/qareviewer.py: save_cb(), save_as_cb(): Set the 'modified'
+      actiongroup to insensitive whenever we successfully save a file.
+    * ChangeLog: Update to (r198).
+    
 2005-08-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r198    
     * src/qaapp.py: Remove this file.
     * src/qa-assistant.pyin.in: Create a QAReviewer instance directly instead

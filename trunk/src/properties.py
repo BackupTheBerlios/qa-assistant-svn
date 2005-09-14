@@ -7,6 +7,9 @@
 '''A class that holds properties on a checklist file.'''
 __revision__ = "$Rev$"
 
+import gobject
+import UserDict
+
 class PropEntry(object):
     '''Hold information on properties.
     
@@ -38,16 +41,22 @@ class PropEntry(object):
         self.function = None
         self.args = []
 
-class Properties(dict):
+class Properties(gobject.GObject, UserDict.DictMixin):
     ''' Holds the CheckList Properties.
         
     Every CheckList may have information about the object that it is reviewing.
     '''
 
+    __gsignals__ = {
+        'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+                (gobject.TYPE_PYOBJECT,))
+    }
+
     def __init__(self):
         '''Create a new Properties object.
         '''
-        dict.__init__(self)
+        gobject.GObject.__init__(self)
+        self.storage = {}
         self._sortedKeys = []
         self._requirementsMet = False
         
@@ -59,6 +68,7 @@ class Properties(dict):
     # 1) Functions are invoked somehow when entries are changed.
     # 2) Have checks that verify that a given type is correct:
     #    (int, URL, etc)
+
     def __setitem__(self, key, value):
         '''Set a property to a value.
 
@@ -69,7 +79,7 @@ class Properties(dict):
         first add it by passing in a complete PropEntry struct.
         '''
         if isinstance(value, PropEntry):
-            dict.__setitem__(self, key, value)
+            self.storage[key] = value
             self._sortedKeys.append(key)
         else:
             try:
@@ -78,6 +88,7 @@ class Properties(dict):
                 raise KeyError, (
                         'This checklist has no %s Property' % (key))
             attrib.value = value
+        self.emit('changed', key)
         if self._requirementsMet and self[key].propType == 'onload' and not (
                 self[key].value or self[key].value == 0):
             self._requirementsMet = False
@@ -105,3 +116,29 @@ class Properties(dict):
 
     requirementsMet = property(_requires,
             doc = '''Whether required properties been filled in''')
+
+    def __delitem__(self, key):
+        index = self._sortedKeys.index(key)
+        del self._sortedKeys[index]
+        return self.storage.__delitem__(key)
+    
+    # Functions to emulate a dict type.  gobject.GObject is not
+    # multiply inheritable with dict so emulate the hard way.
+    def __getitem__(self, key):
+        return self.storage[key]
+
+    def __contains__(self, *extras):
+        return self.storage.__contains__(*extras)
+
+    def __iter__(self):
+        return self.storage.__iter__()
+    
+    def iteritems(self):
+        return self.storage.iteritems()
+
+    def has_key(self, *extras):
+        return self.storage.has_key(*extras)
+
+    def __repr__(self, *extras):
+        return self.storage.__repr__(*extras)
+gobject.type_register(Properties)

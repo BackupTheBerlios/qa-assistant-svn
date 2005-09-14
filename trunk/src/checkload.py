@@ -397,7 +397,7 @@ class NewDruid(gtk.Window):
         try:
             self.newList = checklist.CheckList(self.browseEntry.get_text())
         except error.InvalidChecklist, ex_instance:
-            errorDialog = gtk.MessageDialog(self.app.ReviewerWindow,
+            errorDialog = gtk.MessageDialog(self,
                     gtk.DIALOG_DESTROY_WITH_PARENT,
                     gtk.MESSAGE_WARNING,
                     gtk.BUTTONS_CLOSE,
@@ -429,7 +429,7 @@ class NewDruid(gtk.Window):
             self.newList = checklist.CheckList(model.get_value(selectedRow,
                 self.__FILENAME))
         except error.InvalidChecklist, ex_instance:
-            errorDialog = gtk.MessageDialog(self.app.ReviewerWindow,
+            errorDialog = gtk.MessageDialog(self,
                     gtk.DIALOG_DESTROY_WITH_PARENT,
                     gtk.MESSAGE_WARNING,
                     gtk.BUTTONS_CLOSE,
@@ -440,7 +440,7 @@ class NewDruid(gtk.Window):
             errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
             response = errorDialog.run()
             errorDialog.destroy()
-            druid.set_page(page)
+            druid.set_page(self.selectorPage)
             return True
         druid.set_page(self.propertiesPage)
         self.propBackPage = page
