@@ -8,8 +8,8 @@ Release:        1
 Summary:        Graphical quality assurance report generator
 Group:          Development/Tools
 License:        GPL
-URL:            http://sourceforge.net/projects/qa-assistant
-Source0:        http://dl.sourceforge.net/qa-assistant/qa-assistant-%{version}.tar.bz2
+URL:            http://www.sf.net/projects/qa-assistant
+Source0:        http://dl.sf.net/qa-assistant/qa-assistant-%{version}.tar.bz2
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:	noarch
@@ -18,15 +18,15 @@ BuildRequires:	sed
 BuildRequires:	desktop-file-utils
 # Needed to get xmlcatalog
 BuildRequires:  libxml2
-BuildRequires:	pygtk2-devel >= 0:2.2.0
+BuildRequires:	pygtk2-devel >= 2.4.0
 BuildRequires:	pkgconfig
 BuildRequires:	gtk2-devel
-BuildRequires:	gnome-python2
+BuildRequires:	gnome-python2 >= 2.10.0
 Requires:	python-abi = %{pyver}
 Requires:	libxml2-python
 Requires:	gnome-python2
 Requires:	gnome-python2-gconf
-Requires:	pygtk2 >= 0:2.2.0
+Requires:	pygtk2 >= 2.4.0
 Requires:	rpm-python
 Requires(post): /usr/bin/xmlcatalog
 Requires(postun): /usr/bin/xmlcatalog
@@ -146,6 +146,10 @@ fi
 %{_datadir}/xml/%{name}
 
 %changelog
+* Tue Sep 13 2005 Toshio Kuratomi <toshio-tiki-lounge.com> - 0.4.90.4-1
+- Update to development version 0.4.90.4.
+- Update pygtk2 requirement to 2.4.0; gnome-python to 2.10.0
+
 * Mon Mar 14 2005 Toshio Kuratomi <toshio-tiki-lounge.com> - 0.4.90.3-1
 - Update to development version 0.4.90.3.
 - Remove Epoch 0.
@@ -158,7 +162,7 @@ fi
 * Sun Nov 7 2004 Toshio Kuratomi <toshio-tiki-lounge-com> - 0:0.4.90.1-0.fdr.1
 - Update to development version 0.4.90.1
 
-* Sat Oct 16 2004 Toshio Kuratomi <toshio@tiki-lounge.com> - 0:0.4.1-0.fdr.1
+* Sat Oct 16 2004 Toshio Kuratomi <toshio-tiki-lounge.com> - 0:0.4.1-0.fdr.1
 - Update to version 0.4.1
 
 * Sun Aug 8 2004 Toshio Kuratomi <toshio{here}tiki-lounge.com> - 0:0.4-0.fdr.3
