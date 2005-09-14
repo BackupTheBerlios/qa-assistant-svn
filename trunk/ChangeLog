@@ -1,3 +1,41 @@
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r204    
+    * qa-assistant.spec.in: Run the regression tests from a %check section.
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r203    
+    * qa-assistant.spec.in: Update requirements on pygtk to 2.4.0 and
+      gnome-python to 2.10.0.  Update changelog to 0.4.90.4.
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r202    
+    * TODO: Remove modified actiongroup entry.  It's done.
+    * Makefile.am: Reverse the tests and src directories so src is compiled
+      before the tests are run.
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r201    
+    * src/properties.py:
+      - class Properties(): Convert the base class from dict to gobject with
+        a UserDict mixin.  We needed to make this a gobject so we can inform
+        the CheckList when the properties change.  Unfortunately
+        gobject.GObject and dict conflict when trying to multiply inherit.
+        gobject.GObject and UserDict.DictMixin work okay, though.
+      - Define __gsignals__ with one signal, 'changed' which informs other
+        objects when the properties are updated.
+      - __init__(): define self.storage as a dict which holds the classes data.
+      - Change references to the dict superclass to self.storage.
+      - __setitem__(): emit the changed signal when the properties are changed.
+      - __delitem__(): New function that takes care of deleting a key from the
+        _sortedKeys array and self.storage's dict.
+      - getitem(), __contains__(), __iter__(), iteritems(), has_key(): map onto
+        self.storage's functions.
+      - __repr__(): Map onto self.storage's __repr__() instead of gobject's
+        __repr__ as it's more informative.
+      - Register the Properties class as a gobject.
+    * src/checklist.py: emit our changed signal when we receive the Properties
+      changed signal.
+    * src/checkload.py: Fix the error dialogs to use the druid as their parent
+      rather than the QAReviewer window.  Otherwise the druid window would
+      sometimes be below the main window after an error dialog was displayed.
+    * ChangeLog: Update to (r200).
+    
 2005-09-12 Toshio Kuratomi <toshio@tiki-lounge.com> - r200    
     * src/checklist.py:
       - Create a __gsignal__ dict in CheckList to handle gobject signals.  This
