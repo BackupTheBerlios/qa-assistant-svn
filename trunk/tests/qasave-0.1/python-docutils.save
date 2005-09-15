@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE qasave PUBLIC "-//BadgerWare//DTD QA Assistant Save File 0.1//EN" "http://qa-assistant.sf.net/dtds/qasave/0.1/qasave.dtd">
+<qasave version="0.1">
+  <checklist name="fedoraus" revision="0.2">fedoraus.xml</checklist>
+  <properties>
+    <property name="SRPM">/home/badger/rpmbuild/python-docutils-0.3-0.fdr.1.src.rpm</property>
+  </properties>
+  <entries>
+    <entry name="Security of the build system" item="false" display="false" state="Needs-Reviewing">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass"/>
+        <state name="Fail"/>
+      </states>
+    </entry>
+    <entry name="SRPM GPG signed" display="true" state="Pass">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass">GPG signature checked and found good</state>
+        <state name="Fail">Missing or Bad GPG Signature</state>
+      </states>
+    </entry>
+    <entry name="Canonical Source" display="true" state="Pass">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass">Source URL is canonical</state>
+        <state name="Fail">Specified Source URL is not canonical</state>
+      </states>
+    </entry>
+    <entry name="Upstream source verified" display="true" state="Pass">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass">Upstream source tarball verified</state>
+        <state name="Fail">Upstream source tarball does not match!</state>
+      </states>
+    </entry>
+  </entries>
+</qasave>

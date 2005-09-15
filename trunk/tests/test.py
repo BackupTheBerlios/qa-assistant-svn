@@ -26,14 +26,16 @@ import creationtest
 import checklisttest
 import treetipstest
 import propertiestest
+import qaconverttest
 
 if __name__ == '__main__':
     createSuite = creationtest.suite()
     propertiesSuite = propertiestest.suite()
     checkSuite = checklisttest.suite()
     treetipSuite = treetipstest.suite()
+    qaconvertSuite = qaconverttest.suite()
     suite = unittest.TestSuite((createSuite, treetipSuite, propertiesSuite,
-        checkSuite))
+        checkSuite, qaconvertSuite))
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if result.wasSuccessful():
         sys.exit(0)

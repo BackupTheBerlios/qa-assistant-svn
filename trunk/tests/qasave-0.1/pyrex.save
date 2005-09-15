@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE qasave PUBLIC "-//BadgerWare//DTD QA Assistant Save File 0.1//EN" "http://qa-assistant.sf.net/qasave/0.1/qasave.dtd">
+<qasave version="0.1">
+  <checklist name="fedoraus" revision="0.2">fedoraus.xml</checklist>
+  <properties>
+    <property name="SRPM">/home/badger/rpmbuild/RPMS/Pyrex-0.9-0.fdr.4.src.rpm</property>
+  </properties>
+  <entries>
+    <entry name="SRPM GPG signed" display="true" state="Pass">
+      <states>
+        <state name="Needs-Reviewing">This is a test</state>
+        <state name="Pass">&lt;Marius*lj.ifi.no&gt; &amp; test</state>
+        <state name="Fail">Missing or Bad GPG Signature</state>
+      </states>
+    </entry>
+  </entries>
+</qasave>
