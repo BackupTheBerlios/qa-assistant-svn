@@ -10,15 +10,18 @@
 __revision__ = "$Rev$"
 
 import sys
+import os
+import libxml2
 
 sys.path.append('@#pkgdatadir#@')
+sys.path.append(os.path.join('@#pkgdatadir#@', 'data'))
 
-import libxml2
-import os
 import paths
 import checklist
 
 _qaSaveFileVersion_ = '0.1'
+
+RENAMES = {'Fedora.us SRPM QA' : 'fedoraus'}
 
 class QAConverter(checklist.CheckList):
     '''A savefile object.
@@ -32,8 +35,6 @@ class QAConverter(checklist.CheckList):
         structure is ready to hold it.
         '''
 
-    publicID = '-//BadgerWare//DTD QA Assistant Save File ' + _qaSaveFileVersion_ + '//EN'
-    canonicalURL = 'http://qa-assistant.sf.net/dtds/qasave/' + _qaSaveFileVersion_ + '/qasave.dtd'
     def __init__(self, filename):
         '''Main program.
         
@@ -68,12 +69,14 @@ class QAConverter(checklist.CheckList):
             raise Exception('Base CheckList was not found.')
 
         # Check that the checklist is the appropriate version
-        if (self.name != saveCheck[0].prop('name')):
+        if (self.name != saveCheck[0].prop('name') and
+                (RENAMES.has_key(self.name) and
+                RENAMES[self.name] != saveCheck[0].prop('name'))):
             ### FIXME: Throw an exception to get out gracefully
             sys.exit(1)
         if (self.revision != saveCheck[0].prop('revision')):
             sys.stderr.write(
-                    "Attempting to convert savefile from %s %s to %s %s"
+                    "Attempting to convert savefile from %s %s to %s %s\n"
                     %  (saveCheck[0].prop('name'),
                         saveCheck[0].prop('revision'),
                         self.name, self.revision))
@@ -98,7 +101,7 @@ class QAConverter(checklist.CheckList):
         for node in saveEntries:
             entry = self.__xml_to_entry(node)
             try:
-                iter = self.entries[entry.name]
+                iter = self.entries[entry.name.lower()]
             except KeyError:
                 newEntry = self.add_entry(entry.name,
                         item=entry.item,
@@ -107,7 +110,7 @@ class QAConverter(checklist.CheckList):
                         output=entry.out,
                         resList=entry.reslist,
                         outputList=entry.outlist)
-                self.entries[entry.name] = newItem
+                self.entries[entry.name] = newEntry
             else:
                 self.set(iter, checklist.ISITEM, entry.item,
                     checklist.DISPLAY, entry.display,
@@ -148,8 +151,7 @@ class QAConverter(checklist.CheckList):
             if state.name == 'state':
                 resName = state.prop('name')
                 entry.reslist.append(resName)
-                entry.outlist[resName] = self.pangoize_output(resName,
-                            state.content)
+                entry.outlist[resName] = state.content
                 if resName == entry.res:
                     entry.out = entry.outlist[resName]
             state = state.next
@@ -166,6 +168,6 @@ if __name__ == '__main__':
         print __doc__
         sys.exit(1)
     
-    checklist = QAConverter(sys.argv[1])
-    checklist.publish(sys.argv[2])
+    listConvert = QAConverter(sys.argv[1])
+    listConvert.publish(sys.argv[2])
     sys.exit(0)

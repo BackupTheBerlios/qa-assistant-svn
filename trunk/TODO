@@ -97,6 +97,10 @@ Programming:
   (Namespace, URL, Make sure I follow recommendations for element/attribute)
 * Create a common XML save format/checklist with Erik LaBianca for the
   checklist.  This will involve integrating XML with test infrastructure.
+
+DTD
+===
+* Define a new DTD location on berlios instead of sourceforge.
 * Write a proper check that we can use a file (os.access doesn't work for
   this purpose.  [How does review.py work?])
   
@@ -150,6 +154,11 @@ Build:
   - Basically need a set of unittests for each object defined in the program.
     Don't yet know how to unittest the widgets.  The model objects and the
     program object should work much better, though.
+
+QA Convert
+==========
+
+* Add commandline parsing to override the checklist type we're to convert to.
 
 Documentation
 =============

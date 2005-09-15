@@ -70,7 +70,9 @@ EXTRA_DIST = \
 	$(icons_DATA)		
 
 CLEANFILES= \
-	   qa-assistant*.tar.*
+	data/*.pyc \
+	data/*.pyo \
+	qa-assistant*.tar.*
 
 if GCONF_SCHEMAS_INSTALL
 install-data-local: $(schema_DATA)
