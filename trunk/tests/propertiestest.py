@@ -15,6 +15,8 @@ from types import *
 import test
 
 import properties
+import fedoraus as functions
+import checklist
 
 class TestPropEntry(unittest.TestCase):
     def setUp(self):
@@ -44,15 +46,13 @@ class TestPropEntry(unittest.TestCase):
         value = 'http://localhost/fc3/repo/foo-1.0-1.src.rpm'
         valueType = 'url'
         propType = 'onload'
-        function = 'srpm_from_ticket'
-        args = ('ticketURL')
+        function = ('srpm_from_ticket',)
 
         try:
             self.propEntry.value = value
             self.propEntry.valueType = valueType
             self.propEntry.propType = propType
-            self.propEntry.function = function
-            self.propEntry.args = args
+            self.propEntry.functions = function
         except:
             self.assert_(False,
                     'FAIL: PropEntry  would not set a legal attribute')
@@ -62,18 +62,25 @@ class TestPropEntry(unittest.TestCase):
                 'FAIL: PropEntry.valueType was not set to the given value')
         self.assert_(self.propEntry.propType == propType,
                 'FAIL: PropEntry.propType was not set to the given value')
-        self.assert_(self.propEntry.function == function,
+        self.assert_(self.propEntry.functions == function,
                 'FAIL: PropEntry.function was not set to the given value')
-        self.assert_(self.propEntry.args == args,
-                'FAIL: PropEntry.args was not set to the given value')
         
 class TestPropertiesCreation(unittest.TestCase):
+    def setUp(self):
+        cl = checklist.CheckList(os.path.join(test.srcdir, '..', 'data',
+            'minimal-valid.xml'))
+        self.functions = functions.QAFunctions(cl)
+        
+    def tearDown(self):
+        del self.functions
+        
     def test_CreateProperties(self):
         '''Create a Properties object
 
         Make sure creating a properties structure works.
         '''
-        self.assert_(isinstance(properties.Properties(), properties.Properties))
+        self.assert_(isinstance(properties.Properties(self.functions),
+            properties.Properties))
             
 class TestProperties(unittest.TestCase):
     def setUp(self):
@@ -81,16 +88,17 @@ class TestProperties(unittest.TestCase):
         self.value = 'http://localhost/fc3/repo/foo-1.0-1.src.rpm'
         self.valueType = 'url'
         self.propType = 'onload'
-        self.function = 'srpm_from_ticket'
-        self.args = ('ticketURL')
+        self.function = ('srpm_from_ticket',)
         self.name = 'SRPMURL'
         self.propEntry = properties.PropEntry()
         self.propEntry.value = self.value
         self.propEntry.valueType = self.valueType
         self.propEntry.propType = self.propType
-        self.propEntry.function = self.function
-        self.propEntry.args = self.args
-        self.prop = properties.Properties()
+        self.propEntry.functions = self.function
+        cl = checklist.CheckList(os.path.join(test.srcdir, '..', 'data',
+            'minimal-valid.xml'))
+        func = functions.QAFunctions(cl)
+        self.prop = properties.Properties(func)
         self.prop[self.name] = self.propEntry
 
     def test_50AddProperty(self):
@@ -107,10 +115,8 @@ class TestProperties(unittest.TestCase):
                 'FAIL: Did not set the Properties valueType correctly')
         self.assert_(self.prop[self.name].propType == self.propType,
                 'FAIL: Did not set the Properties propType correctly')
-        self.assert_(self.prop[self.name].function == self.function,
+        self.assert_(self.prop[self.name].functions == self.function,
                 'FAIL: Did not set the Properties function correctly')
-        self.assert_(self.prop[self.name].args == self.args,
-                'FAIL: Did not set the Properties args correctly')
 
     def test_PropertiesChangeValue(self):
         '''Change a value on a property

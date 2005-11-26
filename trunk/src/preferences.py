@@ -248,7 +248,8 @@ class Preferences(gnomeglade.Component):
 
         '''
         color = button.get_color()
-        colorString = '#%02X%02X%02X' % (color.red/256, color.green/256, color.blue/256)
+        colorString = '#%02X%02X%02X' % (color.red/256, color.green/256,
+                color.blue/256)
         self.gconfClient.set_string(key, colorString)
 
     def set_use_gpg(self, toggleButton):
@@ -282,8 +283,9 @@ class Preferences(gnomeglade.Component):
     def set_desc_wait(self, spinButton, event):
         '''
         '''
-        self.gconfClient.set_int(GCONFPREFIX + '/display/checklist-description-wait',
-        spinButton.get_value_as_int())
+        self.gconfClient.set_int(GCONFPREFIX +
+                '/display/checklist-description-wait',
+                spinButton.get_value_as_int())
 
     def set_gpg_path(self, fileEntry):
         '''

@@ -2,30 +2,24 @@
 <!DOCTYPE checklist PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.3//EN" "http://qa-assistant.sf.net/dtds/checklist/0.3/checklist.dtd">
 <checklist version="0.3" name="Fedora.us SRPM QA" revision="0.3">
   <summary>Run QA on SRPMS according to the fedora.us rules</summary>
+  <functions hash="@@hash@@" hashtype="nullhash">fedoraus.py</functions>
   <properties>
     <property name="ticketURL" type="url">
       <require type="optional"/>
+      <function>srpm_from_ticket</function>
     </property>
     <property name="SRPMfile" type="file">
-      <require type="onload">
-        <arg>ticketURL</arg>
-        <function>srpm_from_ticket</function>
-      </require>
+      <require type="onload"/>
+      <function>srpm_md5</function>
+      <function>srpm_internal_md5s</function>
     </property>
     <property name="SRPMMD5sum" type="md5sum">
-      <require type="automatic">
-        <arg>SRPMfile</arg>
-        <function>srpm_md5</function>
-      </require>
+      <require type="automatic"/>
     </property>
     <property name="fileMD5s" type="string">
-      <require type="automatic">
-        <arg>SRPMfile</arg>
-        <function>srpm_internal_md5s</function>
-      </require>
+      <require type="automatic"/>
     </property>
   </properties>
-  <functions hash="@@hash@@" hashtype="nullhash">fedoraus.py</functions>
   <category name="Security of the build system">
     <description>Although many of the checklist items relate to security, the
       ones listed in this section are important to check before you proceed
@@ -41,16 +35,7 @@
         <state name="Pass">Package signature verified: [ID] [Name]</state>
         <state name="Fail">Missing or Bad GPG Signature</state>
       </states>
-      <test>
-        <argument>SRPMfile</argument>
-        <code language="sh">
-# If any of the following tests succeed we can exit with success
-# Need to parse the commands to create a suitable output string
-#fedora-rpmchecksig $1
-#rpm --checksig $1
-#tgpg $1
-        </code>
-      </test>
+      <test>check_srpm_sig</test>
       <description>The SRPM must be signed by the packager.  This gives you
         an association to a gpg key which you can then use in tracking down
         who packaged the code.  It's even better if the gpg key is known to

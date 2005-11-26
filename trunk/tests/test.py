@@ -20,7 +20,10 @@ else:
     srcdir = '.'
 
 sys.path.extend((os.path.join(srcdir, '..', 'src'),
-    os.path.join('..', 'src')))
+    os.path.join('..', 'src'),
+    os.path.join(srcdir, '..', 'data'),
+    os.path.join('..', 'data')
+    ))
 
 import creationtest
 import checklisttest

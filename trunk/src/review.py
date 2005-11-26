@@ -146,7 +146,8 @@ class Review(gtk.VBox):
             try:
                 gpgPath = self.gconfClient.get_string(key)
             except gobject.GError:
-                gpgPath = self.gconfClient.get_default_from_schema(key).get_string()
+                gpgPath = self.gconfClient.get_default_from_schema(
+                        key).get_string()
             reenterPassphrase = False
             while True:
                 passphrase = gpg.get_passphrase(gpgId, reenterPassphrase)

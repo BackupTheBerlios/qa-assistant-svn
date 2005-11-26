@@ -17,29 +17,25 @@ class PropEntry(object):
     :propType: The type of property.  One of optional, onload, or automatic
     :value: The value of the property.
     :valueType: The type of the value.
-    :function: A function that may be used to set the property.
-    :args: List of other properties to use as arguments to the property
-           setting function.
+    :functions: A list of functions to be invoked when the PropEntry is set.
 
     Example:
     entry = PropEntry()
     entry.value = 'http://localhost/fc3/repo/foo-1.0-1.src.rpm'
     entry.valueType = 'url'
     entry.propType = 'onload'
-    entry.function = 'srpm_from_ticket'
-    entry.args = ['ticketURL',]
+    entry.functions = ('srpm_from_ticket',)
     props = Properties()
     props['SRPMfile'] = entry
     
     '''
-    __slots__ = ('value', 'valueType', 'propType', 'function', 'args')
+    __slots__ = ('value', 'valueType', 'propType', 'functions')
 
     def __init__(self):
         self.value = None
         self.valueType = None
         self.propType = None
-        self.function = None
-        self.args = []
+        self.functions = []
 
 class Properties(gobject.GObject, UserDict.DictMixin):
     ''' Holds the CheckList Properties.
@@ -52,13 +48,14 @@ class Properties(gobject.GObject, UserDict.DictMixin):
                 (gobject.TYPE_PYOBJECT,))
     }
 
-    def __init__(self):
+    def __init__(self, functions):
         '''Create a new Properties object.
         '''
         gobject.GObject.__init__(self)
         self.storage = {}
         self._sortedKeys = []
         self._requirementsMet = False
+        self.functions = functions
         
     #
     # Set Property values
@@ -88,7 +85,15 @@ class Properties(gobject.GObject, UserDict.DictMixin):
                 raise KeyError, (
                         'This checklist has no %s Property' % (key))
             attrib.value = value
+
+        # Let everyone know a property has changed
         self.emit('changed', key)
+        # If the property has a function attached to it, run it.
+        if self[key].functions:
+            for function in self[key].functions:
+                exec('self.functions.' + function + '()')
+
+        # Check whether the properties have been completely filled out
         if self._requirementsMet and self[key].propType == 'onload' and not (
                 self[key].value or self[key].value == 0):
             self._requirementsMet = False

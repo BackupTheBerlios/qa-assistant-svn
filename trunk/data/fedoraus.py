@@ -15,6 +15,10 @@ class QAFunctions(BaseQAFunctions):
 
     '''
         
+    #
+    # Output functions
+    #
+    
     def header(self):
         '''Output the header for the revew.
 
@@ -39,6 +43,10 @@ class QAFunctions(BaseQAFunctions):
     def footer(self):
         return ''
 
+    #
+    # UI (Menu/tolbar) functions
+    #
+    
     def get_ui(self, app):
         uiDef = BaseQAFunctions.get_ui(self, app)
         uiElements = '''<ui>
@@ -60,3 +68,37 @@ class QAFunctions(BaseQAFunctions):
 
     def from_srpm_cb(self, action, app, *extras):
         pass
+
+    #
+    # Properties functions
+    #
+
+    def srpm_from_ticket(self):
+        '''Retrieve the latest srpmURL from the buzilla URL.
+        '''
+        bugzillaURL = self.checklist.properties['ticketURL']
+        data = urlgrabber.urlread(bugzillaURL)
+        srpmList = re.compile('"((ht|f)tp(s)?://.*?\.src\.rpm)"', re.IGNORECASE).findall(data)
+        if srpmList == []:
+            # No SRPM was found.  Just decide not to set anything.
+            return
+        srpmURL = srpmList[-1][0]
+        if not srpmURL:
+            # No srpm found.  Just decide not to set anything.
+            return
+        self.checklist.properties['SRPMfile'] = srpmURL
+        
+    def srpm_md5(self):
+        '''Get the md5sum of a src.rpm.
+        '''
+        pass
+    def srpm_internal_md5s(self):
+        pass
+
+    def srpm_from_ticket(self):
+        pass
+        '''
+    <property name="SRPMfile" type="file">
+    <property name="SRPMMD5sum" type="md5sum">
+    <property name="fileMD5s" type="string">
+        '''

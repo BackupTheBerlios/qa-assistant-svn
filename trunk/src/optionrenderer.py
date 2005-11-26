@@ -14,21 +14,29 @@ import gobject
 
 class OptionCellRenderer(gtk.GenericCellRenderer):
     __gproperties__ = {
-        'optionlist' : (gobject.TYPE_PYOBJECT, 'optionList', 'list of options to render', gobject.PARAM_READWRITE),
-        'selectedoption' : (gobject.TYPE_STRING, 'option', 'currently selected option', '', gobject.PARAM_READWRITE),
+        'optionlist' : (gobject.TYPE_PYOBJECT, 'optionList',
+                'list of options to render', gobject.PARAM_READWRITE),
+        'selectedoption' : (gobject.TYPE_STRING, 'option',
+                'currently selected option', '', gobject.PARAM_READWRITE),
     }
     propertyNames = __gproperties__.keys()
     __gsignals__ = {
-        'clicked' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, (gobject.TYPE_PYOBJECT,)),
-        'changed' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, (gobject.TYPE_STRING, gobject.TYPE_PYOBJECT))
+        'clicked' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
+                (gobject.TYPE_PYOBJECT,)),
+        'changed' : (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE,
+                (gobject.TYPE_STRING, gobject.TYPE_PYOBJECT))
     }
     
     def __init__(self):
         self.__gobject_init__()
-        self.xpad=2
-        self.ypad=2
-        self.xalign=0.0
-        self.yalign=0.8
+        # Should work in pygtk-2.6
+        #gtk.GenericCellRenderer(self)
+        self.x = 0
+        self.y = 0
+        self.xpad = 2
+        self.ypad = 2
+        self.xalign = 0.0
+        self.yalign = 0.8
         self.__width = None
         self.__height = None
         self.__xOffset = None
@@ -39,13 +47,13 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
         if not hasattr(self, 'selectedoption'):
             self.selectedoption = ''
 
-    def do_get_property(self, id):
-        return getattr(self, id.name)
+    def do_get_property(self, prop):
+        return getattr(self, prop.name)
 
-    def do_set_property(self, id, value):
-        if not hasattr(self, id.name):
-            raise AttributeError, 'unknown property %s' % (id.name)
-        setattr(self, id.name, value)
+    def do_set_property(self, prop, value):
+        if not hasattr(self, prop.name):
+            raise AttributeError, 'unknown property %s' % (prop.name)
+        setattr(self, prop.name, value)
 
     def on_get_size(self, widget, cellArea):
         """Returns the size needed to render the cell."""
@@ -57,7 +65,7 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
                 if greatest < rect[1][2]:
                     greatest = rect[1][2]
             
-            self.__width= self.xpad*2 + greatest + 22
+            self.__width = self.xpad*2 + greatest + 22
             self.__height = self.ypad*2 + rect[1][3] + 2
         if self.__xOffset == None or self.__yOffset == None:
             if cellArea:
@@ -66,8 +74,8 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
                 self.__yOffset = self.yalign * (cellArea.height - self.__height)
                 self.__yOffset = max(self.__yOffset, 0)
             else:
-                self.__xOffset=0
-                self.__yOffset=0
+                self.__xOffset = 0
+                self.__yOffset = 0
                 
         return self.__xOffset, self.__yOffset, self.__width, self.__height
     
@@ -98,10 +106,10 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
         return self.x, self.y + self.__height, False
 
     def display_options(self, widget, data):
-        tree=data[0]
-        event=data[1]
+        tree = data[0]
+        event = data[1]
         currentOption = self.get_property('selectedoption')
-        menu=gtk.Menu()
+        menu = gtk.Menu()
         item = None
         itemList = []
         for entry in self.optionlist:
@@ -119,7 +127,8 @@ class OptionCellRenderer(gtk.GenericCellRenderer):
         cellArea = tree.get_cell_area(path, column)
         self.x = treeOrigin[0] + cellArea.x
         self.y = treeOrigin[1] + cellArea.y
-        menu.popup(None, None, self.__compute_menu_position, event.button, event.time)
+        menu.popup(None, None, self.__compute_menu_position, event.button,
+                event.time)
         del(menu)
 
     def on_render(self, window, widget, backgroundArea, cellArea,

@@ -16,7 +16,6 @@ Druid
 The druid itself has been created.  Some work still needs to be done -- mostly
 to the supporting widgets:
 
-* Check that all required properties are entered. [check]
 * When loading a savefile from the menus, use the Druid as we have to force
   users to confront the Properties as well.
 * Use the file selector widget instead of the Browse button type file selector
@@ -39,6 +38,21 @@ There are three consumers of Properties:
 * MD5Sums
 * Bugzilla URL
 * SRPM to check
+
+Properties as Dependencies for other Properties
++++++++++++++++++++++++++++++++++++++++++++++++
+
+Problem:
+~~~~~~~~
+
+Properties should be settable using a checklist defined function
+and other filled in properties.
+
+Thoughts:
+~~~~~~~~~
+I am going to implement this by defining a function to call in the checklist
+xml file.  This function will be in the checklist functions file.  It will
+decide whether to change any other properties.
 
 Properties as Function Arguments
 ++++++++++++++++++++++++++++++++

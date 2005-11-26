@@ -10,7 +10,6 @@ __revision__ = '$Rev$'
 
 import os
 import gtk
-import gnome
 
 import error
 import qaglobals
@@ -34,6 +33,11 @@ class BaseQAFunctions(object):
         return self.checklist.resolution
     
     def footer(self):
+        '''Print a footer on a review.
+
+        Override this function if you wish to print an alternate footer on the
+        review.
+        '''
         return ('Created in ' 
                 + qaglobals.HUMANPROGRAMNAME
                 + ' ' + qaglobals.VERSION)
@@ -88,9 +92,9 @@ class BaseQAFunctions(object):
                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         newItemDialog.set_default_response(gtk.RESPONSE_OK)
         table = gtk.Table(3, 2, False)
-        table.attach(gtk.Label('Summary:'), 0,1, 0,1)
-        table.attach(gtk.Label('Initial Resolution:'), 0,1, 1,2)
-        table.attach(gtk.Label('Output:'), 0,1, 2,3)
+        table.attach(gtk.Label('Summary:'), 0, 1, 0, 1)
+        table.attach(gtk.Label('Initial Resolution:'), 0, 1, 1, 2)
+        table.attach(gtk.Label('Output:'), 0, 1, 2, 3)
         summaryEntry = gtk.Entry()
         resEntry = gtk.combo_box_new_text()
         resList = ('Pass', 'Fail', 'Non-Blocker')
@@ -100,9 +104,9 @@ class BaseQAFunctions(object):
             resEntry.append_text(res)
         resEntry.set_active(1)
         outputEntry = gtk.Entry()
-        table.attach(summaryEntry, 1,2, 0,1)
-        table.attach(resEntry, 1,2, 1,2)
-        table.attach(outputEntry, 1,2, 2,3)
+        table.attach(summaryEntry, 1, 2, 0, 1)
+        table.attach(resEntry, 1, 2, 1, 2)
+        table.attach(outputEntry, 1, 2, 2, 3)
         
         newItemDialog.vbox.add(table)
         newItemDialog.show_all()
@@ -193,7 +197,7 @@ class BaseQAFunctions(object):
             qaglobals.lastReviewDir = os.path.dirname(filename) + os.path.sep
             try:
                 app.reviewView.publish(filename)
-            except IOError, msg:
+            except IOError:
                 msgDialog = gtk.MessageDialog(app.ReviewerWindow,
                         gtk.DIALOG_DESTROY_WITH_PARENT,
                         gtk.MESSAGE_QUESTION, gtk.BUTTONS_CLOSE,

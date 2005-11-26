@@ -1,3 +1,35 @@
+2005-09-15 Toshio Kuratomi <toshio@tiki-lounge.com> - r211    
+    * tests/test.py: Add the regression tests for qa-convert.
+    * tests/Makefile.am:
+      - Add qaconverttest.py to test the qa-convert script.
+      - Add qasave-0.1 directory with old qasave-0.1 files to test qa-convert.
+    * tests/qaconverttest.py: New tests for the qa-convert script.
+    * tests/qasave-0.1, tests/qasave-0.1/python-docutils.save,
+      tests/qasave-0.1/ddclient.save, tests/qasave-0.1/pyrex.save,
+      tests/qasave-0.1/customitems.save: Old qasave-0.1 save files to test the
+      qa-convert conversion script with.
+    
+2005-09-14 Toshio Kuratomi <toshio@tiki-lounge.com> - r210    
+    * src/qa-convert.pyin.in:
+      - Add the checklist data directory to sys.path so we can load the
+        CheckList function files.
+      - RENAMES dict that holds renames of checklists between 0.4 and 0.5.
+      - Remove the DTD publicID and canonicalURL.  These were overriding the
+        variables provided by the checklist class.  They're only used for
+        writing the file so we need to use the CheckList class definition,
+        not the older qasave definition.
+      - When we check if the entry is already defined, make sure we check
+        on lowercased name, otherwise we throw some false positives.
+      - Fix a typo: newItem => newEntry.
+      - Do not pangoize our entries.  The new checklist format will pangoize
+        when it displays, not when it loads it into the buffer.
+    * Makefile.am: one make clean, remove the *.py[co]s in the data/ subdir.
+    * TODO: Notes to define a DTD relative to berlios instead of sourceforge
+      for the 0.5 release and add commandline parsing to the qa-convert script.
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r207    
+    * ChangeLog: Update to (r206).
+    
 2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r206    
     * ChangeLog: Update to (r204).
     
@@ -55,7 +87,7 @@
       - Note that the colorization functions really belong in the checkview,
         not here.
     * src/qareviewer.py: Enable the modified menus (Just save for now) when the
-      checklist hasa been modified.
+      checklist has been modified.
     * src/checkload.py: Enable the modified menus when the checklist has been
       modified.  Now that we can use __gproperties__ without worries, we need
       to move this block of functionality from checkload.finish() into

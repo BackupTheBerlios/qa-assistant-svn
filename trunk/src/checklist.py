@@ -102,25 +102,6 @@ class CheckList (gtk.TreeStore):
     class __Entry:
         '''Private class.  Holds entry information until ready to output.'''
 
-    class __Test:
-        '''Information related to automated tests embedded in the XML files.
-        
-        This class is meant to be invoked by the CheckList class.  It will be
-        wrapped in CheckList methods `run_test(SUMMARY)` and `run_all_tests()`
-
-        It won't be used directly by other programs because it is assumed that
-        getting properties from the CheckList into the Test would be harder.
-        If this is not the case, this class may become public and outside code
-        may use its interface directly.
-        '''
-        def run(self):
-            '''
-    
-            Returns: Tuple of Resolution string and Output for the string.  The
-                     output may be None.
-            '''
-            pass
-
     def __init__(self, path):
         ''' Create a new CheckList
 
@@ -137,7 +118,6 @@ class CheckList (gtk.TreeStore):
         self.functionHashType = None # Type of the hash (sha1, md5, etc)
         self.functionFile = None # File containing the functions
         # Properties available on the checklist
-        self.properties = properties.Properties()
         self.customItemsIter = None # Iter to the custom items category
         self.colors = {}
         self.__unspan = re.compile(r'([^<]*)(<span[^>]*>)?([^<]*)(</span>)?(.*)')
@@ -220,29 +200,7 @@ class CheckList (gtk.TreeStore):
             self.filename = None
             self.revision = 0
         
-        # Extract properties from the CheckList file
-        props = root.xpathEval2('/checklist/properties/property')
-        for p in props:
-            propChild = p.children
-            propEntry = properties.PropEntry()
-            propEntry.valueType = p.prop('type')
-            while propChild:
-                if propChild.name == 'require':
-                    propEntry.propType = propChild.prop('type')
-                    requireChild = propChild.children
-                    while requireChild:
-                        if requireChild.name == 'arg':
-                            propEntry.args.append(requireChild.content)
-                        elif requireChild.name == 'function':
-                            propEntry.function = requireChild.content
-                        requireChild = requireChild.next
-                elif propChild.name == 'value':
-                    propEntry.value = propChild.content
-                propChild = propChild.next
-            # Set the property
-            self.properties[p.prop('name')] = propEntry
-
-        # Extract functions for the QA menu
+        # Determine the checklist functions file to use
         funcs = root.xpathEval2('/checklist/functions')
         if funcs:
             self.functionHash = funcs[0].prop('hash')
@@ -253,6 +211,25 @@ class CheckList (gtk.TreeStore):
             self.functions = functions.BaseQAFunctions(self)
         del funcs
         
+        # Extract properties from the CheckList file
+        self.properties = properties.Properties(self.functions)
+        props = root.xpathEval2('/checklist/properties/property')
+        for p in props:
+            propChild = p.children
+            propEntry = properties.PropEntry()
+            propEntry.valueType = p.prop('type')
+            while propChild:
+                if propChild.name == 'require':
+                    propEntry.propType = propChild.prop('type')
+                elif propChild.name == 'function':
+                    propEntry.functions.append(propChild.content)
+                elif propChild.name == 'value':
+                    propEntry.value = propChild.content
+                propChild = propChild.next
+            # Set the property
+            self.properties[p.prop('name')] = propEntry
+        del props
+
         # Record each category as a toplevel in the tree
         categories = root.xpathEval2('/checklist/category')
         self.entries = {}
@@ -474,6 +451,12 @@ class CheckList (gtk.TreeStore):
         node.setProp('name', self.baseName)
         node.setProp('revision', self.baseRevision)
        
+        # Output functions
+        if self.functionFile:
+            funcs = root.newTextChild(None, 'functions', self.functionFile)
+            funcs.setProp('hash', self.functionHash)
+            funcs.setProp('hashtype', self.functionHashType)
+        
         # Output properties we're concerned with
         if self.properties:
             props = root.newChild(None, 'properties', None)
@@ -484,19 +467,11 @@ class CheckList (gtk.TreeStore):
                 node.setProp('type', prop.valueType)
                 require = node.newChild(None, 'require', None)
                 require.setProp('type', prop.propType)
-                for arg in prop.args:
-                    require.newTextChild(None, 'arg', arg)
-                if prop.function:
-                    require.newTextChild(None, 'function', prop.function)
+                for function in prop.functions:
+                    node.newTextChild(None, 'function', function)
                 if prop.value:
                     node.newTextChild(None, 'value', prop.value)
 
-        # Output functions
-        if self.functionFile:
-            funcs = root.newTextChild(None, 'functions', self.functionFile)
-            funcs.setProp('hash', self.functionHash)
-            funcs.setProp('hashtype', self.functionHashType)
-        
         # Output entries
         self.foreach(self.__create_entry, root)
 
@@ -784,7 +759,7 @@ class CheckList (gtk.TreeStore):
                     ' recorded hash' % (self.functionFile))
         # If so, load the file
         sys.path.append(os.path.dirname(filename))
-        exec ('import ' + self.functionFile[0:-3] + ' as functions')
+        exec('import ' + self.functionFile[0:-3] + ' as functions')
         return functions.QAFunctions(self)
     #
     # Helpers to read a checklist
@@ -835,39 +810,7 @@ class CheckList (gtk.TreeStore):
                 desc = ' '.join(fields.content.split())
                 entry.desc = desc
             elif fields.name == 'test':
-                testFields = fields.children
-                entry.test = self.__Test()
-                entry.test.arguments = []
-                while testFields:
-                    if testFields.name == 'argument':
-                        argument = testFields.content
-                        if not self.properties.has_key(argument):
-                            # Argument was invalid substitute this test for
-                            # the real one so the user can be alerted to the
-                            # fact that the test did not run correctly.
-                            entry.test.code = '''import sys
-print 'Automated test error: "%s" is an invalid argument because it is not a property name'
-sys.exit(4)
-''' % (argument)
-                            entry.test.language = 'python' 
-                            entry.test.minlangver = None
-                            entry.test.maxlangver = None
-                            break
-
-                        entry.test.arguments.append(argument)
-                    elif testFields.name == 'code':
-                        entry.test.language = testFields.prop('language') \
-                                or None
-                        entry.test.minlangver = testFields.prop('minlangver') \
-                                or None
-                        entry.test.maxlangver = testFields.prop('maxlangver') \
-                                or None
-                        entry.test.code = testFields.content
-                    else:
-                        # DTD validation should catch things that aren't
-                        # supposed to end up here.
-                        pass
-                    testFields = testFields.next
+                entry.test = fields.content
             else:
                 # DTD validation should prevent anything uwanted from
                 # ending up here.
@@ -909,23 +852,13 @@ sys.exit(4)
             outputs = tree.get_value(entryIter, OUTPUTLIST)
             states = entry.newChild(None, 'states', None)
             for res in resolutions:
-                content = outputs[res]
-                state = states.newTextChild(None, 'state', content)
+                state = states.newTextChild(None, 'state', outputs[res])
                 state.setProp('name', res)
                 
             # test node
             test = tree.get_value(entryIter, TEST)
             if test:
-                testNode = entry.newChild(None, 'test', None)
-                for arg in test.arguments:
-                    testNode.newTextChild(None, 'argument', arg)
-                codeNode = testNode.newTextChild(None, 'code', test.code)
-                if test.language:
-                    codeNode.setProp('language', test.language)
-                if test.minlangver:
-                    codeNode.setProp('minlangver', test.minlangver)
-                if test.maxlangver:
-                    codeNode.setProp('maxlangver', test.maxlangver)
+                testNode = entry.newTextChild(None, 'test', test)
         else:
             entry = root.newChild(None, 'category', None)
 

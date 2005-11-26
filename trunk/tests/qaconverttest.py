@@ -42,13 +42,13 @@ class TestCreation(unittest.TestCase):
         #try:
         self.newList = checklist.CheckList(self.checkFile)
         #except:
-            # If the checklist raises and exception, let the assert_ catch the
+            # If the checklist raises an exception, let the assert_ catch the
             # error.
         #    pass
         self.assert_(isinstance(self.newList, checklist.CheckList))
    
     #
-    # Check that vaious invocations of qa-convert yield correct results.
+    # Check that various invocations of qa-convert yield correct results.
     #
     def test_custom_items(self):
         '''Check conversion with custom items
