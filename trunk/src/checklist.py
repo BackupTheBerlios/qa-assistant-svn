@@ -120,7 +120,8 @@ class CheckList (gtk.TreeStore):
         # Properties available on the checklist
         self.customItemsIter = None # Iter to the custom items category
         self.colors = {}
-        self.__unspan = re.compile(r'([^<]*)(<span[^>]*>)?([^<]*)(</span>)?(.*)')
+        self.__unspan = re.compile(
+                r'([^<]*)(<span[^>]*>)?([^<]*)(</span>)?(.*)')
         self.colorRE = re.compile('^#[A-Fa-f0-9]{6}$')
         self.gconfClient = gconf.client_get_default()
 
@@ -140,7 +141,8 @@ class CheckList (gtk.TreeStore):
         libxml2.registerErrorHandler(self.__no_display_parse_error, None)
         ctxt = libxml2.newParserCtxt()
         try:
-            checkFile = ctxt.ctxtReadFile(path, None, libxml2.XML_PARSE_DTDVALID)
+            checkFile = ctxt.ctxtReadFile(path, None,
+                    libxml2.XML_PARSE_DTDVALID)
         except libxml2.treeError:
             raise error.InvalidChecklist('%s was not an XML file' % (path))
 

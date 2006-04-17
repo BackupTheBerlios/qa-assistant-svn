@@ -15,9 +15,9 @@ try:
     import textwrap
 except ImportError:
     try:
-        from optik import textwrap
-    except ImportError:
         from optparse import textwrap
+    except ImportError:
+        from optik import textwrap
 
 from qaglobals import *
 import checklist
@@ -168,7 +168,7 @@ class Review(gtk.VBox):
                             ' Dialog.')
                     errorDialog.set_title('No Signing Key')
                     errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
-                    response = errorDialog.run()
+                    errorDialog.run()
                     errorDialog.destroy()
                     return
                 except error.NoOut:
@@ -186,7 +186,7 @@ class Review(gtk.VBox):
                             ' number.')
                     errorDialog.set_title('No Output Created')
                     errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
-                    response = errorDialog.run()
+                    errorDialog.run()
                     errorDialog.destroy()
                     return
                 except error.NotGPGCompatible:
@@ -202,7 +202,7 @@ class Review(gtk.VBox):
                             ' for it.')
                     errorDialog.set_title('Invalid GPG program specified')
                     errorDialog.set_default_response(gtk.RESPONSE_CLOSE)
-                    response = errorDialog.run()
+                    errorDialog.run()
                     errorDialog.destroy()
                     return
                 else:

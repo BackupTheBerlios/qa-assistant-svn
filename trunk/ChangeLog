@@ -1,3 +1,57 @@
+2005-11-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r212    
+    * ROADMAP: Tentative roadmap to 1.0.  Does not mention dates, just what
+      features will go into certain releases.
+    * src/properties.py:
+      - Rename the function attribute of a PropEntry to functions.  Make this
+        into a list of functions to invoke when the property is changed instead
+        of just a single one.
+      - Remove the args attribute from PropEntry.  Functions have access to
+        all properties so there is no need to specify arguments.
+      - __init__(): Properties now takes a Function object as an argument when
+        initializing.  This should be BaseQAFunctions or a subclass.
+      - __setitem__(): When a property is changed, see if a function is listed
+        to be called.  If so call a method of the functions object passed into
+        the constructor.
+    * src/optionrenderer.py: Pylint cleanups:
+      - Split lines that were over 80 characters.
+      - Add spaces between operators and operands.
+      - Rename id to prop in functions.  ID is a keyword as well.
+    * src/preferences.py: Pylint cleanups:
+      - Split lines that were over 80 characters.
+    * src/review.py: Pylint cleanups:
+      - Split lines that were over 80 characters/
+    * src/functions.py: Pylint cleanups:
+      - footer(): Add a docstring.
+      - Add spaces between commas.
+    * src/checklist.py:
+      - Remove the __Test class.  The usage of checklist defined tests has
+        changed sufficiently that it doesn't make sense anymore.
+      - __init__(), publish():
+        + The functions file definition comes before the properties in the XML
+          file now.  This is due to the new Properties system which needs a
+          functions object in order to work.
+        + function is now a direct subnode of property so use it there, not
+          from the requires node.
+      - __xml_to_entry(), __create_entry(): Reduce test information to one
+        string that defines the test function's name.
+    * ChangeLog: Update to r211.
+    * PREFERENCES: Thoughts on properties interdependencies.
+    * tests/propertiestest.py: Updates to deal with the new expected behaviour
+      of properties with functions.
+    * tests/test.py: Add the 'data' directory as a source of python files as
+      the checklist files will come from there.
+    * tests/qaconverttest.py: Fix typos in comments.
+    * configure.ac: Bump release to 0.4.90.5.
+    * data/fedoraus.py: Add the definition of several functions declared in
+      fedoraus.xml.  These should be filled in before qa-assistant-0.5.
+    * data/checklist.dtd: Simplifications.
+      - functions is now defined to come before properties.
+      - function is now a member of property instead of require.
+      - No more arg element.  Checklist defined functions have access to all
+        properties.
+      - test is reduced to a string which is the name of a function to call.
+    * data/fedoraus.xml: Changes to conform to the new DTD.
+    
 2005-09-15 Toshio Kuratomi <toshio@tiki-lounge.com> - r211    
     * tests/test.py: Add the regression tests for qa-convert.
     * tests/Makefile.am:
@@ -87,7 +141,7 @@
       - Note that the colorization functions really belong in the checkview,
         not here.
     * src/qareviewer.py: Enable the modified menus (Just save for now) when the
-      checklist has been modified.
+      checklist hasa been modified.
     * src/checkload.py: Enable the modified menus when the checklist has been
       modified.  Now that we can use __gproperties__ without worries, we need
       to move this block of functionality from checkload.finish() into

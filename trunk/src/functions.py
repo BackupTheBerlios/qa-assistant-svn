@@ -9,10 +9,16 @@
 __revision__ = '$Rev$'
 
 import os
+import tempfile
 import gtk
+import gconf
 
 import error
 import qaglobals
+
+class QAError(error.Error):
+    '''Error raised by the functions.'''
+    pass
 
 class BaseQAFunctions(object):
     '''
@@ -22,6 +28,38 @@ class BaseQAFunctions(object):
     def __init__(self, checklist):
         self.checklist = checklist
         self.QAMenu = None
+        gconfClient = gconf.client_get_default()
+        gconfClient.add_dir(qaglobals.GCONFPREFIX, gconf.CLIENT_PRELOAD_NONE)
+        key = qaglobals.GCONFPREFIX + '/files/user-state-dir'
+        try:
+            stateDir = gconfClient.get_string(key)
+        except gobject.GError:
+            stateDir = gconfClient.get_default_from_schema(key).get_string()
+        stateDir = os.path.expanduser(stateDir)
+        # Check that statedir is already setup
+        if os.path.isdir(stateDir) and os.access(stateDir, os.W_OK | os.X_OK):
+            self.tmpDir = tempfile.mkdtemp(dir=stateDir)
+        elif os.path.lexists(stateDir):
+            ### FIXME: Fail the stateDir. Need to get a new one from the user
+            pass
+        else:
+            os.mkdir(stateDir, 0755)
+            self.tmpDir = tempfile.mkdtemp(dir=stateDir)
+
+    def __del__(self):
+        '''Remove the temporary directory.'''
+        os.path.walk(self.tmpDir, self._recursive_rmdir, None)
+       
+    # Helper functions
+    def _recursive_rmdir(self, arg, dirname, files):
+        '''Remove a directory hierarchy.
+        Meant to be called from os.path.walk()
+        '''
+        for name in files:
+            name = os.path.join(dirname, name)
+            if os.path.isfile(name) or os.path.islink(name):
+                os.unlink(name)
+        os.removedirs(dirname)
         
     # Output functions
     def header(self):

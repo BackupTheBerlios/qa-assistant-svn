@@ -69,11 +69,14 @@ class Properties(gobject.GObject, UserDict.DictMixin):
     def __setitem__(self, key, value):
         '''Set a property to a value.
 
-        Override the default method so that we create new values when
-        passed an entire PropEntry.  If we are only passed a value for the
-        PropEntry, set the indicated Property's value if it exists.
-        If it doesn't exist, and you want to be able to set it, you need to
-        first add it by passing in a complete PropEntry struct.
+        Override the default method so that we can do these special things:
+        1) create new values when passed an entire PropEntry.
+        2) If we are only passed a value for the PropEntry, set the
+           indicated Property's value if it exists.
+           (If it doesn't exist, and you want to be able to set it, you need
+            to first add it by passing in a complete PropEntry struct.)
+        3) When a property is set, check if there are any functions that need
+           to be called when that happens.
         '''
         if isinstance(value, PropEntry):
             self.storage[key] = value
