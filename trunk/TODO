@@ -17,31 +17,24 @@ glade/GUI:
 * When the reviewer really should add additional information in a note, how
   should we make it happen?  A field in the XML file under state?  And that
   causes qa-assistant to pop up a textEntry dialog when the item enters that
-  state?
+  state?  Perhaps the checklist needs to define something in the state field:
+  <state name="Fail">Install time scriptlet needs to <user_input>List problems here</user_input></state>
 * Add i18n support.
     
 Functions:
 ==========
-Everything in this list requires rethinking because of the new Functions and
-Properties structure.
-
 * These require integration with the Functions features
 
   - Publish Button should be added to toolbar [Need icon]
 
     + Pressing Submit will build the review and submit to bugzilla.
-    [Needs to have a function written and registered in fedoraus.py]
+      [Needs to have a function written and registered in fedoraus.py]
 
   - Add a New dialog to take input about bugzilla
+    [Now a property to take a bugzilla URL]
 
     + If new then make sure we have both a bugzilla # and an SRPM
-    [Needs to be implemented via properties]
-
-  - Disable pieces of the QA Action menu when there is no SRPM being reviewed
-    [Done]
-    
-  - Accelerators for QA Action items
-    [Done]
+      [Needs to be implemented via properties]
 
 * Security:  We need to fill in two pieces here: 1) The checklist needs to be
   gpg signed.  2) We have to check that byte-compiled function files are valid
@@ -65,44 +58,67 @@ Extra GNOME Functionality:
 Programming:
 ============
 * Revamp Druid.  On start, QA-Assistant will display a blank page.  If the
-  user selects New they will be taken into the Druid.  The Druid will only
-  follow the path for new Reviews.  Load functionality will just use the file
-  chooser.  Properties checking (for entry of required values) is done by the
-  Properties themselves.  Druid on new, PropDialog, and Review:Publish will
-  utilize these checks.  Load will not as Outputting the Review will take care
-  of this.
-* GenericQA needs to provide a menu item to toggle treetip display
+  user selects New they will be taken into the Druid.  If they select load
+  they will just get a file selection dialog.  The Druid will only deal with
+  new Reviews, which simplifies it a bit.
+
+  - Remove the load savefiles pathway out of the Druid.
+  - On startup, display a blank QA Assistant Main Window, not the Druid.
+  - When the druid is active, make it modal so the MainWindow is not focusable.
+  - Properties checking (for entry of required values) is done by the
+    Properties themselves.  Druid on new, PropDialog, and Review:Publish will
+    utilize these checks.  Load will not as Outputting the Review will take
+    care of this.
+    [Check how close to done this is.  Only part of it is in the Druid.]
+  - File chooser needs to use the directory we last used to save/load from.
+    [Check how close to done this is.  It is in the load a savefile section,
+    not in the Druid.]
+
 * Command line argument parsing
 
   - If a savefile is given, open that
   - Use optparse/optik
 
-* Enhance tracking entries into the editor.  We want
-  people to be able to shift text around from Needswork and Non-blocker, and
-  to add to them but we want to keep track of what entry is associated with
-  what entry id.
-* Automate some review tasks
+* Enhance tracking entries into the editor.  We want people to be able to
+  shift text around from Needswork and Non-blocker, and to add to them but we
+  want to keep track of what entry is associated with what entry id.
+* Automate some review tasks in fedoraus/fedoraextras checklist.
 
   - checkheader
   - checksig
   - verify source against spec file/canonical URL
   - look at the new fedora-startqa for more ideas.  Perhaps we can coordinate
     and use fedora-startqa in the backend.  (Look through their SRPM stuff --
-    it might be better code than I have... If we can put it into a SRPM class
-    like I have, then it could be callable from either my script or theirs.)
+    it might be better code than I have.  If it's in a SRPM class like I have,
+    then it could be callable from either my script or theirs.)
     
-* Update to the fedora QAFormat output style
+* Update to the fedora QAFormat output style (QAFormat is somewhat dead)
 * XML stuff to conform better with libxml2's guidelines document:
   file:///usr/share/doc/libxml2-devel-2.6.6/guidelines.html
   (Namespace, URL, Make sure I follow recommendations for element/attribute)
 * Create a common XML save format/checklist with Erik LaBianca for the
   checklist.  This will involve integrating XML with test infrastructure.
+  (This is stalled.  Erik La Bianca has moved on.  Aurelian Bompard is
+  maintaining fedora-startqa.  Need to look closely at that to figure out
+  what can be shared.)
+* Implement or document how to write a property that is set automatically by
+  a function but can be overridden by the user.  It is simply done by defining
+  a function that sets the value of a non-automatic property.  Whether the
+  user or the function has the initial say is decided by the function-writer.
+  It is the function's responsibility to check whether it is overriding a
+  user's entered information.
+* Functions may interact with the program in a few more ways:
+
+  - Set the application's title bar: app.set_title().  This can be used to
+    change how to identify the review (checklist name; srpm under review, etc.)
+  - Application's status bar: app.mainWinAppBar.push().  This is useful for
+    setting the number of pass/fail/needs-reviewing entries.  (This may fall
+    into the realm of the checklist proper rather than functions...)
 
 DTD
 ===
-* Define a new DTD location on berlios instead of sourceforge.
 * Write a proper check that we can use a file (os.access doesn't work for
-  this purpose.  [How does review.py work?])
+  this purpose.  [How does review.py do this?] [Why does os.access not work?])
   
   - For both review.py and savefile we could use try: except IOERROR: to trap
     failure to write the file.
@@ -154,12 +170,15 @@ Build:
   - Basically need a set of unittests for each object defined in the program.
     Don't yet know how to unittest the widgets.  The model objects and the
     program object should work much better, though.
+  - Look into coverage tools to tell how thoroughly the unittests cover the
+    code.
 
 QA Convert
 ==========
 
 * Add commandline parsing to override the checklist type we're to convert to.
-
+  this becomes more important when we go from 0.4 to 0.5 to 0.6 to 1.0 formats.
+  
 Documentation
 =============
 

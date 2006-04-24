@@ -12,7 +12,7 @@ Checklist Reviewer to Aid Quality Assurance
 
 .. contents::
 
-Version 0.4.90.4
+Version 0.4.90.5
 ================
 *This is a development release.*  It's like a snapshot but with a tad more
 care put in.  It is likely to have major bugs.  Things that you see here
@@ -30,7 +30,12 @@ making the checklists more extensible.
 
 * CheckList and SaveFile formats have been combined into the checklist 0.3 dtd.
 * Script qa-convert to convert savefiles to the new checklist format.
-* Preliminary support for automated tests embedded within the XML files.
+* Preliminary support for automated tests.  These are declared in the
+  checklist xml file but implemented in a supplemental python file included
+  with the checklist.  You should know where the checklists you use come from
+  as this is method runs arbitrary python code.  In the future, checklists will
+  be signed so you can at least assign blame if something executes malicious
+  code.
 * Made the checklist code more generic.  We are no longer tied to Quality
   Assurance of SRPM files.
 * Now able to set preferences in the program.
@@ -38,7 +43,7 @@ making the checklists more extensible.
 * A Druid to walk through starting a review.
 * CheckList Properties have been implemented and setting properties has been
   merged into the Druid and menu.
-* The Review widget is now better formatted.
+* The Review widget is somewhat better formatted.
 * CheckList is now a subclass of gtk.TreeStore.
 
 Version 0.4.1
