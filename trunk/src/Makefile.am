@@ -28,7 +28,6 @@ qa_assistant_PYTHON = \
 		propview.py \
 		qareviewer.py \
 		review.py \
-		srpmqa.py \
 		treetips.py \
 		ui.py
 

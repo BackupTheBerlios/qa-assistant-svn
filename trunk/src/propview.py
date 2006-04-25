@@ -16,17 +16,21 @@ class PropertiesView(gtk.HBox):
 
     PropertiesView displays and sets properties on the model.
     '''
-    ### FIXME: 
-    #  - Automatic properties must be notified when their dependents are
-    #    modified so they can auto update.
-    #
     def __init__(self, model=None):
         gtk.HBox.__init__(self)
         self.set_spacing(7)
 
+        self.propDisplays = {}
         self.model = model
+        if model:
+            model.connect('changed', self._update_layout)
         self.create_layout()
-            
+        
+    def _update_layout(self, model, prop):
+        '''
+        '''
+        self.propDisplays[prop].set_text(model[prop].value)
+
     def create_layout(self):
         '''
         '''
@@ -36,11 +40,8 @@ class PropertiesView(gtk.HBox):
             self.add(label)
             label.show()
             return
-        
-        self.labels = gtk.VBox()
-        self.entries = gtk.VBox()
-        self.add(self.labels)
-        self.add(self.entries)
+        self.labels = []
+        self.entries = []
         self.propDisplays = {}
 
         for propName in props.keys():
@@ -65,14 +66,19 @@ class PropertiesView(gtk.HBox):
                 label.set_markup(outPropName)
             else:
                 label.set_text(propName)
-            self.labels.add(label)
+            self.labels.append(label)
             label.show()
+            self.entries.append(self.propDisplays[propName])
             self.propDisplays[propName].show()
-            self.entries.add(self.propDisplays[propName])
 
-        self.labels.show()
-        self.entries.show()
-            
+        self.layout = gtk.Table(len(self.labels), 2, False)
+        self.layout.set_property('row-spacing', 5)
+        for row in range(0, len(self.labels)):
+            self.layout.attach(self.labels[row], 0, 1, row, row + 1)
+            self.layout.attach(self.entries[row], 1, 2, row, row + 1)
+        self.add(self.layout)
+        self.layout.show()
+
     def _change_property(self, entry, event, propName):
         '''Set the property in the model from the entry.
 
@@ -90,6 +96,7 @@ class PropertiesView(gtk.HBox):
 
         '''
         self.model = model
+        model.connect('changed', self._update_layout)
         self.foreach(self.remove)
         self.create_layout()
 

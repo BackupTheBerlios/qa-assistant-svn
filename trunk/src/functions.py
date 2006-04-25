@@ -48,18 +48,22 @@ class BaseQAFunctions(object):
 
     def __del__(self):
         '''Remove the temporary directory.'''
-        os.path.walk(self.tmpDir, self._recursive_rmdir, None)
+        print "In functions.__del__()"
+        self._recursive_rmdir(self.tmpDir)
        
     # Helper functions
-    def _recursive_rmdir(self, arg, dirname, files):
+    def _recursive_rmdir(self, directory):
         '''Remove a directory hierarchy.
-        Meant to be called from os.path.walk()
         '''
-        for name in files:
-            name = os.path.join(dirname, name)
-            if os.path.isfile(name) or os.path.islink(name):
-                os.unlink(name)
-        os.removedirs(dirname)
+        for currentDir, dirs, files in os.walk(directory, topdown=False):
+            for name in files:
+                os.unlink(os.path.join(currentDir, name))
+            for name in dirs:
+                if os.path.islink(name):
+                    os.unlink(os.path.join(currentDir, name))
+                else:
+                    os.rmdir(os.path.join(currentDir, name))
+        os.rmdir(directory)
         
     # Output functions
     def header(self):
@@ -130,6 +134,7 @@ class BaseQAFunctions(object):
                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         newItemDialog.set_default_response(gtk.RESPONSE_OK)
         table = gtk.Table(3, 2, False)
+        table.set_property('row-spacing', 5)
         table.attach(gtk.Label('Summary:'), 0, 1, 0, 1)
         table.attach(gtk.Label('Initial Resolution:'), 0, 1, 1, 2)
         table.attach(gtk.Label('Output:'), 0, 1, 2, 3)

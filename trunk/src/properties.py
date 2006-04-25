@@ -61,9 +61,8 @@ class Properties(gobject.GObject, UserDict.DictMixin):
     # Set Property values
     #
 
-    ### FIXME: two things are not yet implemented:
-    # 1) Functions are invoked somehow when entries are changed.
-    # 2) Have checks that verify that a given type is correct:
+    ### FIXME: Not yet implemented:
+    # 1) Have checks that verify that a given type is correct:
     #    (int, URL, etc)
 
     def __setitem__(self, key, value):

@@ -41,7 +41,7 @@ class Bzip2File(file):
         self.fileobj = fileobj
         self.decompressor = bz2.BZ2Decompressor()
         self.buffer = None
-        
+
     def read(self, bufsize=None):
         if self.buffer == -1:
             return ''
@@ -96,14 +96,14 @@ class QAFunctions(BaseQAFunctions):
         '''
         # Extract the resolution from the checklist
         if self.checklist.resolution == 'Pass':
-            buf = 'PUBLISH +1\n\n'
+            buf = 'APPROVED\n\n'
         elif self.checklist.resolution == 'Fail':
             buf = 'NEEDSWORK\n\n'
         else:
             buf = self.checklist.resolution + '\n\n'
             
         buf += 'MD5Sums:\n'
-        #buf += self.checklist.properties['SRPMMD5sum'].value
+        buf += self.checklist.properties['SRPMMD5sum'].value
         #for hashSum in self.checklist.properties['fileMD5s'].value:
         #    buf += hashSum
         return buf
@@ -150,10 +150,16 @@ class QAFunctions(BaseQAFunctions):
     def srpm_from_ticket(self):
         '''Retrieve the latest srpmURL from the buzilla URL.
         '''
-        bugzillaURL = self.checklist.properties['ticketURL'].value
+        try:
+            bugzillaURL = self.checklist.properties['ticketURL'].value
+        except KeyError:
+            # No ticket URL was given, set nothing
+            return
+
         if not bugzillaURL:
             # No ticket URL was given, set nothing
             return
+
         data = urlgrabber.urlread(bugzillaURL)
         srpmList = re.compile('"((ht|f)tp(s)?://.*?\.src\.rpm)"', re.IGNORECASE).findall(data)
         if srpmList == []:
@@ -184,7 +190,7 @@ class QAFunctions(BaseQAFunctions):
                 self.checklist.properties['SRPMMD5sum'].value = None
                 return
             del hasher
-            self.checklist.properties['SRPMMD5sum'].value = (
+            self.checklist.properties['SRPMMD5sum'] = (
                     fileHash.keys()[0] + ' ' + fileHash.values()[0])
 
     def srpm_internal_md5s(self):
@@ -193,19 +199,26 @@ class QAFunctions(BaseQAFunctions):
         if self.checklist.properties.has_key('fileMD5s'):
             try:
                 srpmDir = self._expand_srpm()
-            except:
+            except FileError:
                 # We were unable to expand the srpm, blank the MD5s and return
-                self.checklist.properties['fileMD5s'].value = ''
+                self.checklist.properties['fileMD5s'] = ''
                 return
             hasher = md5.new()
             fileHashes = self._hash_directory(srpmDir, hasher)
             del hasher
-            self._remove_directory(srpmDir)
 
             output = []
             for files in fileHashes.keys():
                 output.append(files + ' ' + fileHashes[files])
-            self.checklist.properties['fileMD5s'].value = "\n".join(output)
+            self.checklist.properties['fileMD5s'] = "\n".join(output)
+
+    ### FIXME: Unimplemented tests:
+    # check_signatures(): checks that the signatures on an rpm are valid.
+    # Needs to check against several keyrings: main rpm db, private fedora db,
+    # gpg keyring.
+    # check_hashes(): Check the hashes within the rpm against the actual
+    # hashes of the files.  A discrepency means someone's been monkeying
+    # around with the hashes inside the rpm.
 
     #
     # Properties helpers
@@ -214,12 +227,12 @@ class QAFunctions(BaseQAFunctions):
     def _expand_srpm(self):
         # Remove prior expanded SRPMS
         if self.srpmDir:
-            os.path.walk(self.srpmDir, self._recursive_rmdir, None)
+            self._recursive_rmdir(self.srpmDir)
         # Check that the srpm exists
         if not self.checklist.properties.has_key('SRPMfile'):
             raise FileError('No SRPM file listed')
         
-        srpmFile = self.checklist.properties['SRPMfile']
+        srpmFile = self.checklist.properties['SRPMfile'].value
         if not os.access(srpmFile, os.F_OK | os.R_OK):
             raise FileError('Unable to read the SRPM file %s' % (srpmFile,))
 
@@ -228,8 +241,7 @@ class QAFunctions(BaseQAFunctions):
 
         # Read the header from the rpm
         transSet = rpm.TransactionSet()
-        transSet.setVSFlags(~(rpm._RPMVSF_NOSIGNATURES |
-            rpm._RPMVSF_NODIGESTS | rpm.RPMVSF_NOHDRCHK))
+        transSet.setVSFlags(rpm._RPMVSF_NOSIGNATURES | rpm.RPMVSF_NOHDRCHK)
         try:
             srpmHandle = file(srpmFile, 'rb')
         except IOError:
@@ -279,7 +291,7 @@ class QAFunctions(BaseQAFunctions):
                 directories.append(filename)
                 break
             myHasher = hasher.copy()
-            fileHashes.update(self.__hash_file(srcFile, myHasher))
+            fileHashes.update(self._hash_file(srcFile, myHasher))
             del myHasher
 
         if len(directories) > 0:

@@ -32,15 +32,16 @@
      needed and if so, when.
 
      :onload: We need to load this property at the start of the Review.
-              Use this for items that cause the Review to not make sense
-              without.  This type must be entered by the user.
+              Use this for items that are necessary for other tests to be
+	      performed.
+              This type must be entered by the user.
      :onpublish: The property needs to be defined before we can publish a
                  review.  This type may be entered by the user or by the
                  system over the course of the review.
      :automatic: This property is loaded through an automated test.  This
                  type cannot be entered by the user.  It is optional.
-                 It will be loaded when
-                 the cust loads the properties that it depends on.
+                 It will be loaded when the user loads the properties that it
+		 depends on.
      :optional: The property does not need to be entered.
   -->
 <!ENTITY % RequireType
