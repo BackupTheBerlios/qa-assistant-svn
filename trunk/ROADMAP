@@ -8,27 +8,36 @@ QA Assistant Preliminary Roadmap
 :Revision: $Rev$
 
 .. contents::
-Beyond 1.0
-==========
-* GUI method of defining a new checklist (Perhaps a checklist templater?)
-* Support for user defined checklists.
-* Other wishlist items.
 
-Version 1.0.x
-=============
-* Stable release.
+Version 0.4 [Done]
+==================
+* Working prototype
+* Able to do useful work running quality assurance on Fedora.us packages.
 
-Version 0.10.x
-=============
-* Last minute regression tests.
-* Last minute bug fixes.
-* Translations.
+Version 0.5 [Done]
+================
+* Conversion script from 0.4 save format.
+* Properties and Functions support extensible via checklist.
+* Publish function works via functions infrastructure.
+* Preferences support.
 
-Version 0.10
-==============
-* Finish documentation (English language string freeze)
-* Translations.
-* Non-stock icons finished.
+Version 0.6
+===========
+* Running an uninstalled version works as well as an installed version.
+* i18n program and build infrastructure.
+
+Version 0.7
+===========
+* Rewrite Druid to only operate on New.
+* Rewrite treeview to use gtk.ComboRenderer instead of my optionrenderer.
+* Checklist defined automated tests.
+* Start documentation.
+
+Version 0.8
+===========
+* Handle property types
+  - Validation
+  - Allow selection entries that make sense (file browser for file type)
 
 Version 0.9
 ===========
@@ -38,32 +47,24 @@ Version 0.9
 * In-program (not documentation) string freeze.
 * More documentation.
 
-Version 0.8
-===========
-* Rewrite Druid to only operate on New.
-* Rewrite treeview to use gtk.ComboRenderer instead of my optionrenderer.
-* Checklist defined automated tests.
-* Start documentation.
+Version 0.10
+==============
+* Finish documentation (English language string freeze)
+* Translations.
+* Non-stock icons finished.
 
-Version 0.7
-===========
-* Handle property types
-  - Validation
-  - Allow selection entries that make sense (file browser for file type)
+Version 0.10.x
+=============
+* Last minute regression tests.
+* Last minute bug fixes.
+* Translations.
 
-Version 0.6
-===========
-* Running an uninstalled version works as well as an installed version.
-* i18n program and build infrastructure.
+Version 1.0.x
+=============
+* Stable release followed by any bugfix releases.
 
-Version 0.5 [Done]
-================
-* Conversion script from 0.4 save format.
-* Properties and Functions support extensible via checklist.
-* Publish function works via functions infrastructure.
-* Preferences support.
-
-Version 0.4 [Done]
-==================
-* Working prototype
-* Able to do useful work running quality assurance on Fedora.us packages.
+Beyond 1.0
+==========
+* GUI method of defining a new checklist (Perhaps a checklist templater?)
+* Support for user defined checklists.
+* Other wishlist items.

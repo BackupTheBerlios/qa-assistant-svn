@@ -15,13 +15,6 @@ Please report new bugs into the bug tracker at berlios.
 
 Packaging Errors
 ----------------
-* Before release we need to check that our files match with what's in
-  Makefile.am.  We've changed savefile.py to qa-convert.pyin.  Created new
-  files error.py and checkview.py.  Removed files SRPM.py, genericqa.py,
-  srpmqa.py, and properties.py.  Need to make sure these are all taken care of
-  as well as other problems that may not show up until later.  Easy method to
-  do this is to do a make distcheck.  Then compare the packages in the tarball
-  against our working copy.
 * Need to clear my gconf cache of any keys created during testing that aren't
   going to be distributed to guard against error.
 * configure.ac should be modified to check for pygtk, gnome-python, etc as

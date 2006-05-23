@@ -209,6 +209,8 @@ class Review(gtk.VBox):
                     # Success!
                     break
 
+        ### FIXME: Handle the case where passphrase is None (ie: we canceled
+        # the signing process)
         # Output review
         outfile = file(filename, 'w')
         outfile.writelines(outBuf)

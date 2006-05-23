@@ -80,7 +80,7 @@ class QAReviewer(gnomeglade.GnomeApp):
         self.reviewPane.add(self.reviewView)
 
         self.grabArrow = gtk.Arrow(gtk.ARROW_LEFT, gtk.SHADOW_NONE)
-        self.grabArrow.set_size_request(4,4)
+        self.grabArrow.set_size_request(8,8)
         label = self.grabBar.get_child()
         self.grabBar.remove(label)
         self.grabBar.add(self.grabArrow)
@@ -308,7 +308,7 @@ Relative Priority: Low.  The program is currently changing too fast to document 
 
         propDialog.show()
 
-    def toggle_preview_cb(self, action, extra):
+    def toggle_preview_cb(self, action, *extra):
         '''Toggles between checklist view and output view.
 
         Keyword -- arguments:

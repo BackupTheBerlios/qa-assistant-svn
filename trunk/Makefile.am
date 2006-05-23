@@ -52,9 +52,8 @@ $(Desktop_DATA): $(Desktop_in_files)
 	cp $< $@
 
 EXTRA_DIST = \
-	PREFERENCES \
-	TODO \
 	BUGS \
+	TODO \
 	autogen.sh \
 	gen-hash.py \
 	qa-assistant.spec \

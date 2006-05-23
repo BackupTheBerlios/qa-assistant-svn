@@ -14,7 +14,6 @@ qa-assistant: paths.py \
 qa_assistantdir = $(datadir)/qa-assistant
 
 qa_assistant_PYTHON = \
-		SRPM.py \
 		checklist.py \
 		checkload.py \
 		checkview.py \
