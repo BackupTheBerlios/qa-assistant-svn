@@ -1,3 +1,109 @@
+2006-05-23 Toshio Kuratomi <toshio@tiki-lounge.com> - r216    
+    * ROADMAP: Reorganize in ascending instead of descending order.
+    * AUTHORS: Change to UTF8.
+    * src/review.py: Note that passphrase could be returned empty to indicate
+      the user canceled the passphrase box.
+    * src/qareviewer.py:
+      - Make the arrow on the grab bar larger.  Otherwise it just looks like
+        a dot.
+      - Fix toggle_preview_cb() so invoking it works.
+    * src/Makefile.am: Remove SRPM.py as we're not using it anymore.
+    * BUGS: Checked that we're listing all the new fles in Makefile.am
+    * Makefile.am: Remove PREFERENCES as the rewrite is complete.
+    
+2006-04-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r215    
+    * src/properties.py: Change coment to reflect that functions setting
+      properties has been implemented.
+    * src/srpmqa.py: Delete this file.  The functionality it provided is now
+      provided by the functions and properties infrastructure and the
+      fedoraus.py script.
+    * src/functions.py:
+      - Attempt to create a __del__ method to remove the temporary directory.
+        This has issues as the __del__ is not called if the program ends before
+        the referencecount goes to zero.
+      - _recursive_rmdir(): change this to use os.walk internally.  This is
+        better and cleans up a potentially nasty bug where we were attempting
+        to rmdir the parent directory.  Luckily, the parent directory is not
+        empty so the rmdir failed.
+      - Set the row-spacing in the new checklist item dialog to five so things
+        are not so squeezed.
+    * src/propview.py:
+      - __init__(): Connect to the model's connect signal so we know when a
+        property changes.
+      - _update_layout(): New method that is invoked when the model changes.
+        It sets the text for the changed property to reflect the new value
+        in the model.
+      - _create_layout(): Change from two VBox's to a gtk.Table.  This makes
+        the names of properties line up with their values when the widgets
+        are not the same size (for instance, a multiline label as the value.)
+      - set_model(): Connect to the new model's changed signal.
+    * src/SRPM.py: Remove all but __calc_hashes() and __check_hashes().
+      Everything else has been moved into fedoraus.py.
+    * src/Makefile.am: Remove srpmqa.py from the distributed files.
+    * data: Ignore .pyc files.
+    * data/fedoraus.py:
+      - header():
+        + Change PUBLISH +1 to APPROVED.
+        + Print the SRPMMD5sum's as they're now being generated.
+      - srpm_from_ticket(): Catch the case where the ticket URL is not set.
+      - srpm_md5(), srpm_internal_md5s(): Set properties['SRPMfile'] directly
+        so the custom __setitem__ method processes it.
+      - Add a comment about some tests performed in the old srpm.py file that
+        are not implemented here.
+      - _expand_srpm():
+        + Use the new version of _recursive_rmdir()
+        + Remember to use .value when extracting data from a property.
+        + Fix the rpm transaction flags to ignore signatures and the header for
+          now.
+      - _hash_directory(): Fix typo of _hash_file().
+    * data/checklist.dtd: Make documentation of onload and automatic property
+      types clearer.
+    
+2006-04-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r214    
+    * ROADMAP: Add a post-1.0 section.  Add a version for Handling property
+      types.
+    * BUGS: Test some of the fixes and remove.  Add gconf schema and
+      redirecting output from gpg.
+    * TODO: General cleanup.  Removed a few things that have been done.  Added
+      a better druid section and what's left todo in properties.
+    * NEWS: Update to version 0.4.90.5.
+    * PREFERENCES: Removed.  Most of this is done.  The two things that were
+      left (further enhancement to the Druid and properties typing) were added
+      to the TODO.
+    
+2006-04-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r213    
+    * src/properties.py: __setitem__(): Clarify hte docstring.
+    * src/review.py:
+      - Attempt to import textwrap from optparse before optik.
+      - No longer save responses from the errorDialogs as we don't use them.
+    * src/functions.py:
+      - QAError exception for any exception arising from the QAFunctions.
+      - __init__(): Get the statedir from gconf and use it to make a temporary
+        directory to save function temporary files.
+      - __del__(): Destructor that removes the temporary directory.
+      - _recursive_rmdir(): Removes all files and directories in a hierarchy.
+    * src/checklist.py: Split long lines to make pylint happy.
+    * ChangeLog: Update to r212.
+    * data/fedoraus.py:
+      - FileError exception: when a problem occurs accessing the filesystem.
+      - Bzip2File class: This is a minimal subset of the file object that
+        can substitute for a GZipFile to decode an rpm payload.
+      - __BLOCKSIZE: Constant for how much to read at a time.
+      - __init__(): Constructor to set the temporary srpmDir on creation.
+      - from_srpm_cb(): Hav it call srpm_md5() and srpm_internal_md5().  This
+        may go away in the future as it is redundant.
+      - srpm_from_ticket():
+        + Check that a bugzilla URL was given before running.
+        + Attempt to pull an srpm from the page.
+      - srpm_md5(): Implement this (from SRPM.py).
+      - srpm_internal_md5s(): First cut at an implementation (from SRPM.py).
+      - _expand_srpm(): Function to extract the files from the srpm into a
+        temporary directory.
+      - _hash_directory(): Get the cryptographic hashes of all files in a
+        directory (from SRPM.py).
+      - _hash_file(): Get the cryptographic hash of a file (from SRPM.py).
+      - Expand Id and Rev keywords.
+    
 2005-11-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r212    
     * ROADMAP: Tentative roadmap to 1.0.  Does not mention dates, just what
       features will go into certain releases.
