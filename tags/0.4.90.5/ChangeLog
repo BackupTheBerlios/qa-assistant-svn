@@ -1,0 +1,2634 @@
+2006-05-23 Toshio Kuratomi <toshio@tiki-lounge.com> - r216    
+    * ROADMAP: Reorganize in ascending instead of descending order.
+    * AUTHORS: Change to UTF8.
+    * src/review.py: Note that passphrase could be returned empty to indicate
+      the user canceled the passphrase box.
+    * src/qareviewer.py:
+      - Make the arrow on the grab bar larger.  Otherwise it just looks like
+        a dot.
+      - Fix toggle_preview_cb() so invoking it works.
+    * src/Makefile.am: Remove SRPM.py as we're not using it anymore.
+    * BUGS: Checked that we're listing all the new fles in Makefile.am
+    * Makefile.am: Remove PREFERENCES as the rewrite is complete.
+    
+2006-04-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r215    
+    * src/properties.py: Change coment to reflect that functions setting
+      properties has been implemented.
+    * src/srpmqa.py: Delete this file.  The functionality it provided is now
+      provided by the functions and properties infrastructure and the
+      fedoraus.py script.
+    * src/functions.py:
+      - Attempt to create a __del__ method to remove the temporary directory.
+        This has issues as the __del__ is not called if the program ends before
+        the referencecount goes to zero.
+      - _recursive_rmdir(): change this to use os.walk internally.  This is
+        better and cleans up a potentially nasty bug where we were attempting
+        to rmdir the parent directory.  Luckily, the parent directory is not
+        empty so the rmdir failed.
+      - Set the row-spacing in the new checklist item dialog to five so things
+        are not so squeezed.
+    * src/propview.py:
+      - __init__(): Connect to the model's connect signal so we know when a
+        property changes.
+      - _update_layout(): New method that is invoked when the model changes.
+        It sets the text for the changed property to reflect the new value
+        in the model.
+      - _create_layout(): Change from two VBox's to a gtk.Table.  This makes
+        the names of properties line up with their values when the widgets
+        are not the same size (for instance, a multiline label as the value.)
+      - set_model(): Connect to the new model's changed signal.
+    * src/SRPM.py: Remove all but __calc_hashes() and __check_hashes().
+      Everything else has been moved into fedoraus.py.
+    * src/Makefile.am: Remove srpmqa.py from the distributed files.
+    * data: Ignore .pyc files.
+    * data/fedoraus.py:
+      - header():
+        + Change PUBLISH +1 to APPROVED.
+        + Print the SRPMMD5sum's as they're now being generated.
+      - srpm_from_ticket(): Catch the case where the ticket URL is not set.
+      - srpm_md5(), srpm_internal_md5s(): Set properties['SRPMfile'] directly
+        so the custom __setitem__ method processes it.
+      - Add a comment about some tests performed in the old srpm.py file that
+        are not implemented here.
+      - _expand_srpm():
+        + Use the new version of _recursive_rmdir()
+        + Remember to use .value when extracting data from a property.
+        + Fix the rpm transaction flags to ignore signatures and the header for
+          now.
+      - _hash_directory(): Fix typo of _hash_file().
+    * data/checklist.dtd: Make documentation of onload and automatic property
+      types clearer.
+    
+2006-04-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r214    
+    * ROADMAP: Add a post-1.0 section.  Add a version for Handling property
+      types.
+    * BUGS: Test some of the fixes and remove.  Add gconf schema and
+      redirecting output from gpg.
+    * TODO: General cleanup.  Removed a few things that have been done.  Added
+      a better druid section and what's left todo in properties.
+    * NEWS: Update to version 0.4.90.5.
+    * PREFERENCES: Removed.  Most of this is done.  The two things that were
+      left (further enhancement to the Druid and properties typing) were added
+      to the TODO.
+    
+2006-04-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r213    
+    * src/properties.py: __setitem__(): Clarify hte docstring.
+    * src/review.py:
+      - Attempt to import textwrap from optparse before optik.
+      - No longer save responses from the errorDialogs as we don't use them.
+    * src/functions.py:
+      - QAError exception for any exception arising from the QAFunctions.
+      - __init__(): Get the statedir from gconf and use it to make a temporary
+        directory to save function temporary files.
+      - __del__(): Destructor that removes the temporary directory.
+      - _recursive_rmdir(): Removes all files and directories in a hierarchy.
+    * src/checklist.py: Split long lines to make pylint happy.
+    * ChangeLog: Update to r212.
+    * data/fedoraus.py:
+      - FileError exception: when a problem occurs accessing the filesystem.
+      - Bzip2File class: This is a minimal subset of the file object that
+        can substitute for a GZipFile to decode an rpm payload.
+      - __BLOCKSIZE: Constant for how much to read at a time.
+      - __init__(): Constructor to set the temporary srpmDir on creation.
+      - from_srpm_cb(): Hav it call srpm_md5() and srpm_internal_md5().  This
+        may go away in the future as it is redundant.
+      - srpm_from_ticket():
+        + Check that a bugzilla URL was given before running.
+        + Attempt to pull an srpm from the page.
+      - srpm_md5(): Implement this (from SRPM.py).
+      - srpm_internal_md5s(): First cut at an implementation (from SRPM.py).
+      - _expand_srpm(): Function to extract the files from the srpm into a
+        temporary directory.
+      - _hash_directory(): Get the cryptographic hashes of all files in a
+        directory (from SRPM.py).
+      - _hash_file(): Get the cryptographic hash of a file (from SRPM.py).
+      - Expand Id and Rev keywords.
+    
+2005-11-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r212    
+    * ROADMAP: Tentative roadmap to 1.0.  Does not mention dates, just what
+      features will go into certain releases.
+    * src/properties.py:
+      - Rename the function attribute of a PropEntry to functions.  Make this
+        into a list of functions to invoke when the property is changed instead
+        of just a single one.
+      - Remove the args attribute from PropEntry.  Functions have access to
+        all properties so there is no need to specify arguments.
+      - __init__(): Properties now takes a Function object as an argument when
+        initializing.  This should be BaseQAFunctions or a subclass.
+      - __setitem__(): When a property is changed, see if a function is listed
+        to be called.  If so call a method of the functions object passed into
+        the constructor.
+    * src/optionrenderer.py: Pylint cleanups:
+      - Split lines that were over 80 characters.
+      - Add spaces between operators and operands.
+      - Rename id to prop in functions.  ID is a keyword as well.
+    * src/preferences.py: Pylint cleanups:
+      - Split lines that were over 80 characters.
+    * src/review.py: Pylint cleanups:
+      - Split lines that were over 80 characters/
+    * src/functions.py: Pylint cleanups:
+      - footer(): Add a docstring.
+      - Add spaces between commas.
+    * src/checklist.py:
+      - Remove the __Test class.  The usage of checklist defined tests has
+        changed sufficiently that it doesn't make sense anymore.
+      - __init__(), publish():
+        + The functions file definition comes before the properties in the XML
+          file now.  This is due to the new Properties system which needs a
+          functions object in order to work.
+        + function is now a direct subnode of property so use it there, not
+          from the requires node.
+      - __xml_to_entry(), __create_entry(): Reduce test information to one
+        string that defines the test function's name.
+    * ChangeLog: Update to r211.
+    * PREFERENCES: Thoughts on properties interdependencies.
+    * tests/propertiestest.py: Updates to deal with the new expected behaviour
+      of properties with functions.
+    * tests/test.py: Add the 'data' directory as a source of python files as
+      the checklist files will come from there.
+    * tests/qaconverttest.py: Fix typos in comments.
+    * configure.ac: Bump release to 0.4.90.5.
+    * data/fedoraus.py: Add the definition of several functions declared in
+      fedoraus.xml.  These should be filled in before qa-assistant-0.5.
+    * data/checklist.dtd: Simplifications.
+      - functions is now defined to come before properties.
+      - function is now a member of property instead of require.
+      - No more arg element.  Checklist defined functions have access to all
+        properties.
+      - test is reduced to a string which is the name of a function to call.
+    * data/fedoraus.xml: Changes to conform to the new DTD.
+    
+2005-09-15 Toshio Kuratomi <toshio@tiki-lounge.com> - r211    
+    * tests/test.py: Add the regression tests for qa-convert.
+    * tests/Makefile.am:
+      - Add qaconverttest.py to test the qa-convert script.
+      - Add qasave-0.1 directory with old qasave-0.1 files to test qa-convert.
+    * tests/qaconverttest.py: New tests for the qa-convert script.
+    * tests/qasave-0.1, tests/qasave-0.1/python-docutils.save,
+      tests/qasave-0.1/ddclient.save, tests/qasave-0.1/pyrex.save,
+      tests/qasave-0.1/customitems.save: Old qasave-0.1 save files to test the
+      qa-convert conversion script with.
+    
+2005-09-14 Toshio Kuratomi <toshio@tiki-lounge.com> - r210    
+    * src/qa-convert.pyin.in:
+      - Add the checklist data directory to sys.path so we can load the
+        CheckList function files.
+      - RENAMES dict that holds renames of checklists between 0.4 and 0.5.
+      - Remove the DTD publicID and canonicalURL.  These were overriding the
+        variables provided by the checklist class.  They're only used for
+        writing the file so we need to use the CheckList class definition,
+        not the older qasave definition.
+      - When we check if the entry is already defined, make sure we check
+        on lowercased name, otherwise we throw some false positives.
+      - Fix a typo: newItem => newEntry.
+      - Do not pangoize our entries.  The new checklist format will pangoize
+        when it displays, not when it loads it into the buffer.
+    * Makefile.am: one make clean, remove the *.py[co]s in the data/ subdir.
+    * TODO: Notes to define a DTD relative to berlios instead of sourceforge
+      for the 0.5 release and add commandline parsing to the qa-convert script.
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r207    
+    * ChangeLog: Update to (r206).
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r206    
+    * ChangeLog: Update to (r204).
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r205    
+    * BUGS: Note to change configure.ac to detect pygtk as a python module
+      rather than the C headers for compiling an extension to pygtk.
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r204    
+    * qa-assistant.spec.in: Run the regression tests from a %check section.
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r203    
+    * qa-assistant.spec.in: Update requirements on pygtk to 2.4.0 and
+      gnome-python to 2.10.0.  Update changelog to 0.4.90.4.
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r202    
+    * TODO: Remove modified actiongroup entry.  It's done.
+    * Makefile.am: Reverse the tests and src directories so src is compiled
+      before the tests are run.
+    
+2005-09-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r201    
+    * src/properties.py:
+      - class Properties(): Convert the base class from dict to gobject with
+        a UserDict mixin.  We needed to make this a gobject so we can inform
+        the CheckList when the properties change.  Unfortunately
+        gobject.GObject and dict conflict when trying to multiply inherit.
+        gobject.GObject and UserDict.DictMixin work okay, though.
+      - Define __gsignals__ with one signal, 'changed' which informs other
+        objects when the properties are updated.
+      - __init__(): define self.storage as a dict which holds the classes data.
+      - Change references to the dict superclass to self.storage.
+      - __setitem__(): emit the changed signal when the properties are changed.
+      - __delitem__(): New function that takes care of deleting a key from the
+        _sortedKeys array and self.storage's dict.
+      - getitem(), __contains__(), __iter__(), iteritems(), has_key(): map onto
+        self.storage's functions.
+      - __repr__(): Map onto self.storage's __repr__() instead of gobject's
+        __repr__ as it's more informative.
+      - Register the Properties class as a gobject.
+    * src/checklist.py: emit our changed signal when we receive the Properties
+      changed signal.
+    * src/checkload.py: Fix the error dialogs to use the druid as their parent
+      rather than the QAReviewer window.  Otherwise the druid window would
+      sometimes be below the main window after an error dialog was displayed.
+    * ChangeLog: Update to (r200).
+    
+2005-09-12 Toshio Kuratomi <toshio@tiki-lounge.com> - r200    
+    * src/checklist.py:
+      - Create a __gsignal__ dict in CheckList to handle gobject signals.  This
+        change was waiting on pygtk-2.4.  Can now also convert to using
+        __gproperty__ for attributes that make more sense as a gobject
+        property.
+      - Add a changed signal.  This is emitted whenever the checklist is
+        changed.  Still need to hook up a changed signal to properties and
+        catch it here for reemission.
+      - Note that the colorization functions really belong in the checkview,
+        not here.
+    * src/qareviewer.py: Enable the modified menus (Just save for now) when the
+      checklist hasa been modified.
+    * src/checkload.py: Enable the modified menus when the checklist has been
+      modified.  Now that we can use __gproperties__ without worries, we need
+      to move this block of functionality from checkload.finish() into
+      QAReviewer.
+    * src/ui.py: Move the Save As action from the modified group into the
+      checklist group as it can make sense to save a new copy of a checklist
+      even if it hasn't changed.
+    * TODO: Note to convert from __gobject_init__() to gtk.CLASS.__init__(self)
+      as this is working in pygtk-2.4.
+    
+2005-08-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r199    
+    * src/qareviewer.py: save_cb(), save_as_cb(): Set the 'modified'
+      actiongroup to insensitive whenever we successfully save a file.
+    * ChangeLog: Update to (r198).
+    
+2005-08-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r198    
+    * src/qaapp.py: Remove this file.
+    * src/qa-assistant.pyin.in: Create a QAReviewer instance directly instead
+      of going through qaapp.
+    * src/Makefile.am: No longer provide qaapp.py.
+    
+2005-08-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r197    
+    * src/review.py: publish(): Utilize the checklist functions footer()
+      function.
+    * src/functions.py:
+      - get_ui():
+        + Pass the QAReviewer instance into this function so it can be
+          used as extra data for every callback.
+        + Create the gtk.ActionGroup here instead of returning the tuple for
+          the calling function to create.
+      - publish_cb(): Utilize the QAReviewer instance passed via the action's
+        parameters instead of getting it from qaapp.
+    * src/qareviewer.py:
+      - __init__(): Change mergedMenus into a dictionary.  We can hold both the
+       mergeId of the ui manager def and the actionGroup in this.
+      - __load_checklist(): Remove the old menu definitions before adding the
+       new one.
+    * src/checkload.py: Remove the old menu definition before adding the new
+      one.
+    * BUGS: Note that checkload.py has some code duplication with
+      qareviewer.py that needs to be fixed.  Remove Druid on New as that's
+      completed.
+    * TODO: Remve uimanager entry and automatic hashing of data files as those
+      are done.  Add a note to separate error dialogs from widgets and enable
+      the 'modified' actiongroup via change signal notification.
+    * data/fedoraus.py: Modify get_ui() to reflect the functions.get_ui()
+      usage.
+    * data/fedoraus.xml: Make hash="@@hash@@" again.  That way nullhash
+      works on he in progress copy.
+    
+2005-08-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r196    
+    * gen-hash.py: New script to generate hashes of the checklist function
+      files when creating the distribution tarball.
+    * src/preferences.py: Fix a typo.
+    * src/functions.py:
+      - Remove most references to qaapp.  This allows the unittests to run to
+        completion.  Unfortunately there is still a problem with publishing
+        the review.  This is broken in this revision.
+      - Add a toolbar item for Publishing the Review to a file.
+    * src/checklist.py: Check for a function file in the same directory as the
+      checklist if it is not found via gnome.program.locate_file().
+    * src/qaglobals.py.in: Add lastReviewDir() as a global variable.
+    * src/qareviewer.py: Rename callbacks from on_menu*activation to *_cb form
+      when invoking them from other callbacks.
+    * src/ui.py: Add keyword expansion.
+    * src/Makefile.am: Remove the install-data-hook that recompiles the python
+      files.  I've switched to an automake version that's been fixed.
+    * tests/checklisttest.py: Separate tests using minimal-valid.xml and
+      fedoraus.xml.  This allows us to test a minimal checklist as well as an
+      all bells and whistles one.
+    * tests/creationtest.py: Use softwarerelease.xml in this set of tests as
+      we test the checklist in checklisttest.py.  This one is just to test
+      the functioning of checkview.
+    * TODO: Note a whole slew of finished things.
+    * Makefile.am: Add gen-hash.py.  Use it in a dist hook so the distributed
+      function files get hashed.
+    * NEWS: Add qa-convert announcement to the list of 0.5 changes.
+    
+2005-08-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r195    
+    * Housecleaning: Move the qa-assistant/trunk directory to the toplevel.
+      Now have to svn switch my working copy to the new URL.  If all goes
+      as planned this should just be::
+      svn switch svn+ssh://svn.berlios.de/svnroot/repos/qa-assistant/trunk
+    
+2005-08-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r193    
+    * ChangeLog: Update ChangeLog to r192.
+    
+2005-08-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r192    
+    * src/review.py: Add a newline to the end of the header.
+    * src/functions.py:
+      - Import global variables from qaglobals again.  This is a phase out of
+        the ill-conceived qaapp concept.  qaap is problematic because it
+        pushes gnome knowledge all around the source-code where it's otherwise
+        not needed.  It also leads to some interesting circuar dependencies.
+        + Remove references to qaapp.app.ReviewerWindow and make them None
+          when creating new dialogs.  Not sure if this is best or if we'll need
+          to get a reference to the ReviewerWindow by passing it in.
+      - BaseQAFunctions::footer(): Use qaglobals values instead of getting them
+        from qaapp.
+      - BaseQAFunctions::get_menu(): renamed to get_ui().  Returns a list of
+        tuples of ui manager definition strings and lists for generating
+        gtk.ActionGroups.  Depending on how this works out in qareviewer.py,
+        generation of ActionGroups may take place here instead.
+      - BaseQAFunctionsMenu: Removed this class.  We're now using get_ui() to
+        return the ui string and ActionGroups instead.
+    * src/qareviewer.py:
+      - Now utilizing the new ui.UI class to load the uimanager.  Move the ui
+        definition to ui.py.
+      - Load the menu and toolbar from a uimanager subclass (ui.UI).  This
+        frees us from having to keep a qamenu for the functions as well.
+        Instead we merge and unmerge the menu from the uimanager.  Still need
+        to unmerge the actionGroups.
+      - Mass renaming of callbacks from the on_menu_new_activate() form seen
+        in glade to the simpler new_cb() form.  Also changed the parameters
+        as they're now called through the gtk.Action interface.
+      - Changed the order of callbacks to reflect the organization within
+        ActionGroups in ui.UI.
+    * src/checkload.py:
+      - __init__(): Set up so properties must be filled in when starting a
+        new review from within the program as well as on startup.
+      - finish():
+        + Set the checklist ActionGroup active when we load a checklist.
+        + Load the QA Menu into the uimanager.
+    * src/ui.py: New file that sets up the uimanager instance for the program.
+      class UI subclasses uimanager and provides a specific instance tailored
+      to our program's menus and toolbars.
+    * src/Makefile.am: Add ui.py.
+    * TODO: Notes to add i18n, unmerge actiongroups from uimanager, fill the
+      checklists with the relevant hashs for their function files, and document
+      qa-assistant.  Remove nullhash note as that's been added.
+    * data/fedoraus.py:
+      - Remove comments copied from the old fedoraus.xml checklist.
+      - Create a get_ui() function that gets the uimanager information from
+        the BaseQAFunctions and adds the SRPM specific functions to it.
+      - Placeholder for an SRPM callback.
+    * data/checklist.dtd: Add nullhash to the acceptable hashtypes.
+    * data/fedoraus.xml: Change single quotes to double quotes.  This is
+      an artifact of writing an automated tool to generate the hash/hashtype
+      for the functions item.
+    * Makefile.am:  Add a gen-hash.py helper script into the dist-hook.  This
+      is run during make dist to hash the values in the functions files and
+      enter them into the checklist.
+    * glade/qa-assistant.strings: Updated with the new glade file.
+    * glade/qa-assistant.glade: Updated to remove the menubar and toolbar.
+      uimanager now takes care of this instead of glade.
+    
+2005-06-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r191    
+    * src/checklist.py:
+      - Implement a NullHash class that returns a value that will match @@hash@@
+        in the xml file.  We can use this to create and test function files
+        and then replace it with real hash values before release.
+    * data/checklist.dtd: Add nullhash to the list of available types.
+    * data/fedoraus.xml: Change the hash type to nullhash and the value to
+      @@hash@@.
+    
+2005-06-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r190    
+    * src/checklist.py: Revert locate_file() fix in this file as it was
+      correct before.
+    
+2005-06-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r189    
+    * ChangeLog: Update to r1888.
+    * src/checklist.py, src/checkload.py: Fix calls to locate_file().
+    
+2005-06-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r188    
+    * ChangeLog: Update to r186
+    * src/error.py: New exception UnknownHashType when a checklist specifies
+      a hash that we don't recognize.
+    * src/treetips.py: Wrap some long lines in the code.
+    * src/review.py:
+      - Docstring for the Review widget.
+      - Do not save the value returned from a message dialog if we don't use it.
+      - Use the checklist functions to output the header of the review.
+    * src/gnomeglade.py: Remove locate_file() as we now use the standard one
+      provided by gnome-python-2.6.
+    * src/functions.py:
+      - __init__(): Take a checklist instead of properties as subfunctions may
+        need the full data available in the checklist.
+      - header(): Return the checklist.resolution by default.
+      - add_item_cb(): The gtk.combo_box does not need to add entries via
+        append_text() so get rid of that call.
+      - Switch away from qaapp to self.checklist.  qaapp is a bad solution and
+        I'm trying to phase it back out.
+    * src/checklist.py:
+      - Add a __revision__ variable.
+      - import functions with namespace to match the rest of my local imports.
+      - Assign the enum-like types showing position in the TreeStore via
+        a range function to be easier to add more items to.
+      - __init__(): Rename variable functions to funcs to not conflict with
+        import functions namespace.
+      - Convert from using the string join() function to string join() method.
+      - Wrap lines of code that are over 80 columns.
+      - _load_functions():
+        + Write a docstring to tell how it works.
+        + Fix bug where we were constructing a path with a data variable
+          instead of a 'data' string.
+        + Convert to use the gnome.locate_file() function.
+        + Fix typo in import of sha module.
+        + Output the functionFile instead of the Hash in error messages.
+        + import the functionFile instead of attempting to import the
+          functionHash.
+      - __no_display_parse_error(): Convert str to strng to not conflict with
+        str keyword.
+    * src/qareviewer.py:
+      - Start to define the Menu and toolbar as a uimanager format.
+      - Create but don't actually use the uimanager.
+      - Convert to gnome.program.locate_file().
+    * src/propview.py: Remove note to create a widget to set properties as it
+      has been completed.
+    * src/checkload.py:
+      - Change a generic exception to a more specific libxml2.treeError check.
+      - build_properties(), build_end(), properties_create(), finish(),
+        close_druid(): doctring documentation.
+      - Wrap lines longer than 80 columns.
+    * src/gpg.py:
+      - Migrate from using string functions to string methods.
+      - Docstring documentation for all functions.
+    * src/Makefile.am: Add functions.py.
+    * README, configure.ac: Update dependencies to gnome-python version 2.10.
+    * TODO:
+      - Add section on checklist/checklist-function security.
+      - Remove gnome-python section as it is merged.
+    * data/fedoraus.py:
+      - Import functions instead of qaconst.
+      - Switch to string assignment from list appending as it's faster and
+        more legible for the small stuff that we're working with.
+      - Temporarily comment out the code to get MD5Sum information as the data
+        isn't available for extraction.
+    * data/fedoraus.xml: New hash value for fedoraus.py.  Need to implement a
+      NULL hash that will always match for testing new checklists and change the
+      hash at build time.
+    
+2005-05-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r186    
+    * src/error.py:
+      - Make CannotAccessFile subclass IOError.
+      - InvalidFunctions: New exception to show that functions were not valid.
+    * src/qaapp.py: New file that holds a reference to the program for global
+      reference.
+    * src/qa-assistant.pyin.in: Simplified to use the global qaapp object.
+    * src/functions.py:
+      - Use qaapp to get the program reference.
+      - Start coding a uimanager description of the qa menu.  We're switching
+        to return a uimanager xml format rather than a gtk.Menu.
+      - BaseQAFunctions: Only take a Properties object to initialize, not the
+        full checklist.
+      - get_menu(): new function that returns a gtk.Menu.  Will switch to a
+        uimanager xml string soon.
+    * src/checklist.py:
+      - Load and save the new functions xml format instead of the old one.
+        import functions module for this.
+      - New variables functionHash, functionHashType, and functionFile to
+        hold the new function information.  functions has been removed.
+      - _load_functions(): New function to load a function file and verify
+        it is valid according to the information in the checklist file.
+        import gnome, os, and sys to support this.
+    * src/qareviewer.py:
+      - Removed FIXMEs: additional properties [done], qamenu from functions
+        [done], checklist header loading [done].
+      - Load qamenu from the checklist's functions instead of genericqa.
+    * src/checkload.py:
+      - Load qamenu fromchecklist.functions.
+      - Fix propblem when loading a review where all the properties were not
+        being saved.
+    * src/Makefile.am:
+      - Remove genericqa.py and add qaapp.py.
+      - Create a noinst_PYTHON target for qa-assistant.pyin and
+        qa-convert.pyin as those are auto-generated.
+    * ChangeLog: Update to (r185)
+    * configure.ac: Bump version to 0.4.90.4.
+    * data/fedoraus.py: Start of the functions file for the fedoraus.py
+      checklist.
+    * Makefile.am: Add data/fedoraus.py.
+    * NEWS: Bump version to 0.4.90.4
+    
+2005-04-26 Toshio Kuratomi <toshio@tiki-lounge.com> - r185    
+    * src/properties.py: Remove functionType from PropEntry.
+    * src/genericqa.py: Moved to functions.py
+    * src/functions.py: Significant rewrite of genericqa.py.  The new
+      architecture creates functions.BaseQAFunctions which may either be
+      used as the default functions for a checklist or inherited by function
+      modules specific to the checklist.
+      - header(), footer(): Output headers and footers for a review.
+      - add_item_to_checklist_callback(): renamed add_item_cb().
+      - publish_callback(): renamed publish_cb().
+      - Convert resEntry from gtk.OptionMenu to gtk.ComboBox.
+      - Begin work on implementing the Qa Menu as a separate class.
+    * src/checklist.py:
+      - import qaglobals instead of qaconst.
+      - Remove functionType from the checklist load and save code.
+    * data/minimal-valid.xml: Remove the functions entry as it's now optional.
+    * data/checklist.dtd:
+      - Remove functionType.  Only one type is now listed within the checklist.
+      - Add a HashType for sha1 or md5.
+      - Make functions an optional element of checklist.
+      - If a functions element is present, it now has a filename to use to load
+        checklist functions from.  It also contains a cryptographic hash of the
+        file so we can eventually trace where checklist functions come from.
+        (Will also have to implement signed checklists.)
+    * data/fedoraus.xml:
+      - Remove functionType information.
+      - Remove the list of functions and replace with a hash of fedoraus.py.
+    * data/softwarerelease.xml: Remove functions as they only list the generic
+      ones.
+    
+2005-04-26 Toshio Kuratomi <toshio@tiki-lounge.com> - r184    
+    * src/gnomeglade.py:
+      - Add properties to the Gnome Program via gnome.program_init() rather than
+        after the fact.  This was added to gnome-python in 2.6.x.
+      - Rename file variable to gladeFile and gladeFile to gladeXML so we don't
+        rebind the python builtin file object.
+    * src/qaconst.py.in: Renamed to src/qaglobals.py.in.
+    * src/preferences.py, src/review.py, src/checkview.py, src/checkload.py:
+      - import qaglobals instead of qaconst
+    * src/qareviewer.py:
+      - Send HUMANPROGRAMNAME to the GnomeApp __init__() to set as part of
+        gnome.program_init() instead of trying to set it ourselves after the
+        program is created.
+      - Do not set lastSRPMDir.  This must be done by the srpmqa functions
+        module.
+      - import qaglobals instead of qaconst.
+    * src/qa-assistant.pyin.in: Remove executable permissions.
+    * src/gpg.py: Remove import of qaconst.  This module doesn't use it.
+    * src/Makefile.am:
+      - Rename qaconst.py/qaconst.py.in to qaglobals.py/qaglobals.py.in.
+      - Add qa-assistant.pyin and qa-convert.pyin to the nodist target.
+      - Add qa-assistant.pyin.in and qa-convert.pyin.in to EXTRA_DIST.
+    * README: Note we plan to move to gnome-python 2.10 for locate_file()
+    * configure.ac: Change qaconst.py to qaglobals.py.
+    
+2005-04-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r183    
+    * Rename qa-assistant.pyin qa-assistant.pyin.in and qa-convert.pyin to
+      qa-convert.pyin.in because the files are now processed first by the
+      configure script.
+    
+2005-04-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r182    
+    * qa-assistant.desktop.in: Add a generic name field
+    * ChangeLog: Update to r181
+    * src/qa-assistant.pyin: Change to replace the python interpreter from
+      the configure script.
+    * src/qa-convert.pyin: Change to replace the python interpreter from the
+      configure script.
+    * configure.ac: Add generation of qa-convert.pyin and qa-assistant.pyin.
+    
+2005-04-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r181    
+    * src/propview.py: Change the labels for the properties to be red as well
+      as italic.
+    * ChangeLog: Update to r180
+    * BUGS, PREFERENCES: Note the pieces of the Properties infrastructure that
+      have been completed.
+    
+2005-04-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r180    
+    * src/review.py: publish(): Check that required properties are all entered
+      before printing a review.  If they aren't entered, popup a dialog
+      prompting the user to finish entering the information in
+      Edit::Properties before continuing.
+    * src/propview.py:
+      - PropertiesView: create_layout(): Italicize properties that must be
+        entered.
+      - PropertiesDialog: _ok_button_cb(): Check that required properties are
+        entered, otherwise popup a dialog to finish entering the required
+        properties.
+    * src/checkload.py: Check that all required properties have been entered
+      before leaving the property entry page.  If they haven't, keep the user
+      on that page.
+    * ChangeLog: Update to (r179)
+    
+2005-04-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r179    
+    * src/properties.py:
+      - Rename __sortedKeys to _sortedKeys.
+      - Add _requirementsMet that caches whether all required properties have
+        been entered.
+      - __setitem__(): When adding a value, check whether it means we don't
+        have all required properties anymore.
+      - _requires(): New method to check that all requirements have been met.
+      - requirementsMet: property linked to _requires() for reading whether
+        all required properties have been entered.
+    * src/qa-convert.pyin: Add #! line so it's executable by python.
+    * src/propview.py: Remove message to check for required properties.
+      Properties handles this.
+    * src/checkload.py: Remove PROPERTIES as a page to start the druid from.
+    * tests/propertiestest.py: Test that we properly return whether a set of
+      properties has all required values set.
+    * TODO: Note to revamp the Druid as only Druid on new.
+    
+2005-03-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r178    
+    * ChangeLog: Update to (r177)
+    
+2005-03-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r177    
+    * qa-assistant.spec.in: Rework scriptlets to handle gconf upgrade case.
+    
+2005-03-14 Toshio Kuratomi <toshio@tiki-lounge.com> - r176    
+    * ChangeLog: Update to (r175)
+    
+2005-03-14 Toshio Kuratomi <toshio@tiki-lounge.com> - r175    
+    * src/propview.py: Show the label that says we don't have any properties.
+    * README: Note we'll move to newer pygtk and gnome-python soon.
+    * PREFERENCES:
+      - Note what's left for the Druid.
+      - Note that Properties are essentially done.
+    * tests/treetipstest.py:
+      - Check creation of TreeTips.
+      - Add docstrings for all the TreeTip tests.
+      - Make checking for checkview functionality optional.
+    * tests/creationtest.py: Remove treetips creation from here.
+    * configure.ac: Migrate from AC_OUTPUT to AC_CONFIG_FILES.
+    * TODO: Create a new heading Functions and move all Action/QA Menu/
+      Function items in there.
+    
+2005-03-09 Toshio Kuratomi <toshio@tiki-lounge.com> - r174    
+    * ChangeLog: Update to (r173)
+    
+2005-03-09 Toshio Kuratomi <toshio@tiki-lounge.com> - r173    
+    * src/qareviewer.py: Enable the properties menu entry.
+    * src/propview.py:
+      - __init__(): Set spacing for the widget to 7.
+      - create_layout(): Show all the widgets so we don't have to use
+        PropertiesDialog.show_all() in order to get the widget to display.
+      - New class PropertiesDialog that displays a PropertiesView in a window.
+    * src/checkload.py: Do a show of the PropertiesView instead of show_all.
+    
+2005-03-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r172    
+    * README: Update libxml2 version requirement to 2.5.0.
+    * configure.ac: Add a check for libxml2 2.5.0 or higher.
+    * TODO: Remove Druid note as it's completed.
+    * Makefile.am: Add the noinst_DATA files to EXTRA_DIST so they'll be
+      included in the tarball.
+    
+2005-03-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r171    
+    * src/checkload.py:
+      - Import libxml2.
+      - __init__(): Only include .xml files in the list of checklists.
+      - build_selector(): Implement a pretty name::summary for checklist
+        display that utilizes the libxml2.newTextReader() interface.
+    
+2005-03-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r170    
+    * src/checklist.py: Move appending SaveFile to a CheckList name attribute
+      to when we save the file rather than when we load it.  This is slightly
+      less efficient but prevents us from changing the name too early.
+    
+2005-03-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r169    
+    * data/sample-save.xml: Remove sample-save.xml as we don't use the qasave
+      file type anymore.
+    
+2005-03-05 Toshio Kuratomi <toshio@tiki-lounge.com> - r168    
+    * src/treetips.py: __init__(), __compute_tooltip_position(): Changed
+      docstrings to conform to the docutils convention for inline function
+      documentation.
+    * src/checklist.py: publish(): Changed to only output a properties node
+      if there are property nodes to fill it with.  This conforms with the
+      published DTD.
+    * src/propview.py:
+      - Added toplevel documentation.
+      - __init__(): Changed to always create a layout.
+      - create_layout():
+        + Create a label stating there are no properties to set on a checklist
+          if this is so.
+        + Output a label of <No value> when an auto prop is not set.
+        + Call _change_property() to set the new property value when the
+          entrty is changed.
+      - _change_property(): Set the model from the entry.
+    * src/checkload.py: Another place to change PropertiesWidget to
+      PropertiesView.
+    * ChangeLog: Update to (r167)
+    * data/minimal-valid.xml: Add a minimal checklist to test that we don't
+      fail when we have the minimum specification from the DTD.
+    * Makefile.am: Add the minimal-valid.xml as a non-install data file.
+    
+2005-02-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r167    
+    * src/checkload.py: Rename PropertiesWidget object to PropertiesView.
+    
+2005-02-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r166    
+    * src/propview.py: New module that creates a widget PropertiesView that
+      allows displaying and setting the Properties.
+    * src/checkload.py:
+      + build_properties(): Remove the placeholder and use the PropertiesView
+        widget instead.
+      + properties_create(): Fill the PropertiesView with the Properties from
+        the current CheckList.
+    * src/Makefile.am: Add propview.py.
+    * BUGS: Note that gtk.TreeStore.set() performance may not be possible.
+    
+2005-02-22 Toshio Kuratomi <toshio@tiki-lounge.com> - r165    
+    * tests/propertiestest.py:
+      + Add check that keys are correctly returned as FIFO order.
+      + Set expansion of svn:keywords Rev, Id, Date.
+    * configure.ac: Up version to 0.4.90.3.
+    * Up version to 0.4.90.3 and add note about implementing properties.
+    
+2005-02-22 Toshio Kuratomi <toshio@tiki-lounge.com> - r164    
+    * src/properties.py:
+      + Add svn:keyword expansion for Rev and Id
+      + keys(): Removed unused sorted argument.
+    * src/review.py: Added import of gobject.
+    * src/preferences.py: Remove import of os.
+    * src/checkview.py: Added import of gobject.
+    * src/checklist.py: Fix value entry.  Needs to be set into the propEntry
+      rather than a local variable.
+    * src/qareviewer.py:
+      + Added import of gtk.glade.
+      + Note that on_menu_new_srpm_activate() is totally broken.
+    * src/checkload.py: Note that we need to replace the file checker with the
+      new FileSelector.
+    * src/gpg.py: Add svn:keyword expansion of Rev and Id.
+    
+2005-02-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r163    
+    * src/properties.py:
+      + PropEntry:
+        - Add a functionType attribute.
+        - Initialize all values to None and empty list.
+      + Properties: Note that we still want to add type checking and the
+        ability to invoke functions to set properties.
+    * src/checklist.py:
+      + Remove the private __Properties class.  Replaced by PropEntry.
+      + __init__(): 
+        - self.properties now instantiates a properties.Properties object.
+        - Rename local var properties to props so it doesns't conflict with
+          the properties module.
+        - Fill a PropEntry and add it to self.properties rather than using the
+          __Properties private class and putting it in a private list.
+      + publish(): Retrieve values from the Properties object to set into the
+        savefile.
+    * tests/testchecklist.py, tests/checklisttest.py: Renamed testchecklist.py
+      to checklisttest.py.
+    * tests/testtreetips.py, tests/treetipstest.py: Renamed testtreetips.py to
+      treetipstest.py.
+    * tests/Makefile.am: Change names on all renamed files.
+    * tests/testcreation.py, tests/creationtest.py: Renamed testcreation.py to
+      creationtest.py.
+    * tests/test.py:
+      + Change names on all renamed files.
+      + Add the propertiestest module to the set of all tests.
+    
+2005-02-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r162    
+    * ChangeLog: Update to (r161).
+    
+2005-02-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r161    
+    * src/properties.py:
+      + Add a PropEntry class for getting information into and out of the
+        Properties class.
+      + Move PropertiesWidget out to another class.
+      + __init__(): Keep the keys in a __sortedKeys variable.  This is
+        structured in terms of what order these were added.
+      + __setitem__(): Override Properties[] so we can set values or add new
+        values through this interface.
+      + keys(): Override keys to return __sortedkeys.
+      + Remove all thoughts on ordering according to dependency.  We will
+        depend on checklist authors to define the order that properties should
+        be displayed for filling out instead.
+    * src/srpmqa.py: Make Properties inherit from object so it's a newstyle
+      class.  This class is soon to be phased out, though.
+    * src/SRPM.py: Make Properties inherit from object so it's a newstyle
+      class.
+    * BUGS: Note that the persistence of directories seems to be brokem right
+      now.
+    * PREFERENCES:
+      - Remove most preferences info as it's now implemented.
+      - Bunch of Properties and Function notes that may be out of date compared
+        to the implementation.
+    * tests/testchecklist.py: Move tearDown() near setUp().
+    * tests/propertiestest.py: Unittests for the properties object.
+    * tests/testtreetips.py: Move tearDown() near setUp().
+    * tests/Makefile.am: Add propertiestest.py.
+    * TODO: Note to merge paths.py.pyin with qa-assistant.pyin.
+    
+2005-02-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r160    
+    * src/properties.py: New properties module that has an object to hold
+      properties data and an object to display properies data.
+    
+2005-02-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r159    
+    * src/qa-assistant.pyin: Add commented out code to debug libxml2 memory.
+    * src/srpmqa.py: import SRPM so SRPM evaluation works.
+    * src/checklist.py: __init__(): Be sure to free the checkFile when we
+      hit error conditions.
+    * tests/testchecklist.py:
+      + New test suite TestCheckListCreation: For testing CheckList creation.
+      + Move test0_CheckListCreateSuccess(), test_CheckListInvalidFile(),
+        and test_CheckListNotAFile() from testcreation.py.
+      + New function test_CheckListCreateMemoryTest(): To test that the
+        CheckList doesn't leak memory through libxml2.
+      + suite(): Adapt suite() to use the new creation functions as well.
+    * tests/testcreation.py: Move the CheckList creation functions into
+      testchecklist.py.  Trying to move all the creation functions into the
+      unittests for that module.
+    * TODO: Add some notes on reimplementing uninstalled files.
+    
+2005-02-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r158    
+    * src/properties.py: Delete the present properties.py preparatory to adding
+      a new implementation.
+    * src/srpmqa.py: Add the code from properties.py here.  It may be useful.
+      This files will be whittled down as we implement properties and functions
+      and removed by the time we release 0.5.
+    
+2005-01-31 Toshio Kuratomi <toshio@tiki-lounge.com> - r157    
+    * src/error.py: Add InvalidResolution when the CheckList resolution is not
+      listed in resolutionList.
+    * src/review.py:
+      + publish(): Print out a header of PUBLISH +1 or NEEDSWORK for the review.
+        - Format the output so the category headers have a blank line before and
+          no blank after.
+    * src/checklist.py:
+      + add_entry(): Make resolution default to the first type in the
+        resolutionList.
+        - Check that the resolution is in resList, else raise an exception.
+        - Check that the resolutions from resList are in outputList, otherwise
+          enter them as blank entries.
+    * tests/testchecklist.py:
+      + Give each unittest a short docstring explaining what it does.
+      + test_0CheckListUnpangoize(): Set to be run before any other functions
+        as some of the other unittests use unpangoize_output().
+      + New functions;
+        - test_CheckListAddEntry(): Check that we can add entries using
+          checklist.add_entry().
+        - test_CheckListAddEntryDefaultValuesOk(): Test that adding entries
+          using default vaues yields an entry with the default values we think
+          it should.
+        - test_CheckListAddEntryExplicit(): Test that adding entries using
+          explicit values save entries with those explicit values.
+        - test_CheckListAddEntryInvalidRes(): Test that adding entries with
+          resolutions not in the resolutionList fails.
+        - test_CheckListAddEntryDuplicate(): Test that adding entries that
+          are duplicates of other entries fails.
+        - test_CheckListAddEntryIncompleteOutputList(): Test that adding
+          entries with outputlists that do not include all the resolutions in
+          resList causes the outputlist to grow.
+        - Note that publish() and set() still have to be tested.
+    
+2005-01-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r155    
+    * ChangeLog: Update to (r154).
+    
+2005-01-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r154    
+    * src/error.py: Add an exception NotGPGCompatible for when the user
+      specifies a gpg program that isn't gpg call compatible.
+    * src/preferences.py: create_gpg_ids_list(): If we have an old list of
+      identities and the gpg command isn't giving us a new list, keep the
+      old list.
+    * src/review.py: Handle the case where the gpg command has been specified
+      incorrectly.
+    * src/gpg.py:
+      - list_secret_keys(), sign_buffer(): Check that the specified file
+        could possibly be a program before attempting to invoke it.
+      - list_secret_keys(), sign_buffer(): raise a NotGPGCompatible error
+        when the program doeosn't respond to our commandline options the way
+        we expect.
+      - All GPGError exceptions take a msg argument.  Give a message argument
+        each time we raise one.
+    
+2005-01-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r153    
+    * ChangeLog: update to (r152).
+    
+2005-01-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r152    
+    * src/preferences.py:
+      - __init__(), set_gpg_identity(): Fix signing combo to properly set
+        whether it's changed by typing or selecting from the dropdown menu.
+      - creat_gpg_ids_list():
+        + clear the dropdown menu before creating a new list of ids.
+        + Now do a full match of the gpgIds rather than a substring.  This
+          is because several keys could have similar IDs yet be different.
+      - change_gpg_path(): Prepend "self." to call to create_gpg_ids_list.
+      - set_gpg_path(), set_state_dir(): properly set the program and state
+        directory whether the entry is typed in or selcted from the
+        FileChooser.
+    * BUGS: Preferences BUGS fixed.
+    
+2005-01-05 Toshio Kuratomi <toshio@tiki-lounge.com> - r151    
+    * src/genericqa.py: Add note to convert OptionMenu to ComboBox.  Deferring
+      because genericqa.py is being phased out and it's not yet clear
+      whether the code will be reused or go away.
+    * src/review.py: __update_date(): 
+      - Create the review key from Summary after checking whether summary is
+        valid yet.
+      - If the output string in the checklist is not yet set, set it to the
+        empty string so the review label is set correctly.
+    * src/checklist.py: set(): When changing the resolution, automatically
+      change the output only if an outputlist has been set in the checklist.
+      This fixes a bug when the user adds custom entries.
+    * BUGS: Note that there's a bug somewhere in the preferences dialog
+      with handling gpg_path/gpg_id and other ComboBoxEntry widgets.
+    
+2005-01-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r150    
+    * ChangeLog: Update to (r149)
+    
+2005-01-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r149    
+    * qa-assistant.spec.in: Update ChangeLog to latest version.
+    * data/softwarerelease.xml:
+      - Fix a typo in make distcheck
+      - Remove duplicate make distcheck entry.
+      - Add a descriptive entry to the runs fine entry.
+    
+2005-01-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r148    
+    * src/Makefile.am: Add preferences.py
+    
+2005-01-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r147    
+    * src/Makefile.am: Add gpg.py to the list of files.
+    
+2004-12-30 Toshio Kuratomi <toshio@tiki-lounge.com> - r146    
+    * src/error.py: Add exceptions returned by our gpg module.
+    * src/review.py:
+      - Import gconf, our gpg and error modules.
+      - Retrieve gpg information from gconf.
+      - publish():
+        + Change outBuf from a list of lines to a string.
+        + Sign the review
+    * src/gpg.py:
+      - get_passphrase(): function to popup a dialog that takes a passphrase
+        from the user.
+      - sign_buffer(): Fix the gpg invokation to process the output correctly.
+    * README:
+      - Update requirements to python 2.3 and pygtk 2.4.
+    * PREFERENCES: Update preferences to done once tested.
+    * configure.ac:
+      - Update python requirement to 2.3
+      - Update version to 0.4.90.2
+      - Update pygtk requirement to 2.4
+    * TODO: Move Preferences to need testing.
+    * NEWS:
+      - Up version to 4.90.2
+      - Added preferences and druid to new features.
+    
+2004-11-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r145    
+    * src/preferences.py:
+      - If help button is pressed, print a message that there is no help.
+      - When Ok button is pressed, close and destroy the dialog.
+    * src/qareviewer.py:
+      - Set icons for Preferences Dialog and Druid.
+      - Delete the about dialog when we're done with it.
+    * BUGS: Remove note to set icons.
+    * glade/qa-assistant.glade: Rename preferences window help button and ok
+      button so we can access them from code.
+    
+2004-11-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r144    
+    * ChangeLog: Update to (r143)
+    
+2004-11-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r143    
+    * src/error.py: Note that we need to add exceptions for gpg errors.
+    * src/preferences.py:
+      - Watch the /apps/qa-assistant gconf dir for changes.
+      - Use default values from gconf schema when the preference is not set to
+        a correct value.
+      - Set Tooltip decriptions options insensitive when we disable them.
+      - Set gpg options insensitive when we disable GPG signing.
+      - Able to set the gpg options and file options now.  (Should cover
+        all the current preference options.)
+      - New function create_gpg_ids_list(): Create a list of gpg ids we can sign
+        with.  This is used to populate the GPG signing ID ComboBoxEntry.
+      - New function change_gpg_path(): updates the gpg_ids_list when the path
+        to gpg changes.  In case the new program uses a different keyring.
+      - New function toggle_desc_optionsi(): Toggles description/tooltip options
+        sensitivity depending on whether or not we have elected to use the
+        Description tooltips.
+      - New function toggle_gpg_options(): Toggles gpg option sensitivity
+        depending on whether or not we have enabled signing of reviews.
+      - New function set_use_gpg(): Sets and unsets use-gpg in GConf depending
+        on what the user has selected in the dialog.
+      - New function set_gpg_path(): Sets the path to the gpg program in gconf.
+      - New function set_gpg_identity(): Sets the user's chosen gpg identity in
+        gconf.
+      - New function set_state_dir(): Sets the user's chosen state-dir in gconf.
+    * src/checkview.py: Handle getting invalid values in gconf by getting the
+      default gconf values when the normal settings are invalid.
+    * src/checklist.py: Handle getting invalid values in gconf by getting the
+      default gconf values when the normal settings are invalid.
+    * src/qareviewer.py: Properly show the preferences dialog.
+    * src/gpg.py: New file withh functions to handle getting gpg to do things
+      for us.  Eventually we'll move to using gpgme instead.
+      - New functions list_secret_keys() and sign_buffer().
+    * BUGS: Note that we need to get icon/logo properties working for the Druid
+      and Preferences windows.
+    * glade/qa-assistant.strings, glade/qa-assistant.glade:
+      - Properly name some entries so we can refer to them from our code.
+      - Change the layout of the Misc tab to group Path to GPG selection with
+        the other gpg options.
+    
+2004-11-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r142    
+    * glade/qa-assistant.glade, glade/qa-assistant.strings: Add entry to give
+      the path to gpg.
+    * qa-assistant.schemas: Add an entry files/gpg-path to store the path to
+      gpg.
+    * BUGS: Remove note that display tooltip wait syncs too much as this is
+      now fixed.
+    * src/preferences.py: Connect to the description wait timeout spinbutton's
+      focus-out-event signal instead of value-changed.  The value-changed
+      method causes us to set the gconf preference several times per change.
+      focus-out only changes it once.
+      - Add the Rev and Id keyword expansions.
+    
+2004-11-26 Toshio Kuratomi <toshio@tiki-lounge.com> - r141    
+    * src/optionrenderer.py:
+      - Removed some old commented out code
+      - Set optionlist and selectedoption gproperties to empty list and string
+        on init respectively.
+      - alert_changes(): pass in the oldValue of the row rather than getting it
+        from the selectedoption property.  For some reason selectedoption is
+        'Needs-Reviewing' when we run through here, leading to too many sets
+        of the resolution in our checklist.
+      - display_options(): send the proper value of selectedoption to
+        alert_changes() from here.
+    * src/preferences.py: New preferences dialog instantiated from glade.
+      Callback code and initialization into a dialog widget here.
+      - Much of the setting of gconf values is done but a little bit remains.
+        The largest problem is that gpg support has to be added in.
+    * src/checkview.py:
+      - Make checklist an optional argument  to __init__().
+    * src/checklist.py:
+      - Fix noAutoDisplay; it needed parans to make the logic correct.
+      - Fix getting colors from gconf.  Before, we could fail if there wasn't
+        a string in the gconf value.
+      - Use default values from the gconf schema if the writable gconf values
+        are broken.
+    * src/qareviewer.py:
+      - Rearrange menu callbacks to match what we see in the menus.
+      - Enable the on_menu_preferences_activate() callback to popup our new
+        preferences dialog.
+    * src/checkload.py: Add a way to get at the properties page of the druid.
+      Probably going to change this to make a separate, embeddable properties
+      widget that is a view on the checklist model.  Then I can embed it in the
+      druid or embed it in a dialog window for the properties menu item.
+    * BUGS:
+      - Note I have to watch stale gconf keys in my local cache when testing
+        after development.
+      - Note to try to fix wait time on tooltip display preference syncing so
+        it doesn't happen so often.
+    * PREFERENCES:
+      - gconf schema completed.
+      - Coding and pref dialog aspect are nearly ready.
+      - Note in properties section why we can't implement properties as
+        gobject properties on the checklist.
+    * TODO:
+      - Notes on how the QA Functions menu might be taken care of.
+      - Note that paths.py.pyin might be used to make testing an uninstalled
+        installation work.
+    * glade/qa-assistant.strings, glade/qa-assistant.glade:
+      - New PreferencesDialog code.
+      - Removed BugzillaDialog code.
+    
+2004-11-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r139    
+    * ChangeLog: Update to (r138)
+    
+2004-11-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r138    
+    * Split the svn:ignore list for the toplevel and src directory.
+    
+2004-11-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r137    
+    * Move all the source files from the toplevel into a src subdirectory.
+    * Split the Makefile.am into one for the auxiliary files in the toplevel
+      and one for the sources in the src directory.
+    * Get GConf install to work right (copied from metacity)
+    
+2004-11-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r136    
+    * qa-assistant.schemas: Change keynames to have a hierarchy within the
+      apps/qa-assistant space.  Currently we have the following sections:
+      user, display, and file.
+    * checklist.py: Use the new schema key names.
+    * BUGS: Save method has been fixed.
+    * data/softwarerelease.xml: New checklist to see if a software package is
+      ready for release.
+    * checkview.py: Use new schema key names.
+    * TODO: A textwrapping Review widget is now a reality.
+    * qa-assistant.spec.in: Use gconf.
+    * Makefile.am: Add the new files checkload.py, softwarerelease.xml,
+      and BUGS.
+    
+2004-11-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r135    
+    * Ignore qaconst.py as it is generated from qaconst.py.in
+    * optionrenderer.py:
+      - Remove the string module as it's not used.
+      - Change setattrs and getattrs that don't use variables to direct
+        attribute references.
+    * review.py:
+      - Remove the gobject module as it's not used.
+      - Rename sum variable to summary as sum is a python builtin.
+    * checklist.py:
+      - Change comparison to False to a not comparison per pychecker suggestion.
+      - Fix a reference to a node variable that should be propChild.
+      - Remove logic that sets outputList to itself as it's pretty useless.
+      - Do not keep a reference to summary XML node as it's never used.
+      - Do not keep a reference to value XML node as it's never used.
+      - Fix mistake in publish where we need to use self.filename instead of
+        the passed in filename so that qareiwer's save (as opposed to save as)
+        works.
+      - Moved return statement for __change_color() to the end of the function.
+      - Do not keep a reference to description XML node as it's never used.
+    * qareviewer.py:
+      - Get rid of startLabel.
+      - Get rid of __check_readiness()
+      - Popup a warning dialog when we are unable to save a file.
+    * treetips.py: In __paint_window(), use the passed in window instead of
+      self.tip_window.
+    * ChangeLog: Update to (r134).
+    * gnomeglade.py:
+      - Rename list variable to widgetList to not override python builtin.
+      - Rename dir variable to directory to not override python builtin.
+    * srpmqa.py: Add __check_readiness() from qareviewer.py until we know if
+      we're going to need the code there or not.
+    * checkview.py: Spelling correction in docstring.
+    * checkload.py:
+      - Set the window title depending on how we're using the druid.
+      - Dummy properties page so people don't wonder what the empty page
+        is for.
+      - Fix the selector page checker to catch when the user did not select a
+        checklist at all.
+      - Set keywords Id and Rev.
+    * TODO: Notes on what needs to change on the pygtk-2.4 update.
+    * glade/qa-assistant.strings, glade/qa-assistant.glade:
+      - Remove the new menu as we use the druid to handle selecting a
+        new checklist and then filling in the new property values instead
+        of loading the property values directly.
+      - Remove startLabel as we don't use it anymore.
+      - Remove the druid as it's all being done programmatically.
+    
+2004-11-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r134    
+    * checklist.py:
+      - Change long lines of strings to not use the '\' character as strings
+        can simply merge after they've spanned a line.
+      - Add read and write for summary information.
+    * qareviewer.py:
+      - Make sure all instantiations of the druid also show() it.
+      - Write a new on_menu_new_activate() handler to use the druid to load a
+        new checklist.  Willl have to work on glade files as well.
+      - Simplify on_menu_open_activate() down to a call to the druid as the
+        rest of the logic is now part of the druid.
+      - Point on_toolbar_new_activate() at the menu equivalent instead of
+        popping up a new1_menu.  need to remove that menu from glade as well.
+    * error.py: Use a call to Exception's __init__() to create the self.args
+      tuple.
+    * checkload.py:
+      - Remove gnomeglade import as its not needed.
+      - Private constants for the selector's treeview.
+      - Recode the saving of checklist Filenames in the selector to use full
+        path information.
+      - Move the end page creation into its own build_end() function.
+      - There's now a loader_next() method; set propBackPage there instead of
+        __init__().
+      - Get a reference to the selector's gtk.TreeSelection so we can find out
+        which CheckList file was picked.
+      - New function: finish() that saves the loaded checklist into the app.
+    
+2004-11-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r133    
+    * checklist.py: Comment out do_resolution_changed().  We don't seem to have
+      any use for it yet.
+    * qareviewer.py:
+      - Remove properties as we're nearly done converting to GConf.
+      - Save a reference to the logo pixbuf.
+      - Remove all commandline parsing for now.
+      - Move startlabel initialization into __init__()
+      - Copious notes on implementing the druid.
+      - Call to start the druid on program start.
+      - Remove SRPM_into_properties as this whole thing is getting revamped.
+    * PREFERENCES:
+      - Add Druid info.
+      - Add function info.
+      - Note other things that get set with checklist specific information.
+    * configure.ac: Change the version to 0.4.90.1 -- a development release.
+    * data/checklist.dtd: Add summary tag which briefly describes the purpose
+      of the checklist.
+    * data/fedoraus.xml: Add summary tag.
+    * NEWS: Changed to version 0.4.90.1.  Big note that it's a development
+      release.
+    * error.py: Gave my base Error class an __init__ to place the msg into a
+      standard attribute.
+    * srpmqa.py: Add SRPM_into_properties here.  It is just copied verbatim
+      from qareviewer.py and doesn't do anything useful.  But it may have
+      useful code that we want to hang onto.
+    * README: Note that 0.5 final will require pygtk-2.4.0 rather than 2.2.0
+    * checkload.py: New file that instantiates a Druid to get information
+      from the user for loading new and saved checklists.
+    
+2004-10-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r132    
+    * PREFERENCES: Add a section on Functions.  Functions and properties remain
+      to be architected and then implemented.
+    * tests/test.py: Needed to add the parent directory to the python path to
+      allow makedistcheck to detect the built python files in the builddir
+      rather than the ones in the srcdir.
+    * ChangeLog: Update to (r131)
+    * gnomeglade.py: Update from using the deprecate gtk.mainloop() to
+      gtk.main()
+    * README: Add ReStructuredText markup to list webpages for QA Assistant's
+      requirements.
+    
+2004-10-23 Toshio Kuratomi <toshio@tiki-lounge.com> - r131    
+    * qa-assistant.schemas: Rename key: show-checklist-descriptions ->
+      disable-checklist-descriptions because gconf returns false when a value
+      is unset so that makes a better default. 
+    * checklist.py: Use qaconst to import program-wide constants
+      (specifically GCONFPREFIX).
+    * qareviewer.py: Use qaconst to import program-wide constants. As part
+      of this, rename __programName -> PROGRAMNAME, and __programHumanName__ ->
+      HUMANPROGRAMNAME.
+    * PREFERENCES: Files and signing preferences are left to do.
+    * configure.ac: Add qaconst.py to the list of files to generate.
+    * properties.py: Remove properties that are now generated from gconf.
+    * genericqa.py: Use app.lastReviewDir instead of properties.lastReviewDir.
+    * treetips.py: Change the maximum timeout for treetips from one second to
+      one minute.
+    * checkview.py:
+      - Import program-wide constants from qaconst.
+      - Use gconf to set preferences on displaying the treetip help text.
+        + New function: __change_treetip_show() to toggle displaying the help
+          on and off.
+        + New function: __change_treetip_delay() to change how long the mouse
+          must hover before the tip pops up.
+      - Remove executable from the checkview.  Set Id and Rev keywords.
+    * qaconst.py.in: New file to hold program wide constants.
+    * Makefile.am: Add qaconst.py.in to the files.
+    
+2004-10-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r130    
+    * review.py:
+      - Merged the self.*Title variables that held gtk.Labels for the various
+        resolution categories into a self.reviewTitles dict.  This makes
+        iteration over it match with self.reviewBoxes and lends itself to
+        implementing customized headings for these labels.
+      - Rewrote the publish() method to function with the new widget internals.
+        This is not complete as CheckList still has to export data regarding
+        what the header should look like but it does publish a savefile that
+        is somewhat helpful.  (As opposed to being miserably broken before.)
+    * BUGS: Note to try optimizing away CheckList.set() calls.
+    * PREFERENCES: Note which objects the remaining preferences may be
+      implemented within.
+    * NEWS: Add note about the new Review widget.
+    * genericqa.py: Check the checklist's resolution to decide whether its
+      ready to publish or not instead of Review.
+    * ChangeLog: Update to (r129)
+    
+2004-10-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r129    
+    * review.py: Minor reformatting to fit in 80 columns.
+    * qa-assistant.schemas: Rename auto-display-failed key to no-auto-display
+      so that having it unset or the default value of false triggers the
+      auto-displaying of negative entries.  This is because gconf defaults to
+      false when a bool is unset.
+    * checklist.py:
+      - Remove addPaths as we don't use it anymore.
+      - New Private var __GCONFPREFIX for the app prefix.
+      - Comment variables in __init__().
+      - New self.colors dict to keep track of thecolors we're setting via
+        gconf.
+      - Load the colors from gconf.
+      - Decide whether to autoDisplay on negative reviews from gconf.
+      - Start moving from using self.set to gtk.TreeStore.set when we can as
+        self.set is much more expensive than gtk.TreeStore.set.
+      - Change all OUTPUT strings from None to empty string.
+      - Put pangoize into self.set().  Remove it from all other calls.
+      - Pangoize a string when it goes into OUTPUT, not into OUTPUTLIST.
+      - Get rid of do_resolution_changed's print.  We may get rid of this
+        altogether.  I think everything we'd put in here is now being done
+        in the set() method.
+      - set() method reworked to assure resolution happens before OUTPUT and
+        pangoize happens before the set is done.  The whole set() method
+        feels significantly slower than gtk.TreeStore.set().  We need to
+        use the base class method when possible instead of self.set().
+      - New function: __change_auto_display() to handle auto display on fail
+        being changed in gconf.
+      - New function: __init_colors() to initialize colors from gconf.
+      - New function: __color_changed() to change colors when changed in
+        gconf.
+      - New function: __change_color() to change the colors of displayed
+        OUTPUT strings when the colors are changed in gconf.
+    * qareviewer.py: Change references to last*Dir from using a properties
+      class to storing as a variable in the QAReviewer class.  Preparatory
+      to getting rid of Properties altogether.
+    * PREFERENCES: Go into more detail abo9ut what needs to be done and check
+      off the ones that have been finished.
+    * NEWS: Add gconf note.  Move cut 'n paste to 0.4.1.
+    * genericqa.py: Remove call to pangoize.
+    * treetips.py: Use tuples in except clauses to correct an uncaught syntax
+      error.
+    * ChangeLog: Update to r123.
+    * README: Note requirement for pygnome-gconf 2.0.0 or higher.
+    * checkview.py: Change checklist and cl local variables to checkModel in
+      display_toggle() and output_edited() to not conflict with checklist
+      module.
+    * qa-assistant.spec.in: Correct a syntax error in the spec and update the
+      changelog.
+    
+2004-10-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r123    
+    * qa-assistant.schemas: First cut at encoding preferences into a GConf
+      schema.
+    * qareviewer.py: Begin moving the file directories (lastSRPMDir,
+      lastSaveDir, and lastReviewDir into the app instead of the properties.)
+    * PREFERENCES: Expand upon what we're doing with preferences and GConf
+      now that I'm writing the code.
+    * tests/testtreetips.py:
+      - Create treetips with an actual TreeView and TreeModel.
+      - Test reading and setting of all properties.
+    * treetips.py: Slight clarification to the check for a valid view in the 
+      constructor.
+    * Makefile.am: Add the GConf schema.
+    * glade/qa-assistant.strings, glade/qa-asistant.glade:
+      - Begin work on a preferences dialog.
+      - Begin work on a Druid for starting from a new checklist.
+    
+2004-10-13 Toshio Kuratomi <toshio@tiki-lounge.com> - r122    
+    * review.py: Set labels to be selectable so we can use clipboards to copy
+      from them. In the future we'll have to work out editing as well.
+    * BUGS: Move checklist load to Needs Testing.
+    * qareviewer.py, properties.py: Properties is steadily getting eaten away.
+      Remove the need to store the checklist filename there.
+    * qareviewer.py: Code to Cut/copy/paste is now in.
+    * NEWS: Note that cut and paste should now work.
+    * ChangeLog: Update to r121
+    * glade/qa-assistant.glade: Remove the Edit::Clear menu item.  It's a bit
+      ambiguous as to what it means.  Functionality probably already exists.
+    
+2004-10-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r121    
+    * review.py:
+      - Allow a new Review to be created without specifying a CheckList.
+      - BugFix: set newly created labels to use pango markup.
+      - BugFix: attempt to remove the VBox widgets from self.reviewBoxes
+        instead of their names.
+    * BUGS: Noticed that save_as works, but save does not.
+    * qareviewer.py:
+      - Stop loading checklist on startup.  Yay!
+      - Create CheckView and Review on startup and add them to our window.
+      - Get rid of the hacks that destroyed and recreated CheckView and Review
+        widgets when loading a new checklist.  We can now do this with a simple
+        set_model() call.
+      - Make sure we're show()'ing the checkView when we load a new CheckList.
+      - Get rid of pygtk 2.0 bug work around.
+    * ChangeLog: update to (r120)
+    * checkview.py: Rename a variable from checklist to cl to fix problem
+      where I was bashing the checklist namespace.
+    
+2004-10-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r120    
+    * review.py:
+      - Note that publish doesn't work.
+      - Revert CheckList constants back to module level.
+      - Remove __resolution_check() as it's now implemented in the checklist.
+    * checklist.py:
+      - Revert CheckList constants back to module level.
+      - Add more values to __Property.
+      - Fixes to load and save the new, complex properties from the XML file.
+      - Fixes to load and save the more complex functions from the XML file.
+      - Add code to __init__() to figure out the category and checklist
+        resolutions on load.  A lot of commonality with __check_resolution().
+        Look into merging.
+      - Rename check_category_resolution to __check_resolution.
+      - Simplify logic in __check_resolution to use else instead of elif.
+    * qareviewer.py:
+      - Create the CheckView before loading the CheckList.
+      - Use CheckView.set_model to set to the new CheckList instead of detroying
+        the CheckView and recreating it.
+      - Remove self.properties from a call to create a Review().
+    * ChangeLog: Update to (r119)
+    * checkview.py: Made resolution_changed a single line.
+    
+2004-10-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r119    
+    * checklist.py:
+      - Create a resolution attribute that holds the CheckList's resolution.
+      - Note about workarounds because we can't add custom gproperties.
+      - Create a resolution-changed signal that is emitted when the CheckList
+        resolution is changed.
+      - Temporary do_resolution_changed() signal handler.  Doesn't do anything
+        yet.  We may not need to do anything with it.
+      - set() method that overrides the gtk.TreeStore set method.  We have to
+        do this so we can find out if any rows have had their RESOLUTION
+        changed.  If so, we decide if we should update the category and
+        CheckList resolutions as well.
+      - check_category_resolution():
+        + now works for both categories and the CheckList's resolution.
+        + No longer sets any values except the resolution.  These other parts
+          are done in the self.set() method.
+        + Check whether the category is already set to Needs-Reviewing so we
+          don't set it unnecessarily.
+    * checkview.py: Remove call to check_category_resolution().  This is
+      managed entirely by the CheckList now.
+    
+2004-10-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r118    
+    * review.py: Set line wrapping in the labels showing the review items.
+    * tests/test.py: Add treetips to the complement of tests.
+    * tests/testtreetips.py: A set of tests for the treetips module.
+    * tests/Makefile.am: Add treetips to the complement of tests.
+    * treetips.py: Fix a syntax error when checking which property we need
+      to set.
+    * ChangeLog: Update to (r117).
+    
+2004-10-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r117    
+    * review.py:
+      - Check that we're being passed a CheckList type.
+      - Use gtk.VBox.__init__ instead of GObject.__init__.
+      - No longer use gobject.type_register() because we don't define our
+        own __gproperties__.
+    * checklist.py:
+      - A beginning for signal addition.
+      - Remove set_output_string()
+    * tests/testcreation.py:
+      - Add tests for the Review widget.
+      - Push CheckView creation back to normal precedence.  Our reimplemented
+        TreeTips don't depend on CheckView but CheckView does depend on
+        TreeTips.
+      - Create two more success tries as treetips should now take a normal
+        gtk.TreeView and No arguments whatsoever.
+      - Push TreeTips precedence up as it is needed for CheckView.
+      - Failure test now looks for TypeError as we check that the widget
+        supports our needed signals rather than explicit types.
+    * treetips.py:
+      - Remove random numbers.  We should be able to get timeout IDs from a
+        simple counter (self.unique) instead.
+      - Add many __gproperties__ supported by gtk.Tooltips.
+      - Add view and column __gproperties__ for the treeview and column that
+        we draw our data from.
+      - Make __init__ able to handle the no argument case.
+      - Remove check for whether we're passed a gtk.TreeView.  Instead, we
+        check if we get an object with the proper __gsignals__.
+      - Rename some internal variables to use the publicly available
+        __gproperties__ names instead.
+      - Add self.enable() and self.disable() methods to mirror Tooltips.
+      - do_get_property() and do_set_property() methods to work with the
+        __gproperties__.
+      - Using the self.enabled gproperty, it should now be possible to turn
+        treetips off.
+      - gobject.type_register() as we now define our own __gproperties__.
+    
+2004-10-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r115    
+    * ChangeLog: Update to r114
+    * genericqa.py: Fix one place where we were setting the outputList to
+      none values instead of empty string.
+    
+2004-10-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r114    
+    * Warning: This commit should display the checklist on the screen fine but
+      will not publish a review to file.  It also will not display any header
+      information associated with SRPM reviews.  Anything that was broken
+      before is likely to still be broken now.  On the plus side, this is
+      probably the most broken the package will get for a while.  The major
+      architectural changes are done for the next version.  There is a great
+      deal to do, but should be mostly rewriting older features to work within
+      the new design.
+    * ChangeLog: Update to r113
+    * review.py: Major rewrite of the Review widget.  Display is mostly
+      finished but publish does not work and some more reworking of the
+      interaction with the CheckList/checklist file is needed.
+      - Removed re and string as functions using them are now in CheckList.
+      - Remove MyRendererText.  The new Review widget does not use a ListView
+        so it doesn't need a custom Cell Renderer.
+      - Remove listview positional constants.
+      - __init__ no longer creates self.properties or takes a properties
+        argument.  All operations on the SRPM (which we got from properties)
+        will now be done in a header creation function in the checklist.
+      - Remove self.addPaths and __add_data as the functionality has been
+        merged into __update_data.
+      - resolution and hashLabel are replaced with a header label which will
+        be set from a property on the CheckList.
+      - The four gtk.ListViews have been replaced with a reviewBoxes dict
+        that holds four gtk.VBoxes.
+      - Remove update_hash and __update_hash as hashes become the
+        responsibility of the CheckList.
+      - set_model() method to set a data model for the Review to view.
+      - __sync_checklist() method to sync the Review to a new CheckList.
+        This replaces and extends __generate_data.
+      - Significant rewrite of __update_data() using the new
+          self.entries[SUMMARY] = (RESOLUTION, unique number) and
+          self.displayList[(RESOLUTION, unique number)] = label and
+          self.reviewBoxes[RESOLUTION] = label
+        datastructures.  This has the side effect of incorporating the logic
+        for new CheckList entries entirely into this function.
+      - Remove __filter_good, __filter_work, __filter_minor, __filter_note as
+        we aren't using Cell Renderers anymore so we don't have to create
+        arcane callbacks to transform our data before passing to them for
+        display.
+      - Note that most of __resolution_check's functionality is going to be
+        merged into the checklist.
+    * checklist.py:
+      - Set values for outputList to the empty string rather than None.  This
+        works with the new Review widget better.
+      - Note that check_category_resolution is going to undergo a major
+        overhaul.
+    * qareviewer.py: Remove calls to Review.update_hash.
+    * tests: ignore Makefile, Makefile.in and *.pyc files.
+    * tests/Makefile.am: Add *.pyc and *.pyo files to the CLEANFILES.
+    
+2004-09-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r113    
+    * tests/testchecklist.py, tests/testcreation.py:
+      - Make this a runnable script so we can run the checklist tests as a
+        subset of the complete suite.
+      - Now import the local test module to get path information and other
+        things global to all tests.
+      - Change naming format from test* to test[0-9]*_*.  This allows us to
+        define priorities for our tests.
+      - Make suite a toplevel function instead of a method so it's easily
+        callable by external programs.
+      - Call our own suite function to create the test suite.  Also check the
+        results to give a proper return code on exit.
+      - Add Rev, Id, and Date substitution.
+    * tests/testcreation.py:
+      - Add tests for TreeTips and CheckView.
+      - Change detection of classes from a string test on the type to calls
+        to isinstance().
+    * tests/test.py:
+      - Check for the existence of srcdir environment variable before running
+        the test.  If it's available we use it to enable VPATH builds.
+        Otherwise default to using modules relative to the current directories.
+      - Use the suite functions of the test* modules to create the test suites.
+      - Add Rev, Id, and Date substitution.
+    * tests/Makefile.am: Change from running test.py to invoke all tests to
+      the two test modules individually.  Not sure if this is more desirable or
+      not.  Will try for a while and see.
+      - Add Rev, Id, and Date substitution.
+    * autogen.sh: Change from using the auto* tools individually to using
+      autoreconf as suggestied in the autoconf info pages.
+    * treetips.py: Check that the treeview argument to the TreeTips is a
+      gtk.TreeView.
+    * ChangeLog:
+      - Update to r112.
+      - Fix some spelling and formatting errors.
+    * TODO: Add a note to finish the unittests.
+    
+2004-09-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r112    
+    * tests, tests/testchecklist.py, test.py, tests/Makefile.am,
+      tests/testcreation.py, configure.ac, Makefile.am: The tests directory
+      holds unittests for QA Assistant.  Currently, there are two in-progress
+      modules: One that tests creation of new objects.  A second that tests
+      the functioning of checklist objects.
+    
+2004-09-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r111    
+    * checklist.py: Correct a syntax error in our lowercasing of entries for
+      duplication checking that our unittesting framework caught.  Need to
+      start working on merging unittests into the program's build.
+    
+2004-09-24 Toshio Kuratomi <toshio@tiki-lounge.com> - r110    
+    * Warning: Untested.  Probably broken.  Basic changes to the data format.
+    * checklist.py: Bugfix: When checking for duplicate entries, ignore case
+      as we probably want to consider "Parts Move", "Parts move", and
+      "parts move" as duplicates of each other.
+    * BUGS: Move the duplicate entries bug to testing.
+    * data/checklist.dtd:
+      - Add file to the allowed PropType's.  I was going to rely on file URL
+        but have decided a file type makes it easier to know when to open a
+        file selection dialog.
+      - Add FuntionType that tells where a function is to be used.
+      - Add RequireType that tells at what point a Property needs to be known.
+      - Restructure property element to hold a function that can select the
+        property's value.
+    * data/fedoraus.xml:
+      - Use the new function information for properties.
+      - Add type information to functions.
+    
+2004-09-23 Toshio Kuratomi <toshio@tiki-lounge.com> - r109    
+    * AUTHORS, BUGS, PREFERENCES, NEWS, README, TODO: Small formatting fixes
+      to make the files ReStructuredText compliant.  I can now transform them
+      all with rst2html to make HTML documentation.
+    * qareviewer.py: Remove 'None' from a conditional.
+    * ChangeLog: Update to r108
+    
+2004-09-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r108    
+    * checklist.py:
+      - Removed __added_row from handling __row-inserted signals and
+        __modified_row from row-changed.  Migrate functionality into
+        add_entry().
+      - add_entry() no longer returns an iter to the new entry as using
+        the iter is taken care of in add_entry().
+      - Fix exception name DuplicateItem instead of DuplicateItemError.
+      - Fix problem in check_category_resolution() where an iter variable
+        was split into two when it was renamed.
+    * BUGS:
+      - Move five bugs into the fixed/testing category.
+      - Add note to make duplicate item entry case insensitive.
+    * genericqa.py:
+      - The CheckList is now responsible for setting the entries dict.
+        Remove the code from here that did that.
+      - Fix exception name DuplicateItem.
+    
+2004-09-17 Toshio Kuratomi <toshio@tiki-lounge.com> - r107    
+    * Warning:  This is another known broken commit.
+    * Subversion property mergelog updated to reflect merge from the current
+      0.4 branch.
+    * qaconvert.py: File renamed qa-convert.pyin.
+    * checklist.py:
+      - Copied the gtk.TreeModel constants back out to the module level.
+        Have to decide if it makes more sense to be at the module or class
+        level.
+      - Throw an exception if the user specified checklist isn't an XML file.
+      - When loading a checklist savefile, change the revision to an integer.
+      - Note to see what happens if we move the row-inserted and row-changed
+        signal handler functionality into the add_entry function.
+      - Move check_category_resolution method into CheckList from qareviewer.
+        Should be ported, but still needs to be called by the CheckList when
+        we open a savefile.
+    * BUGS: List of known bugs.  Currently very long.  Helps inform of what
+      is known to be broken in the current checkin.
+    * qareviewer.py:
+      - Move CheckList display into CheckView.py.
+      - Create a CheckView object to take its place.
+    * configure.ac: Change the checklist DTD path to version 0.3
+    * data/checklist.dtd: Lowercase the "url" proptype.
+    * data/fedoraus.xml: Change ticketURL from type string to "url"
+    * NEWS:
+      - Note that checklist is no longer tied to SRPM QA.
+      - Merge note that distuninstallcheck was fixed in 0.4.1 (r106)
+    * properties.py: Remove bugzillaURL and bugzillaNumber as the code now
+      uses in XML properties.
+    * genericqa.py:
+      - Use the error module to get the exception values.
+      - Remove the resolution_changed call from here.  Need to test whether
+        it works automatically in CheckList/CheckView interaction or if we'll
+        need to write some code to handle this.
+    * qa-convert.pyin: Renamed from qaconvert.py.  This is now a toplevel
+      program that will convert from qasave 0.1 format to checklist 0.3.
+    * checkview.py: Functionality moved from qareviewer.py to display a
+      checklist.  Reimplemented as a subclass of gtk.TreeView.
+    * TODO: Save and load buttons for toolbar is done.
+    * Makefile.am:
+      - Add the qa-convert script as a build target.
+      - Add checkview.py and error.py and removed savefile.py from the
+        qa-assistant files.
+      - Add qa-convert.pyin to the EXTRA_DIST
+      - Overrode the default distuninstallcheck_listfiles to not error on
+        the XML catalogs.  From 0.4 branch (r106)
+    
+2004-09-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r105    
+    * savefile.py: Rename to qaconvert.py
+    * qaconvert.py: Conversion to a script that can read in qasave 0.1 files
+      and output checklist 0.3 files.
+      - Changes to allow running as a standalone script
+      - Rename base class from SaveFile to QAConverter
+      - Now a subclass of CheckList
+      - load(): The new __init__().
+        Changes to initialize an 0.3 format checklist, layer the qasave 0.1
+        on top, and still have a valid 0.3 format checklist in memory.
+      - Removed pieces related to saving.  We're only loading this format.
+        Saves take place as an 0.3 CheckList.
+      - Changes to use the CheckList attributes and publish function to output
+        a correct 0.3 checklist file.
+    
+2004-09-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r104    
+    * Note: Saving and loading checklists should now work entirely with the
+      new code.  There are still some known cosmetic bugs but they are
+      being worked on as part of the next phase of rewriting.
+    * checklist.py:
+      - Create __Property class to save property information.
+      - Bugfix: Save and load property type information.
+      - Bugfix: Use the saved value for resolution instead of the default
+        'Needs-Reviewing' when loading a checklist.
+      - Bugfix: Whether to display a checklist item in the output was being
+        set backwards.  Fixed.
+    * qareviewer.py: New plan for moving the category resolution code after
+      we abstract the CheckView code.
+    
+2004-09-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r103    
+    * This revision is known to not create valid savefiles.
+    * genericqa.py: Remove the checklist import as it's not needed here.
+    * checklist.py:
+      - Move treeModel constants into the CheckList class instead of the
+        module level.
+      - Many conversions of treeModel constants to reference inside the
+        class instead of at the module level.
+      - __init__(): Bugfix properties and functions weren't being extracted
+        from the XML file at all.  This gets them loaded in except for one
+        issue with properties not loading the type attribute.
+      - publish(): Bugfix revision needs to be converted to a string before
+        being saved into the XML.
+      - Change function output to use newTextChild() instead of newChild().
+      - unpangoize_output(): Bugfix span tag is now removed properly.
+      - __xml_to_entry(): Bugfix: the script telling users that an automated
+        test was unable to run needed to specify None for the language
+        versions.
+    * review.py:
+      - Update the checklist treeModel field constants to reference those
+        saved inside the checklist rather than at the module level.
+      - Bugfix indentation problem from iter fixups.
+    * qareviewer.py:
+      - Import the CheckList class from the checklist instead of the whole
+        module.
+      - Convert from SaveFile to CheckList.
+      - Update the checklist treeModel constants to reference those saved
+        inside the checklist rather than at the module level.
+    
+2004-09-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r102    
+    * treetips.py, optionrenderer.py, review.py, qareviewer.py: Rename all
+      variables named iter as it's the name of a python builtin and it's
+      not that descriptive of what's actually being operated on.
+    * ChangeLog: Update to r101
+    
+2004-09-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r101    
+    * NEWS: Really add notes about updated DTD and support for automated tests.
+    
+2004-09-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r100    
+    * Warning: This revision is likely to contain bugs.  Possibly serious
+      bugs.  The checklist dtd and checklist.py has been updated to a new
+      checklist format but the code in savefile.py hasn't.  savefile.py is
+      being phased out in development in favour of the new checklist code.
+      The main app has not yet been ported over to this code so some parts
+      are using the new checklist and others are using the old savefile.
+      The design of QA Assistant means the old and new pieces should be
+      insulated from each other but this isn't guaranteed.
+    * error.py:
+      - Add CannotAccessFile exception for when accessing a given filename
+        doesn't work.
+      - Remove InvalidSaveFile as the savefile format is going away.
+    * genericqa.py: Use new checklist pangoize_output() function.
+    * savefile.py: Use pangoize_output() and unpangoize_output when loading
+      and saving information to the XML files.
+    * review.py:
+      - Set the checklist in the __init__ method.  This is in preparation
+        for making Review into a gtk.TreeView subclass.
+      - Use unpangoize_output() when printing a review.
+    * checklist.py:
+      - Rename _checklistFileVersion_ to formatVersion and move it inside
+        the checklist class.
+      - Remove MODIFIED from the TreeStore entries.
+      - Added TEST to the TreeStore entries.
+      - Moved Exceptions to the error module.
+      - More thorough documentation of the CheckList class.
+      - Define publicID and canonicalURL strings for the checklist.
+      - Create a __Test private class for information on the automated
+        tests that might be included in the XML file.
+      - Create self.functions and self.properties from the XML savefile
+        nodes of the same name.
+      - Save the filename too.
+      - Change exception names to be uppercase word start since exceptions
+        are classes.
+      - Remove checklist "type" attribute as the prop is we're moving to
+        use "functions" instead.
+      - Code to extract the base element from the checklist.
+      - Rename all variables named "iter" as that's a python builtin.
+      - Convert from colorize_output() to pangoize_output().
+      - New function publish() from the savefile.  Writes the modified
+        checklist out to a file.  Many changes over the publish function
+        in savefile to write a checklist 0.3 format instead of qasave 0.1.
+      - Rename colorize_output() to pangoize_output().
+      - New function unpangoize_output() provides the reverse of pangoize.
+        It removes pango markup and make entity substitution for &, < , >.
+      - In __xml_to_entry(), extract the test information as well.
+      - New function __create_entry() from savefile.  Heavily modified to
+        make a checklist 0.3 instead of qasave 0.1 entry.
+    * qareviewer.py:
+      - Use error module for checklist exceptions.
+      - Disable checklist.type checking as that's being replaced by the
+        checklist.functions functionality.
+      - Utilize pangoize_output() to make output strings ready for display.
+    * data/checklist.dtd: Work on version 0.3
+      - New PUBLIC and SYSTEM IDs.
+      - Comment everything.
+      - Remove Checklist type.
+      - Merge necessary qasasve data such as base and property.
+      - Add function element to hold information on what additional
+        abilities the checklist wants added to the QA Actions.
+      - Add test element to hold information for running automated tests.
+    * data/fedoraus.xml: Update to checklist.dtd 0.3
+    * NEWS: Add notes about updated DTD and support for automated tests.
+    
+2004-09-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r99    
+    * error.py:
+      - Make the class names uppercase word since they're classes.
+      - New exception InvalidSaveFile.
+    * data/sample-save.xml:
+      - Combine the various Bugzilla properties into one: TicketURL.
+      - Make SRPM property a URL.
+    
+2004-08-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r98    
+    * error.py: New program wide error module to define exceptions.
+    
+2004-08-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r97    
+    * checklist.py:
+      - Make CheckList be a subclass of gtk.TreeStore.
+      - Get rid of the tree attribute as its functionality is now
+        implemented by the class itself.
+      - Switch to a program wide error module for defining exceptions
+        instead of in-module.
+      - Get rid of the props. attribute because properties are only used
+        to define the output colors and those are moving into GConf.
+    * qareviewer.py, savefile.py: CheckList is now a subclass of
+      gtk.TreeStore so invoke the TreeStore methods directly on it instead
+      of a tree that it holds.
+    * review.py: Rename variable tree references to treeStore as it's more
+      appropriate.
+    * NEWS: Note that the CheckList is now a subclass of gtk.TreeStore.
+    
+2004-08-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r96    
+    * configure.ac: Bump version to 0.5
+    * Merged changes from the 0.4 stable branch.
+      - lastmerge: Set to 0.4 branch, rev 95
+      - checklist.py: Fix display of categories as items after loading a
+        savefile (r95)
+      - NEWS: Merge 0.4.1 Release notes (r95)
+    
+2004-08-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r94    
+    * checklist.py: Instead of saving the path to the customItems category,
+      save an iter.
+    * qa-assistant.spec.in: Cleanups after undergoing Fedora.us QA.
+    * NEWS: Start an 0.5 entry.
+    
+2004-08-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r90    
+    * ChangeLog: Update to r89 in preparation for 0.4 release.
+    
+2004-08-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r89    
+    * AUTHORS: Reformat into ReStructured Text.
+    * README:
+      - Reformat into ReStructured Test.
+      - Change to be a little more clear.
+      - Add $Date$ substitution.
+    * PREFERENCES:
+      - Reformat into ReStructured Test.
+      - Add $Date$ substitution.
+    * TODO:
+      - Add $Date$ and $Rev$ substitution.
+    * NEWS:
+      - Reformat into ReStructured Test.
+      - Add $Date$ substitution.
+    
+2004-08-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r88    
+    * savefile.py: Add a reference to the application so we can
+      use locate_file().
+    * qareviewer.py: Move savefile initialization after GnomeApp creation
+      so we can use it there.
+    
+2004-08-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r87    
+    * savefile.py: import gnome because we're using gnome.program_get()
+      to get the gnome app to use locate_file with.
+    
+2004-08-03 Toshio Kuratomi <toshio@tiki-lounge.com> - r86    
+    * properties.py: Remove the saveDTD from properties.
+    * genericqa.py:
+      - Create resList and outputList for allowable resolutions.
+      - Use resList to create the resolutions in the Option Box.
+      - Use return value from checklist.add_entry() to set Custom Item
+        resolution.
+    * savefile.py:
+      - Remove DTD path as it's all done with catalogs now.
+      - Unescape <, >, & before saving.
+      - Change back to GnomeApp.program.locate_file()
+    * gnomeglade.py: Move locate_file() back into the GnomeApp class.
+      When locate_file() makes its way into pygtk it's going to be a
+      method of GnomeProgram.
+    * checklist.py:
+      - duplicateItemError: New exception used when attempting to add an
+        item that is already allocated.
+      - add_entry(): returns an iter to the new entry.  not sure if this
+        should be a permanent part of the API or just a quick hack to get
+        resolution changing working.
+    * qareviewer.py:
+      - Remove all the DTD handling stuff as it's now done with xml catalogs
+        instead.
+      - Change back to GnomeApp.program.locate_file().
+      - Note that resolution_changed should probably move to the checklist.
+      - Reset the savefile name to None when we load a new SRPM so we don't
+        accidentally overwrite a different saved review.
+    * TODO: Note to look into salvaging uninstalled_file lookups.
+    * SRPM.py: Catch IOError when opening the SRPM fails.  Then we can spit
+      an error about the file being inaccessible.
+    * Makefile.am: Remove the dtd's name from rewriteSystem and rewriteURI
+      as those methods add the dtd filename themselves.
+    
+2004-08-02 Toshio Kuratomi <toshio@tiki-lounge.com> - r85    
+    * savefile.py: Change canonical URL to include a dtds directory.
+    * review.py: Justify the hash output on the left side of the output.
+    * data/checklist.dtd: Change canonical URL to include a dtds directory.
+    * data/fedoraus.xml: Change the DOCTYPE to a full PUBLIC ID and
+      canonical URL.
+    * data/qasave.dtd: Add a dtds directory to the canonical URL.
+    
+2004-08-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r84    
+    * review.py:
+      - Import the textwrap module.
+      - self.textwrap: New attribute holding a textwrapper to output reviews.
+      - publish(): Modified to use self.textwrap to cut lines at 70 columns.
+    * configure.ac:
+      - Require Python 2.2 or above.
+      - If python 2.2, check for an external textwrap module.
+    * TODO:
+      - Add note to look into display textwrapping in the review and
+        treeview widgets.
+      - Remove save/load as it is complete.
+      - Remove Review.publish wordwrapping as it's done.
+      - Remove DTD catalogs as they're done.
+    * NEWS:
+      - ReStructuredText reformatting
+      - Add textwrap to the list of new things.
+    
+2004-08-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r83    
+    * configure.ac: Changes to enable installing DTDs
+      - Add SUBST'd vars for CHECKLIST and QASAVE versions.
+      - Find out where xmlcatalog is installed.
+    * TODO: Add note to write proper checks for file existence.
+    * qa-assistant.spec.in: Updates to get the DTDs properly installed in
+      the system catalog.
+    * Makefile.am:
+      - Move the DTDs to $(datadir)/xml/qa-assistant/checklist or qasave.
+      - Create an xmlcatalog for the dtds at installtime.
+      - Add the new catalog to the system supercatalog.
+    * NEWS: Add note that the DTDs are now installed into the system catalog.
+    
+2004-08-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r82    
+    * savefile.py: Create new entries into the checklist when we have Custom
+      Checklist Items in the savefile.
+    * genericqa.py: Move code to create Custom Items out of genericqa and
+      into checklist.py using the new checklist.add_entry() method.
+    * checklist.py:
+      - Create customItemsPath attribute holding the gtk.tree path to the
+        custom items category.
+      - add_entry(): new method that adds an entry to the Custom Items
+        Category of the review checklist.
+    
+2004-07-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r81    
+    * savefile.py:
+      - set_checklist(): method to set the checklist whenever it changes.
+        dirty hack that will go away when we merge with checklist as we'll
+        then be able to reference `self`.
+      - __xml_to_entry(): Fix the Output List to be a dict rather than a list.
+    * qareviewer.py:
+      - __init__(): Create saveFile before checklist so that __load_checklist
+        can access the saveFile.
+      - Remove the TreeModel from the arguments to the output_edited callback
+        because arguments passed in are set at definition time, not runtime,
+        leading to stale data.
+      - on_menu_open_activate(): Make sure we destroy the old checklist
+        before creating a new one.
+      - on_menu_open_activate(): Ditto for reviewView
+    
+2004-07-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r80    
+    * savefile.py: Add is item property to savefile.
+    * review.py: Unescape <, >, & when publishing.
+    * README:
+      - Reformat to ReStructured Text.
+      - Note python 2.3 as development platform.
+      - Note pygtk-2.2.0 is a requirement
+    * checklist.py: Escape <, >, & in output strings.
+    * data/qasave.dtd: Add an item attribute to entry.
+    
+2004-07-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r79    
+    * Merge the savefile branch back to the mainline.
+    * properties.py:
+      - Remove checklistName and checklistRev as these are now set on
+        checklist load now. (r75)
+      - Create a set method to set a property if it exists. (r78)
+    * savefile.py:
+      - Start using publicID and canonicalURL. (r75)
+      - Save the whole checklist here instead of just the tree data. (r75)
+      - Fix external subset reference. (r75)
+      - Set checklist name and revision in the checklist rather than through
+        properties. (r75)
+      - Create entries element around the <entry> list. (r75)
+      - Call freeDoc() so we don't leak memory. (r75)
+      - Create a load method. (r75)
+      - Set SaveFile.filename to None until it's set. (r76)
+      - Pass the new checklist to __xml_to_entry so it can colorize the
+        output.  Need to remove when we combine with checklist. (r76)
+      - Whitespace fix. (r77)
+      - When loading the SRPM property use properties.load_SRPM(). (r78)
+      - Use the properties.set() interface. (r78)
+      - Set _qaSaveFileVersion_ to 0.1.
+    * optionrenderer.py: Cast event.x/y to int() when calling alert_changes
+      because gtk.get_path_at_pos has deprecated taking floats. (r76)
+    * treetips.py: Cast event.x/y to int's when calling __treetip_show
+      because gtk.get_path_at_pos has deprecated taking floats. (r76)
+    * qareviewer.py:
+      - Create a save menu callback. (r76)
+      - Sync the view of the checklist when we load a save file. (r77)
+      - Move the menu save handler to mirror menu placement. (r77)
+      - Move creation of the Review widget to __load_checklist(). (r78)
+      - Revert workaround for gtk.menu.popup time bug as it's fixed in
+        pygtk-2.2.0. (r78)
+      - Loading a new review from SRPM now calls __load_checklist(). (r78)
+      - Create an open menu callback to load a save file. It has copies
+        of code in __load_checklist to work so cleanup is necessary. (r78)
+    * configure.ac: Require pygtk >= 2.2.0 because it fixes the
+      gtk.menu.popup time bug. (r78)
+    * TODO:
+      - XML save/checklist merge note. (r77)
+      - Textwrap in optik note. (r78)
+      - Treetip display note. (r78)
+      - Save-load header bug note. (r78)
+      - Savefiles implemented.  Woo-hoo! (r78)
+      - Reformat to RestructuredText (so we can generate docs with python's
+        docutils package.) (r78)
+    * SRPM.py: Bugfix: SRPM.hashes() now returns a copy instead of the
+      actual hashes. (r78)
+    * data/fedoraus.xml:
+      - Change output for Package signature verified. (r77)
+      - Add Not-Applicable state to Default Password entry. (r77)
+    * NEWS: Add fact that save format will change to the release notes. (r78)
+    
+2004-06-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r73    
+    * gnomeglade.py: Move utility functions __uninstalled_file and
+      locate_file to the toplevel.  Make uninstalled_file public.
+    * PREFERENCES: Note the difference between a preference and a property.
+    * qareviewer.py: Switch to toplevel gnomeglade.locate_file() and
+      gnomeglade.uninstalled_file()
+    * data/checklist.dtd: Add a public identifier and canonical URL.
+    * data/sample-save.xml: Move list of <entry> into new toplevel <entries>.
+    * data/qasave.dtd:
+      - Add a public identifier and canonical URL.
+      - Move list of <entry> into a new toplevel <entries> tag.
+      - Add comments.
+    * Makefile.am:
+      - Add savefile.py.
+      - Fix comment typos.
+    * autogen.sh: Add --force-missing to automake invokation.
+    
+2004-05-12 Toshio Kuratomi <toshio@tiki-lounge.com> - r72    
+    * properties.py:
+      - Add the save DTD filename.
+      - Separate things for future preferences from properties.
+    * genericqa.py:
+      - Fix the dialogs in the publish callback to have a default response.
+      - msgDialog to closes gracefully when closed via the window manager.
+      - Fix remembered directories to point to the ReviewDir, not the SRPMDir.
+      - Rearrange things with the FileSelectDialog to run as little as possible
+        under the try:finally: block.
+      - Setup infrastructure to test if we succeed or fail to write the file.
+      - Check for a new category resolution when adding entries to the Custom
+        Checklist Items.
+    * savefile.py: New object to hold savefile routines.  Currently saves but
+      still needs to load.
+    * ChangeLog: Update to r71
+    * review.py: When we update a Category, we still have to check if there
+      are resolution changes that affect the review as a whole.
+    * qareviewer.py:
+      - Add the qasave.dtd file to the properties.
+      - Fix looking for properties.checklist (filename) instead of
+        checklistName (symbolic name)
+      - Remove the publish callback as it's now in genericqa.py
+      - Create on_menu_save_as_activate modeled on genericqa.py:publish
+        (review).
+      - Rearrange things with the FileSelectDialog when loading an SRPM to
+        run as little as possible under the try:finally: block.
+    * TODO: Note that libxml2 has some guidelines for good xml definitions
+      that we need to look at.
+    * data/qasave.dtd: <checklist> is no longer empty.  Instead it contains
+      the filename of the checklist.
+    * data/sample-save.xml: <checklist> now contains the filename of the
+      checklist.
+    * NEWS: Add saving and loading to the new features.
+    
+2004-04-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r71    
+    * genericqa.py: Add Rev and Id keyword expansion.
+    * treetips.py: Add Rev and Id keyword expansion.
+    * review.py: Bugfix ListStore.append takes a tuple, not a straight sequence
+      of values.
+    * srpmqa.py: Add Rev and Id keyword expansion.
+    * checklist.py: Beginning of changes to allow Saving of work.
+      - Add a MODIFIED entry to the tree.
+      - self.addPaths hash to alert us that an entry is being added.
+      - __modified_row and __added_row replace broken __add_entry_to_lookup
+      - __modified_row: new function
+        + Sets the MODIFIED flag on the row.
+        + Adds new entries to the entries hash for quick lookup of existing
+          checklist items.
+      - __added_row: New function
+        + Sets MODIFIED flag on a new row so it gets saved.
+        + Adds the row path to addPaths so __modified_row can add it when the
+          SUMMARY information becomes available.
+    * data/checklist.dtd: Use ENTITY for Enumerated values.
+    * data/qasave.dtd: New dtd that defines a savefile.
+    * data/sample-save.xml: A sample savefile.
+    * Makefile.am: Move comments on the install-data-hook above the definition
+      to make it more portable.
+    
+2004-04-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r70    
+    * genericqa.py:
+      - Add an attribute to cache the path where we add custom checklist items.
+      - Use the customItemsPath attribute instead of searching.
+      - Don't emit the row-inserted signal manually, gtk takes care of it
+        automatically.
+    * review.py:
+      - Add an attribute to cache items being added.
+      - Stop using self.tree.  It was unnecessary to hold a reference to the
+        tree because it was sent to our functions whenever we needed to use
+        data from it.
+      - __update_data(): Now does most of the work when adding entries as well.
+      - __add_data(): Functionality moved to __update_data because row-inserted
+        is emitted when the row is created.  But it is created empty.  So we
+        have no way to use it at that point.  New __add_data() just flags the
+        treeStore's path as being added so __update_data doesn't have to
+        guess that an addition is coming.
+    
+2004-04-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r69    
+    * paths.py.pyin: Add Id and Rev keyword expansion.
+    * review.py: Change 'if variable == True:' to 'if variable:' form
+    * gnomeglade.py: Fix typo: gnome.PARAM_GNOME_SYSCONFIGDIR => SYSCONFDIR
+    * qareviewer.py: Change 'if variable == True:' to 'if variable:' form
+    * configure.ac:
+      - Add a header to describe what the file does.
+      - Set Id and Rev keyword expansion
+      - Check for PYGNOME existence as well as pygtk.
+    * TODO: Reformat.
+    * qa-assistant.spec.in: Add Requires gnome-python-gconf2 and pygtk2
+    * Makefile.am: Add a header and Id Rev expansion
+    * glade/qa-assistant.strings, glade/qa-assistant.glade:
+      - Change QA Actions Mnemonic
+      - Change the Start label to reflect the change in menus
+      - Add others to the AUTHORS section of the about dialog
+    * NEWS: Started summary of what the changes are for this release
+    
+2004-04-27 Toshio Kuratomi <toshio@tiki-lounge.com> - r68    
+    * genericqa.py:
+      - Change the 'Add Checklist Item' mnemonic
+      - add_item_to_checklist_callback: Now performs.  We are able to add custom
+        review items using this action.
+    * treetips.py: Do not pop-up a tooltip if there is no tooltip text.
+    * review.py: Load new checklist entries into the Review widget when they
+      are added to the checklist tree.
+    * srpmqa.py: Some notes on things fedora-startqa does that we might want to
+      add to the SRPM Actions.
+    * checklist.py:
+      - Change function names from __xmlToEntry() form to __xml_to_entry()
+      - Create a new data struct 'entries' which is a map of Summary => iter.
+        The immediate need was to have fast lookups of what Summary items
+        appear in the checklist.  Eventually, the Review widget should also use
+        this to quickly access an iter from a Summary value.
+      - colorize_output: Move colorization of output to its own function.
+      - __add_to_entry_lookup: New function to support the entries dict.
+    * qareviewer.py:
+      - Rename columns 'pass/fail' and 'Description' to 'Resolution' and
+        'Summary'.
+      - Use checklist.colorize_output()
+      - Set default responses on dialog boxes
+    * TODO:
+      - Add note about architectural changes for QA Functions
+      - Remove add non-checklist items as it's finished
+    * glade/qa-assistant.glade: Change the Mnemonic on QA Actions menu.
+    * NEWS: Add ability to add custom checklist items to 0.4 announce.
+    
+2004-04-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r66    
+    * Add generated spec file and .pyo's to ignore list
+    * qa-assistant.desktop.in: Remove leading _ on internationalized entries
+      because we're not yet sophisticated enough to use i18n
+    * qareviewer.py: Bump version to 0.4
+    * configure.ac: Bump version to 0.4
+    * TODO: Druid on New note
+    * qa-assistant.spec.in: Make the desktop install conform to Fedora Extras
+    * Makefile.am: Automake's py_compile script doesn't account for DESTDIR.
+      Created an install-data-hook that sets compiled in paths properly
+    * NEWS: Begin the 0.4 notes
+    
+2004-04-21 Toshio Kuratomi <toshio@tiki-lounge.com> - r65    
+    * ChangeLog: Update to r64
+    * README: Add a quick install section.  Remove redundant stuff.  Note that
+      subversion server is currently unavailable.
+    * NEWS: Remove subversion archive from announcement.  Rewrite summary.
+    
+2004-04-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r64    
+    * treetips.py: FIXME notes
+    * ChangeLog: Update to rev 61
+    * qareviewer.py:
+      - New start label message reflects QA Action menu.  Need some
+        architectural thought here.
+      - Not Yet Implemented Dialog path bugfix.
+    
+    
+2004-04-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r63    
+    * configure.ac: Generate qa-assistant.spec
+    * TODO: Spec file written
+    * qa-assistant.spec.in: First cut spec file for qa-assistant.  Needs some
+      touchups to the desktop file handling and check to make sure the URL and
+      Source0 download link are correct.
+    * Makefile.am:
+      - Add genericqa.py and srpmqa.py to the dist scripts.
+      - Remove qa-assistant from the nodist section.  It is already in the
+        bin_SCRIPTS target.  Add qa-assistant manually to CLEANFILES.
+      - Add the *.spec and *.spec.in to EXTRA_DIST
+    * NEWS: Spec file and QA Actions menu notes.
+    
+2004-04-20 Toshio Kuratomi <toshio@tiki-lounge.com> - r62    
+    * genericqa.py: Not yet implemented dialog for adding checklist items
+    * srpmqa.py: Bug fix function calls in From SRPM and From Bugzilla
+    * qareviewer.py: Make SRPM_into_properties a public method
+    * TODO: QA Menu TODO item is now implemented.
+    * glade/qa-assistant.strings, glade/qa-assistant.glade:
+      - Remove Publish and Submit from the File menu.
+      - Add a default_width of 400 to the Not Yet Implemented Dialog.
+    
+2004-04-19 Toshio Kuratomi <toshio@tiki-lounge.com> - r61    
+    * genericqa.py: A new subclass of gtk.Menu.  This represents a generic QA
+      Menu with callbacks for its menu items.  Actions that can be performed
+      on all QA checklists should be added here.
+    * srpmqa.py: A new subclass of genericqa.py that adds menuitems and
+      callbacks for actions specific to writing a review of an srpm.
+    * checklist.py: Comments for each of the TreeModel field enums
+    * qareviewer.py: Import the proper QA Menu code depending on the type of
+      checklist we load.
+    * glade/qa-assistant.glade, glade/qa-assistant.strings: Create the empty
+      QA Action menu that qareviewer.py fills with a GenericQA or SRPMQA object.
+    
+2004-04-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r60    
+    * review.py: Remove the formatting tags before spitting out the review
+    * checklist.py: Change Needs-Reviewing output back to None as it turns out
+      it wasn't necessary and broke the Review widget's publish method.
+    * qareviewer.py: 
+      - Popup a message dialog if the reviewer wants to publish and the review
+        has a resolution of Incomplete.
+      - Publish review dialog is now destroyed whether it's successful or not.
+      - gtk.get_current_event_time, event.time, and menu.popup have an overflow
+        bug.  event.time and menu.popup use 32Bit Python signed ints.
+        get_current_event_time returns a Python Long type.  The C gtk library
+        uses an Unsigned 32 bit int.  Problem should probably be fixed in the
+        bindings by using Python Long for python code and coerce to C unsigned
+        int when sending to the library.  My temporary work around is to munge
+        the long type into an int32 that's wrapped into the negatives.
+    * TODO, NEWS: Check for 'Needs-Reviewing' Resolution done.
+    
+2004-04-16 Toshio Kuratomi <toshio@tiki-lounge.com> - r59    
+    * checklist.py, qareviewer.py: Give the whole props array to the new
+      checklist rather just the colors.
+    * TODO: Note that textwrap is a python 2.3 method.
+    
+2004-04-15 Toshio Kuratomi <toshio@tiki-lounge.com> - r58    
+    * properties.py: Add *Color properties
+    * review.py: Set the output renderers to use markup instead of text
+    * checklist.py: Add color information to the output strings.  The color
+      information is stored in the Properties object which is not a part of
+      the checklist.  So the information is given when initializing the
+      checklist.  Not ideal.
+    * qareviewer.py:
+      - Set output renderer to use markup instead of text
+      - Note about __load_checklist bug
+      - Set colors when editing an output string
+    * TODO: Remove colorize.  Add spec file
+    * NEWS: Add colorize to the list of new features
+    
+2004-04-15 Toshio Kuratomi <toshio@tiki-lounge.com> - r56    
+    * qareviewer.py: Fix a bug where reloading the checklist causes editing of
+      the entries to stop working.
+    
+2004-04-14 Toshio Kuratomi <toshio@tiki-lounge.com> - r50    
+    * ChangeLog: Update to r49
+    * qareviewer.py: Display the SRPM in the title and status bars
+    * TODO: Cross things off and file the comments from the code appropriately
+    * NEWS: Add titlebar note
+    
+2004-04-14 Toshio Kuratomi <toshio@tiki-lounge.com> - r49    
+    * Ignore files generated by autoconf/automake
+
+2004-04-14 Toshio Kuratomi <toshio@tiki-lounge.com> - r48    
+    * properties.py: Uncomment bugzilla stuff although it doesn't do anything.
+    * paths.py.pyin: Python file that has variables which make expands to point
+      at various parts of the installation path.  This gives us access to the
+      paths the user gives to configure for Gnome functions.
+    * qa-assistant.desktop.in: First stab at a desktop file to put things in
+      the menus.  It is a .in because intltool messes with it.  However, we
+      aren't yet using that.
+    * qa-assistant, qa-assistant.pyin: Moved qa-assistant to .pyin because we
+      need make to append the install directory ($pkgdatadir) to the python
+      import path.
+    * gnomeglade.py:
+      - Set the gnome PARAM_APP_* properties on the GnomeApp object using the
+        configure values stored in paths.py
+      - GnomeApp.__uninstalled_file(): looks for the filename in the program's
+        directory.  Useful when testing the program in the build directory.
+      - GnomeApp.locate_file(): simulate the libgnome function.  Look for
+        files in a specified FileDomain and return a list of possibilities.
+      - Use __uninstalled_file and locate_file to load the user interface.
+    * README:
+      - Changes for sourceforge and the fact that it can now install
+      - Bump version to 0.3
+    * checklist.py: Accommodate the checklist now having a type.
+    * qareviewer.py:
+      - Separate programName from programHumanName
+      - Bump version to 0.3
+      - Set gnome properties on the GnomeApp
+      - Use locate_file to find the program data/pixmap/glade files.
+    * configure.ac: Configure script for qa-assistant
+    * data/checklist.dtd: Bump version to 0.2 and make a type attribute for
+      checklist so we can load certain menus based on the checklist type.
+    * data/fedoraus.xml: Version bump and specify type=SRPM
+    * Makefile.am: Makefile.am for qa-assistant
+    * autogen.sh: Minimal autogen.sh
+    * glade/qa-assistant.glade: Remove icon and logo lines.  These are now set
+      programmatically.  (Otherwise the path names would have to be munged
+      in the glade file.)
+    * NEWS: Begin charting major 0.3 changes
+    
+2004-04-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r44    
+    * ChangeLog: updated to r43
+    * README: List the subversion repository URL
+    
+2004-04-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r43    
+    * qareviewer.py: Add callback to open New Menu from toolbar button
+    * SRPM.py: Bugfix case where a directory with no hashable files is in the
+      way of expanding a new SRPM
+    * glade/qa-assistant.strings, glade/qa-assistant.glade:
+      - Reverse the order of New from SRPM and New from Bugzilla
+      - Add callbacks for toolbar New, Open, and Save
+    * NEWS: Note that the toolbar now has working "New" button
+    
+2004-04-10 Toshio Kuratomi <toshio@tiki-lounge.com> - r42    
+    * properties.py: Fixup SRPM Exception passing
+    * qareviewer.py: Document what we want to do eventually with Security
+      Exceptions from reading in SRPMs.  The infrastructure should all be there
+      now.  Just needs detail work.
+    * SRPM.py:
+      - Fix up Exception handling.  May need more work but I need more code
+        that utilizes the exceptions to see what to do.
+      - Detect errors when trying to read a file that isn't an rpm
+      - Fix __hash_directories crash
+    * data/qa-assistant.glade: Set the startLabel to sensitive so things
+      display in a normal state instead of greyed out.
+    * AUTHORS: New file crediting Stephen Kennedy for gnomeglade.py and
+      Ville Skyttä for rpm2cpio implementation
+    * ChangeLog: Sync to r41
+    * TODO: Check off two items
+    * NEWS: Complete the version 0.2 list of features
+    
+2004-04-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r41    
+    * properties.py: 
+      - Move SRPM loading into Properties class
+      - Implement persistent directories for FileSelect Dialogs
+    * review.py:
+      - Move MD5Sums to the top of the review
+      - Note to connect to properties signals when implemented
+      - hash label creation moved to function __update_hash
+      - update_hash function created as stopgap until properties has gsignals
+    * qareviewer.py:
+      - Move SRPM loading to properties.py
+      - translate_option_mode() => __translate_option_mode()
+      - Reorder __init__(): commandline parsing at the bottom
+      - Get rid of ReviewWindow.show_all().  Per widget show method instead.
+      - __load_checklist()  loads the checklist from the data file
+      - __SRPM_into_properties() loads a new SRPM file into the properties
+        structure
+      - __check_readiness() figures out whether we've got an SRPM and are ready
+        to load a checklist or need to display a label that says we aren't
+        ready to do anything yet.
+      - Implement persistent directories for FileSelect Dialogs
+      - Implement New From SRPM menu item
+    * TODO: Move notes from qa-assistant into the TODO
+    * qa-assistant: Move TODO comments into the TODO
+    * glade/qa-assistant.glade: Create startLabel which displays a message when
+      we don't have an SRPM targeted (So the user won't start filling in a
+      checklist by mistake.)
+    
+2004-04-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r40    
+    * treetips.py: Fix timeoutID to keep from popping up tooltips when we
+      aren't hovering over a tooltip item.
+    * checklist.py: Remove extraneous whitespace from the xml content nodes.
+      May revisit this in the future.
+    * TODO: Note that python textwrap may be able to solve the wordwrapping in
+      Review issue.
+    
+2004-04-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r39    
+    * properties.py: Remove #! line and version as this isn't the main script.
+    * treetips.py: Class to do tooltips on a treeview row.
+    * optionrenderer.py: Remove on_start_editing as we're not going to support
+      that.
+    * review.py:
+      - Change '-' bullets to '*' (Better for gpg)
+      - Move MD5Sums to beginning of review to be more like fedora-startqa
+    * README: Start of an introduction to QA Assistant
+    * qareviewer.py:
+      - Increment the version to 0.2
+      - Set up the TreeTips on our TreeView
+    * TODO: Tooltips are taken care of
+    * NEWS: Start keeping a NEWS file for 0.2
+    
+2004-04-06 Toshio Kuratomi <toshio@tiki-lounge.com> - r38    
+    * properties.py, review.py, qareviewer.py, SRPM.py: Fix $$Rev instead of
+      $$Revision for keyword expansion
+    * optionrender.py:
+      - Fix the $$Rev instead of $$Revision keyword
+      - Cache the cell's height and width in an internal variable
+      - __compute_menu_position now used to display the menu as if it came from
+        the dropdown box.
+    * ChangeLog: updated to Rev 37
+    * TODO: Add menu for checklist actions note
+    * data/fedoraus.xml: Changed the name of MD5Sum verified to upstream source
+      verified
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r37    
+    * data/fedoraus.xml: Add Non-Blocker status to Buildroot.
+    * ChangeLog: Update
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r36    
+    Add Id and Rev keyword expansion to source code
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r35    
+    * fedora-md5, fedora-qatemplate: Removed files that have no part in this
+      program (except as ideas.)
+    * TODO: Add note to work on scripts to install and distribute the program
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r34    
+    * Copy fedora-rpmdevtools over to the new project.  Will delete extraneous
+      files shortly.
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r33    
+    * ChangeLog: Create a ChangeLog with the current svn changes
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r31    
+    * qareviewer.py: Fix argument handling to really only take one argument
+    * data/fedoraus.xml: Set SRPM GPG signed entry to display by default
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r30    
+    * TODO: Add note about fedora-startqa script
+    * data/fedoraus.xml: Finish inputting the fedoraus checklist
+    
+2004-04-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r29    
+    * qareviewer.py:
+      - Only load an SRPM if one is given on the commandline.  Print a usage
+        message otherwise.
+      - Catch exceptions from loading the SRPM -- but don't do anything
+        useful with them yet.
+      - Fix the Auto-display of non-Pass items to display non-blockers as well.
+    * TODO: update SRPM.py entry
+    * SRPM.py:
+      - Added some simple exceptions.  May need more refinement as we progress.
+      - Check if the SRPM file exists and is readable instead of just if the
+        file has the potential to be readable.
+      - Some cleanups to how we use python file objects.
+      - Reordered the functions to be somewhat more logical.  Still some work
+        to be done there.
+      - Check for previous unarchival of rpm.  Still needs a few problem cases
+        resolved nicely.
+      - Fix up the internal rpm2cpio code.  It now works with gzip compressed
+        payloads.  BZ2 stuff needs python-2.3 and someone to take a look at the
+        different interface.  
+    
+2004-03-30 Toshio Kuratomi <toshio@tiki-lounge.com> - r28    
+    * checklist.py: Change the Display tag to an attribute of entry
+    * data/checklist.dtd: Ditto
+    * data/fedoraus.xml: Ditto
+      - Also take out display altogether when it's the default value of false.
+    
+2004-03-30 Toshio Kuratomi <toshio@tiki-lounge.com> - r27    
+    * review.py: Fix logic in deciding the overall review resolution
+    * checklist.py:
+      - Removed INPUT from the checklist file.  Needs some rethinking before we
+        add something like it back in.
+      - Validate the checklist file with the checklist.dtd
+      - Fixed the Exception names.
+      - Removed 'output' tag from checklist.  Output is now the content of the
+        state tag rather than having its own tag.
+    * qareviewer.py: Catch exceptions from libxml2.treeError as well as
+      libxml2.parserError
+    * TODO: Logo item and needing something to "force" the user to edit output
+      items when they could add useful information that the program can't
+      guess.
+    * data/checklist.dtd:
+      - Remove input
+      - Set false as the default display state
+      - Remove output: information is now directly in the state tag
+    * data/fedoraus.xml:
+      - Add DOCTYPE line to associate with checklist.dtd
+      - Add many more entries from the Fedora Checklist
+      - Changes to output and input for new dtd.
+    
+2004-03-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r26    
+    * qareviewer.py:
+      - Reorder menu callbacks in depth first order they appear in the menu
+        bar.
+      - publish_activate: Prompt user for a filename to save the review to.
+    * TODO: Remove items that have been completed and notes to enhance others.
+    * glade/qa-assistant.strings, glade/qa-assistant.glade: Remove the
+      FileSelection dialog from the glade definition.  It's very easy to add
+      fileSelectionDialogs programmatically so that's how I'm going to do it.
+    
+2004-03-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r25    
+    * review.py: publish(filename) method implemented.  Call the publish method
+      on a review object to print out the review.  Note:  further work could be
+      done for word wrapping and WYSIWYG-ness.
+    * qareviewer.py: connect publish menu item to review.publish()
+    
+2004-03-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r24    
+    * review.py: Finish the display methods.  Implemented as a listStore that
+      connects to the QAReviewer.checklist.tree row-changed signal and mirrors
+      the data there.
+    * checklist.py: Change resolution state from 'Needs Reviewing' to
+      'Needs-Reviewing' because of limitations of DTD (Wish libxml2 did
+      XML Schemas...)
+    * qareviewer.py:
+      - Allow editing the OUTPUT Field
+      - Change resolution state names because of DTD
+      - Change the reviewPane toggle to use hide/show rather than 
+        remove/insert
+    * TODO: Minor reorganizations
+    * checklist.dtd: Initial DTD for our checklist data files.  Preparatory
+      for adding validation to the checklist.py script.
+    * fedoraus.xml: Changes to naming due to DTD limitations
+    * glade/qa-assistant.glade: Add a ViewPort into the ScrolledWindow.
+      Renamed ViewPort to reviewPane and ScrolledWindow as reviewScroll
+    
+2004-03-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r23    
+    * glade/fedora-qareviewer.glade, glade/fedora-qareviewer.strings:
+      Renamed to qa-assistant.glade and qa-assistant.strings
+    
+2004-03-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r22    
+    * glade/fedora-qareviewer.strings, glade/fedora-qareviewer.glade,
+      TODO, qareviewer.py: Change reference to editorPane to reviewPane
+    * fedora-qareviewer: Rename to qa-assistant.
+      - Remove constants from here that are going into qareviewer.py instead
+    * qareviewer.py: Change fedora-* file names to qa-assistant* files
+    * glade/fedora-qareviewer.glade, glade/fedora-qareviewer.gladep,
+      glade/fedora-qareviewer.strings: Changed text inside the files to match
+      the new name.
+    * Renamed glade/fedora-qareviewer.gladep to qa-assistant.gladep
+    
+    
+2004-03-28 Toshio Kuratomi <toshio@tiki-lounge.com> - r21    
+    * pixmaps, pixmaps/qa-icon.xcf, pixmaps/qa-icon.png: icon file for QA
+      Assistant
+    * properties.py: Initial work on a properties class to keep properties
+      for the review
+    * review.py: Initial, non-working start on the review widget.  May
+      implement as a glade custom widget
+    * PREFERENCES: split into preferences/properties
+    * qareviewer.py: add SRPM and Properties code
+      - Reorganized the method ordering to be more logical
+      - Added docstrings for all completed methods
+      - Small reworking of logic in resolution_changed
+      - Implement Not Yet Implemented dialog for every menu item that's not yet
+        working
+    * TODO: Reorganized
+    * SRPM.py: Initial work at an SRPM class to track the SRPM associated with
+      the Review.  Works just barely.  Currently uses a system call to
+      fedora-unrpm for part of its work and unrpms to a directory without
+      being able to deal with that directory already existing.
+    * glade/fedora-qareviewer.strings glade/fedora-qareviewer.glade: 
+      - Added icons to the windows (Note: Probably should be done within the
+        program instead.)
+      - Added menu entries for all the features I can think of wanting to add.
+    
+2004-03-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r20    
+    * TODO: View Menu and preferences notes
+    * PREFERENCES: Start a list of preferences to add once we have GConf stuff
+    * optionrenderer.py: Set 'selectedoption' when we change the resolved state
+    * qareviewer.py: Change Category resolution when we change the state of the
+      individual checklist items
+    
+2004-03-25 Toshio Kuratomi <toshio@tiki-lounge.com> - r19    
+    * TODO: 
+    * data/fedoraus.xml: Change from all lowercase to mixed case.
+    * checklist.py, qareviewer.py, optionrenderer.py: Many changes to use my
+      custom optionrenderer that simulates a combo box. 
+    
+2004-03-09 Toshio Kuratomi <toshio@tiki-lounge.com> - r18    
+    * Able to switch from review view to in-list view.
+    
+2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r17    
+    * Parsing the checklist is done.  Doesn't display well or do anything yet.
+    
+2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r16    
+    * qareviewer.py, fedora-qareviewer: Split QAReviewer Class to its own file.
+
+2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r15    
+    * fedora-qareviewer, checklist.py: Split checklist class into its own file.
+
+2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r14    
+    * Start of a TODO list
+
+2004-03-04 Toshio Kuratomi <toshio@tiki-lounge.com> - r13    
+    * Change <help> to <description>
+
+2004-03-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r12    
+    * Set up svn properties on the files.
+    
+2004-03-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r11    
+    * Initial import of fedora-qareviewer, a program to aid Quality Assurance
+      Reviews.
+    
+2004-03-01 Toshio Kuratomi <toshio@tiki-lounge.com> - r10    
+    * COPYING: checkin a copy of the GPL version 2
+
+2004-02-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r9    
+    * fedora-qatemplate: Merge sensible things from my version of fedora-md5.
+      - Update version to 0.2
+      - Add --checkhdr to check whether the rpm header agrees with the
+        actual MD5Sums.
+      - Redo the argument parsing because the old version only worked by
+        accident.
+      - Rework hash_file/hash_directory to output a hash rather than writing
+        to an opened filehandle.
+      - New functions get_hashes_from_rpm and perform_header_check to verify
+        the RPM header MD5's against the actual md5s
+    
+2004-02-29 Toshio Kuratomi <toshio@tiki-lounge.com> - r8    
+    * fedora.md5: Note that the regex check for directory structure isn't
+      exact.
+    
+2004-02-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r7    
+    * Set keyword expansion on the file.
+    
+2004-02-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r6    
+    * Remove some comments that aren't going to be implemented now.
+    
+2004-02-08 Toshio Kuratomi <toshio@tiki-lounge.com> - r5    
+    * New Program fedora-md5 that replaces the old shell script of the same
+      name.
+    
+2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r4    
+    * $ keyword should be $
+    
+2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r3    
+    * Get svn:keywords right
+    
+2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r2    
+    * Expand keywords in the script.
+    
+2004-02-07 Toshio Kuratomi <toshio@tiki-lounge.com> - r1    
+    * Checkin my script and a directory layout.  The script performs hashing
+      of source files fine but doesn't do any of the other stuff I have
+      planned.
+    

@@ -1,0 +1,54 @@
+==================
+List of Known Bugs
+==================
+
+:Author: Toshio Kuratomi
+:Contact: toshio-tiki-lounge.com
+:Date: $Date$
+:Revision: $Rev$
+
+.. contents::
+
+Reporting New Bugs
+------------------
+Please report new bugs into the bug tracker at berlios.
+
+Packaging Errors
+----------------
+* Need to clear my gconf cache of any keys created during testing that aren't
+  going to be distributed to guard against error.
+* configure.ac should be modified to check for pygtk, gnome-python, etc as
+  python modules; not for the pygtk-devel C level interface.  We don't need
+  to build anything against pygtk-devel; we just need the pygtk module to
+  test and run.
+
+Programming Errors
+------------------
+* src/checkload.py:  Need to take some code that's almost verbatim duplicated
+  in qareviewer.py and make it exist in only one place.  checkload is
+  currently where all the loading takes place so it makes the most sense.
+  But in the future we will have new reviews in checkload and loaded files
+  elsewhere so perhaps qareviewer is the best place for this.
+* Use gtk.TreeStore.set instead of self.set in checklist wherever possible.
+  Significant performance boost. [Done -- audit]
+* Define default preferences within the code in case the schema hasn't been
+  registered with gconf.
+* For tests somethings have to be preconfigured for certain tests to be
+  performed.  In fedora.us some tests may need the network.  Others may need
+  the SRPM to be available (or the network).  Others may need to have the
+  unarchived rpm available.
+
+  - In the softwarerelease checklist we need to have the network to check the
+    svn repository.  The repository or a tarball needs to be accessbile to run
+    make dist-check, et al.
+* Redirect gpg output to /dev/null.
+
+Working: Need to test
+---------------------
+* Need to set the category state from checklist.py
+* No longer need the checklist to connect to the row-inserted and row-changed
+  signals as we do not track modifications to rows anymore and all adds go
+  through add_entry so we can perform the add to self.entries there instead.
+* Need to migrate code to set the category state into checklist.py.
+* We don't need to create a checklist on program start anymore.  Wait until
+  we have data (A savefile load or SRPM load) to instantiate.

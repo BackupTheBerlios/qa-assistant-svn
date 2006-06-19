@@ -1,0 +1,22 @@
+# File: qaglobals.py
+# Author: Toshio Kuratomi <toshio@tiki-lounge.com>
+# Date: 22 October, 2004
+# Copyright: Toshio Kuratomi
+# License: GPL
+# Id: $Id$
+'''Program wide constant values.
+'''
+__revision__ = '$Rev$'
+
+# Present version
+VERSION = '@VERSION@'
+
+# Names for the program
+PROGRAMNAME = 'qa-assistant'
+HUMANPROGRAMNAME = 'QA Assistant'
+
+# Prefix for the gconf keys
+GCONFPREFIX = '/apps/qa-assistant'
+
+# Set default paths for File Dialogs to look in
+lastReviewDir = './'

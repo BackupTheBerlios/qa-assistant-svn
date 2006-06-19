@@ -1,0 +1,96 @@
+<?xml version='1.0' ?>
+<!DOCTYPE checklist PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.3//EN" "http://qa-assistant.sf.net/dtds/checklist/0.3/checklist.dtd">
+<checklist version="0.3" name="Software Release" revision="0.1">
+  <summary>Pre-release testing to assure a decent package</summary>
+  <properties>
+    <property name="softwarename" type="string">
+      <require type="onload"/>
+    </property>
+    <property name="repositoryType" type="string">
+      <require type="onload"/>
+    </property>
+    <property name="repositoryURL" type="url">
+      <require type="onload"/>
+    </property>
+  </properties>
+  <category name="Automated steps">
+    <description>Much of the release of a new software package can be
+      automated.  The following entries each have code to make the job of
+      releasing a GNU software project easier.</description>
+    
+    <entry name="Release in Source Control" display="true">
+      <states>
+        <state name="Pass">The release is in the source control system</state>
+        <state name="Fail">The release is not yet checked in</state>
+      </states>
+      <description>The source control system is a repository for code history.
+        As such it is important that it contains each release of the code.
+        Please make sure that checking out of the current HEAD or a TAG for
+        the release will get the code we are packaging for this release.
+        In a subversion environment, one way to check is::
+          svn update; svn status
+        Then review the list of files for ones that are not uptodate.
+      </description>
+    </entry>
+    <entry name="autoreconf/autogen.sh" display="true">
+      <states>
+        <state name="Pass">Able to autoreconf/autogen.sh the source tree</state>
+        <state name="Fail">autoreconf/autogen.sh fails</state>
+      </states>
+      <description>The source code must be able to rebuild from the sources
+        checked out of the repository.  This entails doing a checkout and then
+        invoking autoreconf or autogen.sh in order to recreate all the build
+        files necessary to create the program.</description>
+    </entry>
+    <entry name="configure" display="true">
+      <states>
+        <state name="Pass">Able to configure the source tree</state>
+        <state name="Fail">configure fails</state>
+      </states>
+      <description>Running configure is the next step in the process.  Does
+        configure correctly assess what is available on the system?  Or does
+        it perform its tests incorrectly?</description>
+    </entry>
+    <entry name="make distcheck" display="true">
+      <states>
+        <state name="Pass">make distcheck successfully creates a new distribution</state>
+        <state name="Fail">make distcheck fails</state>
+      </states>
+      <description>Running make distcheck should create a new distribution
+        tarfile.  It performs checks of the documentation, the build, and runs
+        the package's regression tests to try to verify the package is
+        correct.</description>
+    </entry>
+    <entry name="rpm creation" display="true">
+      <states>
+        <state name="Pass">rpms successfully build</state>
+        <state name="Fail">RPMS do not build</state>
+      </states>
+      <description>Creating an rpm for the distribution via rpmbuild -ta
+        &lt;source tarball&gt; is helpful for distributing the program.</description>
+    </entry>
+  </category>
+  <category name="Manual steps">
+    <description>Some tests just have to be done manually.</description>
+    <entry name="All files included" display="true">
+      <states>
+        <state name="Pass">All files in the source tree are in the distribution</state>
+        <state name="Fail">Some files are missing</state>
+      </states>
+      <description>The source tarball created in make dist-check is only as
+        good as the Makefile.am's that produced it.  Comparing the files in
+        the tarball compared to the files in the source tree is a good way to
+        tell when the Makefile.am may be missing files.</description>
+    </entry>
+    <entry name="runs fine" display="true">
+      <states>
+        <state name="Pass">Only minor bugs noted in the BUGS file</state>
+        <state name="Fail">Critical bugs found</state>
+      </states>
+      <description>Attempting to run the program through a couple test runs
+        should not reveal any major or unexpected BUGS.  Any bugs discovered
+        but not fixed should be noted in the BUGS file.
+      </description>
+    </entry>
+  </category>
+</checklist>

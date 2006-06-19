@@ -1,0 +1,16 @@
+<?xml version='1.0' ?>
+<!DOCTYPE checklist PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.3//EN" "http://qa-assistant.sf.net/dtds/checklist/0.3/checklist.dtd">
+<checklist version="0.3" name="Little Do Nothing" revision="0.1">
+  <summary>Test for crashing with no values</summary>
+  <category name="Minimal one item category">
+    <description>
+    </description>
+    <entry name="Minimal single entry">
+      <states>
+        <state name="Pass"></state>
+      </states>
+      <description>
+      </description>
+    </entry>
+  </category>
+</checklist>

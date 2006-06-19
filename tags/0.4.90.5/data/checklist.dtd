@@ -1,0 +1,213 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+ Identifiers:
+ PUBLIC "-//BadgerWare//DTD QA Assistant Checklist File 0.3//EN"
+ SYSTEM "http://qa-assistant.sf.net/checklist/0.3/checklist.dtd"
+-->
+
+<!-- Valid resolutions for a checklist item. -->
+<!ENTITY % Resolutions
+  '(Needs-Reviewing|Pass|Fail|Non-Blocker|Not-Applicable)'
+>
+
+<!-- True or False -->
+<!ENTITY % Boolean
+  '(true|false)'
+>
+
+<!-- Currently recognized languages to write tests in -->
+<!ENTITY % ExtensionLangs
+  '(python|sh)'
+>
+
+<!-- Types available for properties.  All properties need to be of one of
+     these types.
+  -->
+<!ENTITY % PropType
+  '(string|file|url|number|md5sum|sha1sum)'
+>
+
+<!-- Requirement types for properties.  All properties need to be set to one
+     of these.  The requirement types allow us to know if the property is
+     needed and if so, when.
+
+     :onload: We need to load this property at the start of the Review.
+              Use this for items that are necessary for other tests to be
+	      performed.
+              This type must be entered by the user.
+     :onpublish: The property needs to be defined before we can publish a
+                 review.  This type may be entered by the user or by the
+                 system over the course of the review.
+     :automatic: This property is loaded through an automated test.  This
+                 type cannot be entered by the user.  It is optional.
+                 It will be loaded when the user loads the properties that it
+		 depends on.
+     :optional: The property does not need to be entered.
+  -->
+<!ENTITY % RequireType
+  '(onload|onpublish|automatic|optional)'
+>
+
+<!-- Types of cryptographic hashes to use when summing checklist functions.
+  :sha1: A sha1 type hash
+  :md5: A traditional md5 hash
+  :nullhash: The hash will not be checked.  Useful when developing a new
+             checklist but should not be used when distributing files.
+  -->
+<!ENTITY % HashType
+  '(sha1|md5|nullhash)'
+>
+
+<!-- Top level element
+
+     Attributes:
+     version: Version of the checklist DTD
+     name: Name of this checklist
+     revision: Revision of this checklist
+  -->
+<!ELEMENT checklist (summary, base?, functions?, properties?, category+)>
+  <!ATTLIST checklist
+    version CDATA #FIXED '0.3'
+    name CDATA #REQUIRED
+    revision CDATA #REQUIRED
+  >
+  
+  <!-- A brief description of the checklist
+  
+       This is mostly used when showing users of a checklist what the
+       checklist is for.
+    -->
+  <!ELEMENT summary (#PCDATA)>
+  
+  <!-- Information on the base checklist used to create this one
+  
+       Attributes:
+       name: Name of the base checklist
+       revision: Revision of the base checklist
+
+       Content: Filename of the base checklist (Generally does not include
+                  full path info at this time.)
+    -->
+  <!ELEMENT base (#PCDATA)>
+    <!ATTLIST base
+      name CDATA #REQUIRED
+      revision CDATA #REQUIRED
+    >
+  
+  <!-- File containing functions requested by the checklist.
+       Attributes:
+       :hash: A cryptographic hash of the file.
+       :hashtype: The type of hash this is.
+       Content: The name of the file in which the functions reside.
+    -->
+  <!ELEMENT functions (#PCDATA)>
+    <!ATTLIST functions
+      hash CDATA #REQUIRED
+      hashtype %HashType; 'sha1'
+    >
+
+  <!-- Properties associated with the checklist such as filename,
+       Issue tracking number, etc. -->
+  <!ELEMENT properties (property+)>
+
+    <!-- An individual property set on the checklist.
+
+         Attributes:
+         name: The name of the property
+         type: The type of the property
+
+         Content: The property's value.  The application should validate
+                  the property's value against its type.
+      -->
+    <!ELEMENT property (require, function*, value?)>
+      <!ATTLIST property
+        name CDATA #REQUIRED
+        type %PropType; #REQUIRED
+      >
+
+      <!-- Requirements for the property.
+
+           Attributes:
+           :type: When and whether the property is required.
+
+           Content: A function to call to get the property.
+        -->
+      <!ELEMENT require EMPTY>
+        <!ATTLIST require
+          type %RequireType; #REQUIRED
+        >
+
+    <!-- Function to run to set other properties when this one is changed.
+    
+         Contents: The name of the function.
+      -->
+    <!ELEMENT function (#PCDATA)>
+
+    <!ELEMENT value (#PCDATA)>
+        
+  <!-- Metainfo for a group of entries.
+    
+        Attributes:
+        name: Name for the category.
+    -->
+  <!ELEMENT category (description, entry+)>
+    <!ATTLIST category
+      name CDATA #REQUIRED
+    >
+    
+    <!-- Long description of the entry or category.  For categories, this
+         holds an overview of the category.  For entries, it has instructions
+         for evaluating an entry and filling it out.
+
+         Content: The description text.
+      -->
+    <!ELEMENT description (#PCDATA)>
+
+    <!-- A checklist item to fill out.
+    
+         Attributes:
+         name: The name of the entry.  Should be a *brief* description and
+                 unique.
+         display: Whether to display the entry or not.
+         state: state to set the entry to initially.
+      -->
+    <!ELEMENT entry (states, test?, description)>
+      <!ATTLIST entry
+        name CDATA #REQUIRED
+        display %Boolean; "false"
+        state %Resolutions; "Needs-Reviewing"
+      >
+      
+      <!-- An automated test that may be run to fill in the value for this
+           checklist item.  This should be the name of a python function to
+           call to run this test.
+           
+       The test should take properties as arguments and return the results
+       of the test as a tuple:
+             First element of the tuple is a string corresponding to the
+             resolution of the item (ie: Pass, Fail, etc: Anything from
+             %Resolutions;)
+
+             The second item is a string to set the output to.  This can be
+         None and the program will use the string that is already set.
+       
+       *** WARNING: Do not depend on this.  This functionality has not yet
+           been implemented and may change drastically as a result of that
+           work.
+        -->
+      <!ELEMENT test (#PCDATA)>
+         
+      <!-- Allowable states for this checklist item. -->
+      <!ELEMENT states (state+)>
+        <!-- A state tht the checklist item may be in.
+        
+             Attributes:
+             name: Name of the state.  Must be one of the valid resolutions.
+             
+             Content: The output string to print when the entry is in this
+                        state.
+          -->
+        <!ELEMENT state (#PCDATA)>
+          <!ATTLIST state
+            name %Resolutions; #REQUIRED
+          >

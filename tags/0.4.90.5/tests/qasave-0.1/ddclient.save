@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE qasave PUBLIC "-//BadgerWare//DTD QA Assistant Save File 0.1//EN" "http://qa-assistant.sf.net/dtds/qasave/0.1/qasave.dtd">
+<qasave version="0.1">
+  <checklist name="fedoraus" revision="0.2">fedoraus.xml</checklist>
+  <properties>
+    <property name="SRPM">/home/badger/rpmbuild/RPMS/ddclient-3.6.3-0.fdr.4.fc1.src.rpm</property>
+  </properties>
+  <entries>
+    <entry name="Security of the build system" item="false" display="false" state="Pass">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass"/>
+        <state name="Fail"/>
+      </states>
+    </entry>
+    <entry name="SRPM GPG signed" display="true" state="Pass">
+      <states>
+        <state name="Needs-Reviewing">This is a test</state>
+        <state name="Pass">&lt;Marius*lj.ifi.no&gt; &amp; test</state>
+        <state name="Fail">Missing or Bad GPG Signature</state>
+      </states>
+    </entry>
+    <entry name="Canonical Source" display="true" state="Pass">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass">Source URL is canonical</state>
+        <state name="Fail">Specified Source URL is not canonical</state>
+      </states>
+    </entry>
+    <entry name="Upstream source verified" display="true" state="Pass">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass">Upstream source tarball verified</state>
+        <state name="Fail">Upstream source tarball does not match!</state>
+      </states>
+    </entry>
+    <entry name="Install time scriptlet safety" display="true" state="Pass">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass">Install time scriptlets do not have obvious malicious code.</state>
+        <state name="Fail">Install time scriplet does unsafe things. [REVIEWER please add details]</state>
+        <state name="Not-Applicable">There are no install time scriptlets</state>
+      </states>
+    </entry>
+    <entry name="Upstream GPG Checked" display="false" state="Pass">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass">Good upstream GPG Signature</state>
+        <state name="Fail">Upstream GPG Signatures do not match</state>
+        <state name="Not-Applicable">No upstream GPG Signature</state>
+      </states>
+    </entry>
+    <entry name="Specfile Scan" item="false" display="false" state="Fail">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass"/>
+        <state name="Fail"/>
+      </states>
+    </entry>
+    <entry name="Package Naming" display="true" state="Fail">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass">Package name conforms to the Fedora Naming Guidelines</state>
+        <state name="Fail">Package needs to be renamed to meet the Fedora Naming Guidelines</state>
+      </states>
+    </entry>
+    <entry name="Custom Checklist Items" item="false" display="false" state="Fail">
+      <states>
+        <state name="Needs-Reviewing"/>
+        <state name="Pass"/>
+        <state name="Fail"/>
+      </states>
+    </entry>
+    <entry name="Test" display="true" state="Fail">
+      <states>
+        <state name="Pass"/>
+        <state name="Fail">te</state>
+        <state name="Non-Blocker"/>
+      </states>
+    </entry>
+    <entry name="Test II" display="true" state="Non-Blocker">
+      <states>
+        <state name="Pass"/>
+        <state name="Fail">tete</state>
+        <state name="Non-Blocker">tete</state>
+      </states>
+    </entry>
+    <entry name="Test III" display="true" state="Pass">
+      <states>
+        <state name="Pass">Good job</state>
+        <state name="Fail"/>
+        <state name="Non-Blocker"/>
+      </states>
+    </entry>
+    <entry name="Epochr" display="true" state="Fail">
+      <states>
+        <state name="Pass"/>
+        <state name="Fail">e</state>
+        <state name="Non-Blocker"/>
+      </states>
+    </entry>
+    <entry name="epoch" display="true" state="Fail">
+      <states>
+        <state name="Pass"/>
+        <state name="Fail">Let's see if this word wraps still and if there's anything wrong with the saving of files.  I think the conversion from a standalone type into a gtk.TreeView subclass worked.</state>
+        <state name="Non-Blocker"/>
+      </states>
+    </entry>
+  </entries>
+</qasave>
